@@ -6,6 +6,12 @@ using System;
 
 public partial class GodotEGP : Node
 {
+	enum States
+	{
+		State10,
+		State20,
+		State30
+	}
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -43,28 +49,28 @@ public partial class GodotEGP : Node
 		StateMachine sm = new StateMachine(this);
 
 		// add some test states
-		sm.Add("state1");
-		sm.Add("state2");
-		sm.Add("state3");
+		sm.Add(States.State10);
+		sm.Add(States.State20);
+		sm.Add(States.State30);
 
 		// start the FSM
-		sm.Init("state1");
+		sm.Init(States.State10);
 
-		sm.RegisterCallback("state2", StateMachine.CallbackType.OnEnter, () => {
+		sm.RegisterCallback(States.State20, StateMachine.CallbackType.OnEnter, () => {
 			LoggerManager.LogDebug("State change callback state2, OnEnter");
 			});
-		sm.RegisterCallback("state2", StateMachine.CallbackType.OnExit, () => {
+		sm.RegisterCallback(States.State20, StateMachine.CallbackType.OnExit, () => {
 			LoggerManager.LogDebug("State change callback state2, OnExit");
 			});
 
-		sm.RegisterCallback("state3", StateMachine.CallbackType.OnChanged, () => {
+		sm.RegisterCallback(States.State20, StateMachine.CallbackType.OnChanged, () => {
 			LoggerManager.LogDebug("State change callback state3, OnChanged");
 			});
 
 		// test changing state
-		sm.Change("state2");
+		sm.Change(States.State20);
 
-		sm.Change("state3");
+		sm.Change(States.State30);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

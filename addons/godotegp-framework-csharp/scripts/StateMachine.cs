@@ -11,10 +11,10 @@ public class StateMachine
 	object _ownerObject;
 
 	// holds list of states
-	Dictionary<string, Dictionary<CallbackType, Action>> _states;
+	Dictionary<object, Dictionary<CallbackType, Action>> _states;
 
 	// current state
-	string State = "";
+	object State = null;
 
 	// enum for valid state change callbacks
 	public enum CallbackType
@@ -28,12 +28,12 @@ public class StateMachine
 	{
 		_ownerObject = ownerObject;
 
-		_states = new Dictionary<string, Dictionary<CallbackType, Action>>();
+		_states = new Dictionary<object, Dictionary<CallbackType, Action>>();
 
 		LoggerManager.LogDebug("Creating new instance for object", _ownerObject.GetType().Name);
 	}
 
-	public bool Add(string stateName)
+	public bool Add(object stateName)
 	{
 		// try to add the dictionay for the added state
 		// will fail if state with this key name already exists
@@ -51,13 +51,13 @@ public class StateMachine
 		return res;
 	}
 
-	public void Init(string stateName)
+	public void Init(object stateName)
 	{
 		SetState(stateName);
 		Change(stateName);
 	}
 
-	public void SetState(string stateName)
+	public void SetState(object stateName)
 	{
 		if (!IsValidState(stateName))
 		{
@@ -67,12 +67,12 @@ public class StateMachine
 		State = stateName;
 	}
 
-	public bool IsValidState(string stateName)
+	public bool IsValidState(object stateName)
 	{
 		return _states.ContainsKey(stateName);
 	}
 
-	public void Change(string newState)
+	public void Change(object newState)
 	{
 		// run state change callbacks
 		if (IsValidState(newState))
@@ -89,7 +89,7 @@ public class StateMachine
 		}
 	}
 
-	public void _runCallback(string currentState, CallbackType callbackType)
+	public void _runCallback(object currentState, CallbackType callbackType)
 	{
 		if (_states[currentState].ContainsKey(callbackType))
 		{
@@ -98,7 +98,7 @@ public class StateMachine
 		}
 	}
 
-	public void RegisterCallback(string stateName, CallbackType callbackType, Action callbackFunc)
+	public void RegisterCallback(object stateName, CallbackType callbackType, Action callbackFunc)
 	{
 		if (IsValidState(stateName))
 		{
@@ -113,13 +113,13 @@ public class InvalidStateException : Exception
     {
     }
 
-    public InvalidStateException(string message)
-        : base(message)
+    public InvalidStateException(object message)
+        : base(message.ToString())
     {
     }
 
-    public InvalidStateException(string message, Exception inner)
-        : base(message, inner)
+    public InvalidStateException(object message, Exception inner)
+        : base(message.ToString(), inner)
     {
     }
 }
