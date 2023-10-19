@@ -11,13 +11,13 @@ public class StateMachine
 	object _ownerObject;
 
 	// holds list of states
-	Dictionary<string, Dictionary<CallbackType, Func>> _states;
+	Dictionary<string, Dictionary<CallbackType, Action>> _states;
 
 	// current state
 	string State = "";
 
 	// enum for valid state change callbacks
-	enum CallbackType
+	public enum CallbackType
 	{
 		OnEnter, // pre-changed
 		OnChanged, // actually changed
@@ -28,39 +28,81 @@ public class StateMachine
 	{
 		_ownerObject = ownerObject;
 
-		_states = new Dictionary<string, Dictionary<CallbackType, Func>>();
+		_states = new Dictionary<string, Dictionary<CallbackType, Action>>();
+
+		LoggerManager.LogDebug("Creating new instance for object", _ownerObject.GetType().Name);
 	}
 
-	public AddState(string stateName)
+	public bool Add(string stateName)
 	{
 		// try to add the dictionay for the added state
 		// will fail if state with this key name already exists
-		_states.TryAdd(stateName, new Dictionary<CallbackType, Func>());
-	}
+		bool res = _states.TryAdd(stateName, new Dictionary<CallbackType, Action>());
 
-	public void ChangeState(string newState)
-	{
-		if (!_states.ContainsKey(newState))
+		if (res)
 		{
-			raise InvalidStateException();
+			LoggerManager.LogDebug("Adding state", _ownerObject.GetType().Name, "state", stateName);
+		}
+		else
+		{
+			LoggerManager.LogError("Adding state failed", _ownerObject.GetType().Name, "state", stateName);
 		}
 
-		// run state change callbacks
-		_runStateChangeCallback(State, CallbackType.OnExit);
-		_runStateChangeCallback(newState, CallbackType.OnEnter);
-
-		// set new state
-		State = newState;
-
-		// run final changed callback
-		_runStateChangeCallback(newState, newState, CallbackType.OnChanged);
+		return res;
 	}
 
-	public void _runStateChangeCallback(string currentState, CallbackType callbackType)
+	public void Init(string stateName)
 	{
-		if (_states[stateName].ContainsKey(callbackType))
+		SetState(stateName);
+		Change(stateName);
+	}
+
+	public void SetState(string stateName)
+	{
+		if (!IsValidState(stateName))
 		{
-			_states[stateName][callbackType]();
+			throw new InvalidStateException(stateName);
+		}
+
+		State = stateName;
+	}
+
+	public bool IsValidState(string stateName)
+	{
+		return _states.ContainsKey(stateName);
+	}
+
+	public void Change(string newState)
+	{
+		// run state change callbacks
+		if (IsValidState(newState))
+		{
+			LoggerManager.LogDebug("Changing state", _ownerObject.GetType().Name, "stateChange", $"{State} => {newState}");
+
+			_runCallback(State, CallbackType.OnExit);
+			_runCallback(newState, CallbackType.OnEnter);
+
+			SetState(newState);
+
+			// run final changed callback
+			_runCallback(newState, CallbackType.OnChanged);
+		}
+	}
+
+	public void _runCallback(string currentState, CallbackType callbackType)
+	{
+		if (_states[currentState].ContainsKey(callbackType))
+		{
+			LoggerManager.LogDebug("Running state change callback", _ownerObject.GetType().Name, "callbackType", $"{callbackType.ToString()}");
+			_states[currentState][callbackType]();
+		}
+	}
+
+	public void RegisterCallback(string stateName, CallbackType callbackType, Action callbackFunc)
+	{
+		if (IsValidState(stateName))
+		{
+			_states[stateName].TryAdd(callbackType, callbackFunc);
 		}
 	}
 }

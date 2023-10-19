@@ -1,6 +1,7 @@
 namespace Godot.EGP;
 
 using Godot;
+using Godot.EGP.State;
 using System;
 
 public partial class GodotEGP : Node
@@ -38,6 +39,32 @@ public partial class GodotEGP : Node
 		LoggerManager.LogDebug("testing 2", "Custom Name", "node_pool_config", ServiceRegistry.Get<ObjectPoolService>().GetPoolConfig<Node>());
 
 		LoggerManager.LogDebug("testing long multi-line string again just to see");
+
+		StateMachine sm = new StateMachine(this);
+
+		// add some test states
+		sm.Add("state1");
+		sm.Add("state2");
+		sm.Add("state3");
+
+		// start the FSM
+		sm.Init("state1");
+
+		sm.RegisterCallback("state2", StateMachine.CallbackType.OnEnter, () => {
+			LoggerManager.LogDebug("State change callback state2, OnEnter");
+			});
+		sm.RegisterCallback("state2", StateMachine.CallbackType.OnExit, () => {
+			LoggerManager.LogDebug("State change callback state2, OnExit");
+			});
+
+		sm.RegisterCallback("state3", StateMachine.CallbackType.OnChanged, () => {
+			LoggerManager.LogDebug("State change callback state3, OnChanged");
+			});
+
+		// test changing state
+		sm.Change("state2");
+
+		sm.Change("state3");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
