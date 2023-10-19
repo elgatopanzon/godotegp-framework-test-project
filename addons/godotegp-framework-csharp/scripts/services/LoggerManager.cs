@@ -76,7 +76,7 @@ public partial class LoggerManager : Service
             logger = new Logger(Instance.LoggerDestinationCollectionDefault);
             Instance._loggers.Add(loggerType, logger);
 
-            GD.Print($"Creating Logger for {loggerType}");
+            LoggerManager.LogDebug($"Creating Logger instance", "", "instanceName", loggerType.FullName);
         }
 
         return logger;
