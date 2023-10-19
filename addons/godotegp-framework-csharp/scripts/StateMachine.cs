@@ -93,7 +93,7 @@ public class StateMachine
 	{
 		if (_states[currentState].ContainsKey(callbackType))
 		{
-			LoggerManager.LogDebug("Running state change callback", _ownerObject.GetType().Name, "callbackType", $"{callbackType.ToString()}");
+			LoggerManager.LogDebug("Running state change callback", _ownerObject.GetType().Name, "callback", $"{currentState} => {callbackType.ToString()}");
 			_states[currentState][callbackType]();
 		}
 	}
