@@ -13,8 +13,19 @@ public class StateMachine
 	// holds list of states
 	Dictionary<object, Dictionary<CallbackType, Action>> _states;
 
-	// current state
-	object State = null;
+	// current state stack and accessor
+	private Stack<object> _state = new Stack<object>();
+
+	public object State
+	{
+		get { 
+			return _state.Peek(); 
+		}
+		set { 
+			_state.Clear();
+			_state.Push(value);
+		}
+	}
 
 	// enum for valid state change callbacks
 	public enum CallbackType
@@ -77,16 +88,47 @@ public class StateMachine
 		// run state change callbacks
 		if (IsValidState(newState))
 		{
-			LoggerManager.LogDebug("Changing state", _ownerObject.GetType().Name, "stateChange", $"{State} => {newState}");
-
-			_runCallback(State, CallbackType.OnExit);
-			_runCallback(newState, CallbackType.OnEnter);
+			_onStateChanged(State, newState);
 
 			SetState(newState);
-
-			// run final changed callback
-			_runCallback(newState, CallbackType.OnChanged);
 		}
+	}
+
+	private void _onStateChanged(object prevState, object newState)
+	{
+		LoggerManager.LogDebug("Changing state", _ownerObject.GetType().Name, "stateChange", $"{prevState} => {newState}");
+
+		_runCallback(prevState, CallbackType.OnExit);
+		_runCallback(newState, CallbackType.OnEnter);
+
+
+		// run final changed callback
+		_runCallback(newState, CallbackType.OnChanged);
+	}
+
+	public void Push(object pushState)
+	{
+		LoggerManager.LogDebug("Pushing state to stack", _ownerObject.GetType().Name, "state", pushState);
+
+		_onStateChanged(State, pushState);
+
+		_state.Push(pushState);
+	}
+
+	public object Pop()
+	{
+		if (_state.Count > 1)
+		{
+			object poppedState = _state.Pop();
+
+			LoggerManager.LogDebug("Popped state from stack", _ownerObject.GetType().Name, "state", poppedState);
+
+			_onStateChanged(poppedState, State);
+
+			return poppedState;
+		}
+
+		return null;
 	}
 
 	public void _runCallback(object currentState, CallbackType callbackType)
