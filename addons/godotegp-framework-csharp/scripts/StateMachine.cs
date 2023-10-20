@@ -11,7 +11,7 @@ public class StateMachine
 	object _ownerObject;
 
 	// holds list of states
-	Dictionary<object, Dictionary<CallbackType, Action>> _states;
+	Dictionary<object, Dictionary<CallbackType, Action<object, object>>> _states;
 
 	// current state stack and accessor
 	private Stack<object> _state = new Stack<object>();
@@ -39,7 +39,7 @@ public class StateMachine
 	{
 		_ownerObject = ownerObject;
 
-		_states = new Dictionary<object, Dictionary<CallbackType, Action>>();
+		_states = new Dictionary<object, Dictionary<CallbackType, Action<object, object>>>();
 
 		LoggerManager.LogDebug("Creating new instance for object", _ownerObject.GetType().Name);
 	}
@@ -48,7 +48,7 @@ public class StateMachine
 	{
 		// try to add the dictionay for the added state
 		// will fail if state with this key name already exists
-		bool res = _states.TryAdd(stateName, new Dictionary<CallbackType, Action>());
+		bool res = _states.TryAdd(stateName, new Dictionary<CallbackType, Action<object, object>>());
 
 		if (res)
 		{
@@ -98,12 +98,12 @@ public class StateMachine
 	{
 		LoggerManager.LogDebug("Changing state", _ownerObject.GetType().Name, "stateChange", $"{prevState} => {newState}");
 
-		_runCallback(prevState, CallbackType.OnExit);
-		_runCallback(newState, CallbackType.OnEnter);
+		_runCallback(prevState, CallbackType.OnExit, prevState, newState);
+		_runCallback(newState, CallbackType.OnEnter, prevState, newState);
 
 
 		// run final changed callback
-		_runCallback(newState, CallbackType.OnChanged);
+		_runCallback(newState, CallbackType.OnChanged, prevState, newState);
 	}
 
 	public void Push(object pushState)
@@ -131,16 +131,16 @@ public class StateMachine
 		return null;
 	}
 
-	public void _runCallback(object currentState, CallbackType callbackType)
+	public void _runCallback(object currentState, CallbackType callbackType, object prevState, object newState)
 	{
 		if (_states[currentState].ContainsKey(callbackType))
 		{
 			LoggerManager.LogDebug("Running state change callback", _ownerObject.GetType().Name, "callback", $"{currentState} => {callbackType.ToString()}");
-			_states[currentState][callbackType]();
+			_states[currentState][callbackType](prevState, newState);
 		}
 	}
 
-	public void RegisterCallback(object stateName, CallbackType callbackType, Action callbackFunc)
+	public void RegisterCallback(object stateName, CallbackType callbackType, Action<object, object> callbackFunc)
 	{
 		if (IsValidState(stateName))
 		{
