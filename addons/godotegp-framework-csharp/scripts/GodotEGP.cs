@@ -16,6 +16,7 @@ public partial class GodotEGP : Node
 	public override void _Ready()
 	{
 		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance, "Log");
+		ServiceRegistry.Instance.RegisterService(new RandomService(), "Random");
 		ServiceRegistry.Instance.RegisterService(new SystemService(), "System");
 		ServiceRegistry.Instance.RegisterService(new ObjectPoolService(), "ObjectPool");
 
@@ -157,6 +158,32 @@ public partial class GodotEGP : Node
         //
 		// // moveState.Change(otherState);
 		// // moveState.ChangeTo(other2State);
+		
+		// var random1 = ServiceRegistry.Get<RandomService>().Get();
+		// LoggerManager.LogDebug($"Random test: randf", "", "value", random1.Randf());
+		// LoggerManager.LogDebug($"Random test: randf", "", "value", random1.Randf());
+        //
+		// LoggerManager.LogDebug($"Random test: randf_range", "", "value", random1.RandfRange(0.0, 10.0));
+        //
+		// LoggerManager.LogDebug($"Random test: randi", "", "value", random1.Randi());
+		// LoggerManager.LogDebug($"Random test: randi", "", "value", random1.Randi());
+        //
+		// LoggerManager.LogDebug($"Random test: randi_range", "", "value", random1.RandiRange(0, 10));
+        //
+		// LoggerManager.LogDebug($"Random test: randfn", "", "value", random1.Randfn());
+        //
+		// var random2 = ServiceRegistry.Get<RandomService>().RegisterInstance(new RandomNumberGeneratorExtended(124432203923092, 3409348273897433484), "test");
+		// LoggerManager.LogDebug($"Random seed/state test: randf", "", "value", random2.Randf());
+		// LoggerManager.LogDebug($"Random seed/state test: randf", "", "value", random2.Randf());
+        //
+		// LoggerManager.LogDebug($"Random seed/state test: randf_range", "", "value", random2.RandfRange(0.0, 10.0));
+        //
+		// LoggerManager.LogDebug($"Random seed/state test: randi", "", "value", random2.Randi());
+		// LoggerManager.LogDebug($"Random seed/state test: randi", "", "value", random2.Randi());
+        //
+		// LoggerManager.LogDebug($"Random seed/state test: randi_range", "", "value", random2.RandiRange(0, 10));
+        //
+		// LoggerManager.LogDebug($"Random seed/state test: randfn", "", "value", random2.Randfn());
 	}
 
 	public class MoveState : HStateMachine { }
