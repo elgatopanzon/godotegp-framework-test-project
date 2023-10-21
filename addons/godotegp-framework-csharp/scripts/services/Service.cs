@@ -23,23 +23,23 @@ public partial class Service : Node
 	}
 
 	// Called when service is registered in manager
-	public void _OnServiceRegistered()
+	public virtual void _OnServiceRegistered()
 	{
 		LoggerManager.LogDebug($"Service registered!", "", "service", this.GetType().Name);
 	}
 
 	// Called when service is deregistered from manager
-	public void _OnServiceDeregistered()
+	public virtual void _OnServiceDeregistered()
 	{
 	}
 
 	// Called when service is considered ready
-	public void _OnServiceReady()
+	public virtual void _OnServiceReady()
 	{
 	}
 
 	// Sets service as ready
-	public void _SetServiceReady(bool readyState)
+	public virtual void _SetServiceReady(bool readyState)
 	{
 		this.ServiceReady = readyState;
 
