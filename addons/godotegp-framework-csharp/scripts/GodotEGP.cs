@@ -16,8 +16,7 @@ public partial class GodotEGP : Node
 	public override void _Ready()
 	{
 		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance, "Log");
-		ServiceRegistry.Instance.RegisterService(new Service(), "Base");
-		ServiceRegistry.Instance.RegisterService(new TestService(), "Test");
+		ServiceRegistry.Instance.RegisterService(new SystemService(), "System");
 		ServiceRegistry.Instance.RegisterService(new ObjectPoolService(), "ObjectPool");
 
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
