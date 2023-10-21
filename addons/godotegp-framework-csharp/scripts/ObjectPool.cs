@@ -27,13 +27,13 @@ public class ObjectPool<T> where T: class
 	{
 		if (_objects.Count > 0)
 		{
-			GD.Print($"{typeof(T)}: Using instance from pool");
+			LoggerManager.LogDebug("Using instance from pool", typeof(T).ToString());
 
 			return _objects.Pop();
 		}
 		else
 		{
-			GD.Print($"{typeof(T)}: Creating new instance");
+			LoggerManager.LogDebug("Creating new instance", typeof(T).ToString());
 
 			return (T) Activator.CreateInstance(typeof(T));
 		}

@@ -40,7 +40,7 @@ public partial class ObjectPoolService : Service
             pool = new ObjectPool<T>(poolConfig["capacityInitial"], poolConfig["capacityMax"]);
             _pools.Add(typeof(T), pool);
 
-            GD.Print($"Creating pool for {typeof(T)}");
+			LoggerManager.LogDebug($"Creating pool", "", "pool", typeof(T));
         }
 
         return pool;

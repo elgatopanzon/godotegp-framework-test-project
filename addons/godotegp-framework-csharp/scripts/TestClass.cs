@@ -6,7 +6,7 @@ public class TestClass
 {
 	public TestClass()
 	{
-		GD.Print("TestClass");
+		LoggerManager.LogDebug($"TestClass");
 	}
 
 	// Called when the node enters the scene tree for the first time.

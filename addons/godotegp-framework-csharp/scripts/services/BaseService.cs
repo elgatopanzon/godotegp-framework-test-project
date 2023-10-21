@@ -25,7 +25,7 @@ public partial class Service : Node
 	// Called when service is registered in manager
 	public void _OnServiceRegistered()
 	{
-		GD.Print($"Service registered! {this.GetType().Name}");
+		LoggerManager.LogDebug($"Service registered!", "", "service", this.GetType().Name);
 	}
 
 	// Called when service is deregistered from manager

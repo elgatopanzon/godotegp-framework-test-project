@@ -20,21 +20,21 @@ public partial class GodotEGP : Node
 		ServiceRegistry.Instance.RegisterService(new TestService(), "Test");
 		ServiceRegistry.Instance.RegisterService(new ObjectPoolService(), "ObjectPool");
 
-		// GD.Print(ServiceRegistry.Get<Service>().GetReady());
-		// GD.Print(ServiceRegistry.Get<TestService>().GetReady());
-		// GD.Print(ServiceRegistry.Instance["Test"].GetReady());
+		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
+		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
+		// LoggerManager.LogDebug(ServiceRegistry.Instance["Test"].GetReady());
 		
 		// ServiceRegistry.Get<ObjectPoolService>().SetPoolConfig<Node>(10, 100);
         //
 		// Node obj = ServiceRegistry.Get<ObjectPoolService>().Get<Node>();
         //
-		// GD.Print($"Obj: {obj} {obj.GetType().Name}");
+		// LoggerManager.LogDebug($"Obj: {obj} {obj.GetType().Name}");
         //
 		// ServiceRegistry.Get<ObjectPoolService>().Return<Node>(obj);
         //
 		// obj = ServiceRegistry.Get<ObjectPoolService>().Get<Node>();
         //
-		// GD.Print($"Obj: {obj} {obj.GetType().Name}");
+		// LoggerManager.LogDebug($"Obj: {obj} {obj.GetType().Name}");
 
 		// LoggerManager.LogTrace("testing");
 		// LoggerManager.LogDebug("testing");
