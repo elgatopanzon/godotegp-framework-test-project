@@ -52,6 +52,8 @@ public partial class ServiceRegistry : Node
 	{
 		_serviceObjs.Add(serviceName, serviceObj);
 
+		AddChild(serviceObj);
+
 		serviceObj._OnServiceRegistered();
 	}
 
