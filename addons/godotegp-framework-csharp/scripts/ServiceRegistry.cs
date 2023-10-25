@@ -72,8 +72,18 @@ public partial class ServiceRegistry : Node
 	/// <summary>
 	/// Get a service object by the given type
 	/// </summary>
-	public static T Get<T>() where T : Service
+	public static T Get<T>() where T : Service, new()
 	{
-		return Instance._serviceObjs.Values.OfType<T>().FirstOrDefault() as T;
+		var obj = Instance._serviceObjs.Values.OfType<T>().FirstOrDefault() as T;
+
+		if (obj == null)
+		{
+			LoggerManager.LogDebug("Lazy-creating service instance", "", "service", typeof(T).Name);
+
+			obj = new T();
+			Instance.RegisterService(obj, obj.ToString());
+		}
+
+		return obj;
 	}
 }

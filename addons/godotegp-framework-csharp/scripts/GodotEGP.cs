@@ -15,10 +15,14 @@ public partial class GodotEGP : Node
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance, "Log");
-		ServiceRegistry.Instance.RegisterService(new RandomService(), "Random");
-		ServiceRegistry.Instance.RegisterService(new SystemService(), "System");
-		ServiceRegistry.Instance.RegisterService(new ObjectPoolService(), "ObjectPool");
+		// ServiceRegistry.Instance.RegisterService(new EventService(), "Events");
+        //
+		// ServiceRegistry.Instance.RegisterService(LoggerManager.Instance, "Log");
+		// ServiceRegistry.Instance.RegisterService(new RandomService(), "Random");
+		// ServiceRegistry.Instance.RegisterService(new SystemService(), "System");
+		// ServiceRegistry.Instance.RegisterService(new ObjectPoolService(), "ObjectPool");
+
+		LoggerManager.LogDebug(ServiceRegistry.Get<EventService>().ToString());
 
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
