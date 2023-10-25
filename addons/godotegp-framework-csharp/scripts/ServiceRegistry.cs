@@ -11,19 +11,19 @@ public partial class ServiceRegistry : Node
 	public static ServiceRegistry Instance { get; private set; }
 
 	// Dictionary of BaseService objects
-	private Dictionary<string, Service> _serviceObjs = new Dictionary<string, Service>();
+	private Dictionary<Type, Service> _serviceObjs = new Dictionary<Type, Service>();
 
 	/// <summary>
 	/// Access service objects using []
 	/// <example>
 	/// <code>
-	/// ServiceRegistry.Instance["Base"]
+	/// ServiceRegistry.Instance[Service]
 	/// </code>
 	/// </example>
 	/// </summary>
-	public Service this[string name] {
+	public Service this[Type serviceType] {
 		get {
-			return GetService(name);
+			return GetService(serviceType);
 		}
 	}
 
@@ -48,9 +48,9 @@ public partial class ServiceRegistry : Node
 	/// <param name="serviceObj">Instance of a BaseService object</param>
 	/// <param name="serviceName">Short-name for the service object</param>
 	/// </summary>
-	public void RegisterService(Service serviceObj, string serviceName)
+	public void RegisterService(Service serviceObj)
 	{
-		_serviceObjs.Add(serviceName, serviceObj);
+		_serviceObjs.Add(serviceObj.GetType(), serviceObj);
 
 		AddChild(serviceObj);
 
@@ -59,12 +59,12 @@ public partial class ServiceRegistry : Node
 
 	/// <summary>
 	/// Get a service object
-	/// <param name="name">Short-name of the service object</param>
+	/// <param name="serviceType">Short-name of the service object</param>
 	/// </summary>
-	public Service GetService(string name)
+	public Service GetService(Type serviceType)
 	{
-		if (_serviceObjs.ContainsKey(name))
-			return _serviceObjs[name];
+		if (_serviceObjs.ContainsKey(serviceType))
+			return _serviceObjs[serviceType];
 
 		return null;
 	}
@@ -72,16 +72,14 @@ public partial class ServiceRegistry : Node
 	/// <summary>
 	/// Get a service object by the given type
 	/// </summary>
-	public static T Get<T>() where T : Service, new()
+	public static Service Get<T>() where T : Service, new()
 	{
-		var obj = Instance._serviceObjs.Values.OfType<T>().FirstOrDefault() as T;
-
-		if (obj == null)
+		if (!Instance._serviceObjs.TryGetValue(typeof(T), out Service obj))
 		{
 			LoggerManager.LogDebug("Lazy-creating service instance", "", "service", typeof(T).Name);
 
 			obj = new T();
-			Instance.RegisterService(obj, obj.ToString());
+			Instance.RegisterService(obj);
 		}
 
 		return obj;
