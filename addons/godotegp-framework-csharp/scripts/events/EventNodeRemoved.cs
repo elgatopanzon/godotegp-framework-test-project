@@ -5,9 +5,9 @@ using Godot;
 
 public class EventNodeRemoved : Event
 {
-	public object Node { get; set; }
+	public Node Node { get; set; }
 
-	public EventNodeRemoved(object ownerObj, object nodeObj) : base(ownerObj)
+	public EventNodeRemoved(object ownerObj, Node nodeObj) : base(ownerObj)
 	{
 		Node = nodeObj;
 	}
