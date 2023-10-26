@@ -55,6 +55,8 @@ public partial class ServiceRegistry : Node
 		AddChild(serviceObj);
 
 		serviceObj._OnServiceRegistered();
+
+		Get<EventManager>().Emit(new EventServiceRegistered(serviceObj));
 	}
 
 	/// <summary>
@@ -72,7 +74,7 @@ public partial class ServiceRegistry : Node
 	/// <summary>
 	/// Get a service object by the given type
 	/// </summary>
-	public static Service Get<T>() where T : Service, new()
+	public static T Get<T>() where T : Service, new()
 	{
 		if (!Instance._serviceObjs.TryGetValue(typeof(T), out Service obj))
 		{
@@ -82,6 +84,6 @@ public partial class ServiceRegistry : Node
 			Instance.RegisterService(obj);
 		}
 
-		return obj;
+		return (T) obj;
 	}
 }

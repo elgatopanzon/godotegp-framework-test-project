@@ -22,7 +22,40 @@ public partial class GodotEGP : Node
 		// ServiceRegistry.Instance.RegisterService(new SystemService(), "System");
 		// ServiceRegistry.Instance.RegisterService(new ObjectPoolService(), "ObjectPool");
 
-		LoggerManager.LogDebug(ServiceRegistry.Get<EventService>().ToString());
+		// EventManager testing
+		// LoggerManager.LogDebug(ServiceRegistry.Get<EventManager>().ToString());
+		//
+
+		// var queue = ServiceRegistry.Get<EventManager>().GetQueue<EventQueueCustom>();
+		// ServiceRegistry.Get<EventManager>().Queue<EventQueue>(new Event(this));
+		// ServiceRegistry.Get<EventManager>().Queue<EventQueue>(new EventCustom(this));
+		// ServiceRegistry.Get<EventManager>().Queue<EventQueue>(new EventCustom(this));
+		// ServiceRegistry.Get<EventManager>().Queue<EventQueue>(new EventCustom(this));
+		// ServiceRegistry.Get<EventManager>().Queue<EventQueue>(new Event(this));
+		// ServiceRegistry.Get<EventManager>().Queue<EventQueue>(new Event(this));
+        //
+		// LoggerManager.LogDebug("Fetched Event", "", "events", ServiceRegistry.Get<EventManager>().Fetch<EventQueue>(typeof(Event)).Peek().Created);
+		// LoggerManager.LogDebug("Fetched Event", "", "events", ServiceRegistry.Get<EventManager>().Fetch<EventQueue>(typeof(Event)).Peek().Created);
+		// LoggerManager.LogDebug("Fetched Event", "", "events", ServiceRegistry.Get<EventManager>().Fetch<EventQueue>(typeof(Event)).Peek().Created);
+		// // LoggerManager.LogDebug("Fetched Event", "", "events", ServiceRegistry.Get<EventManager>().Fetch<EventQueue>(typeof(Event)).Peek().Created);
+        //
+		// LoggerManager.LogDebug("Fetched EventCustom", "", "events", ServiceRegistry.Get<EventManager>().Fetch<EventQueue>(typeof(EventCustom)).Peek().Created);
+		// LoggerManager.LogDebug("Fetched EventCustom", "", "events", ServiceRegistry.Get<EventManager>().Fetch<EventQueue>(typeof(EventCustom)).Peek().Created);
+		// LoggerManager.LogDebug("Fetched EventCustom", "", "events", ServiceRegistry.Get<EventManager>().Fetch<EventQueue>(typeof(EventCustom)).Peek().Created);
+		// // LoggerManager.LogDebug("Fetched EventCustom", "", "events", ServiceRegistry.Get<EventManager>().Fetch<EventQueue>(typeof(EventCustom)).Peek().Created);
+
+		// var sub = new EventSubscription<EventServiceRegistered>(this, false);
+		// ServiceRegistry.Get<EventManager>().Subscribe(sub);
+
+		var sub = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered, false);
+		var sub2 = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered_highpriority, true);
+
+		ServiceRegistry.Get<EventManager>().Subscribe(sub);
+		ServiceRegistry.Get<EventManager>().Subscribe(sub2);
+
+		Node obj = ServiceRegistry.Get<ObjectPoolService>().Get<Node>();
+
+		var random1 = ServiceRegistry.Get<RandomService>().Get();
 
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
@@ -204,5 +237,17 @@ public partial class GodotEGP : Node
 	public void StateOnEnter()
 	{
 		LoggerManager.LogDebug("State OnEnter");
+	}
+
+	public void __On_EventServiceRegistered(IEvent eventObj)
+	{
+		LoggerManager.LogDebug("Received event!", "", "eventType", eventObj.GetType().Name);		
+		LoggerManager.LogDebug("", "", "eventOwner", eventObj.Owner.GetType().Name);		
+	}
+
+	public void __On_EventServiceRegistered_highpriority(IEvent eventObj)
+	{
+		LoggerManager.LogDebug("Received high priority event!", "", "eventType", eventObj.GetType().Name);		
+		LoggerManager.LogDebug("", "", "eventOwner", eventObj.Owner.GetType().Name);		
 	}
 }
