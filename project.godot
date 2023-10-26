@@ -28,6 +28,11 @@ project/assembly_name="Addon - godotegp-framework-csharp"
 
 enabled=PackedStringArray("res://addons/godotegp-framework-csharp/plugin.cfg")
 
+[network]
+
+limits/debugger/max_chars_per_second=327680
+limits/debugger/max_queued_messages=20048
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
