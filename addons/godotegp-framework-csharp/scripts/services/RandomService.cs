@@ -8,6 +8,11 @@ public partial class RandomService : Service
 {
 	private Dictionary<string, RandomNumberGeneratorExtended> _randomInstances = new Dictionary<string, RandomNumberGeneratorExtended>();
 
+	public override void _Ready()
+	{
+		_SetServiceReady(true);
+	}
+
 	public RandomNumberGeneratorExtended Get(string instanceName = "default")
 	{
 		if (!_randomInstances.TryGetValue(instanceName, out RandomNumberGeneratorExtended randomInstance))

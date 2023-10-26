@@ -12,8 +12,9 @@ public partial class EventManager : Service
 
 	private Dictionary<GodotObject, string> _connectedSignals = new Dictionary<GodotObject, string>();
 
-	public EventManager()
+	public override void _Ready()
 	{
+		_SetServiceReady(true);
 	}
 
 	public void Subscribe(IEventSubscription<Event> eventSubscription)

@@ -10,6 +10,11 @@ public partial class ObjectPoolService : Service
 
 	private Dictionary<Type, Dictionary<string, int>> _poolsConfig = new Dictionary<Type, Dictionary<string, int>>();
 
+	public override void _Ready()
+	{
+		_SetServiceReady(true);
+	}
+
 	/// <summary>
 	/// Get an object of type <c>T</c> from an instance of
 	/// <c>ObjectPool<T></c>.

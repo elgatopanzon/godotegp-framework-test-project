@@ -42,6 +42,11 @@ public partial class LoggerManager : Service
 
 	private LoggerManager() { }
 
+	public override void _Ready()
+	{
+		_SetServiceReady(true);
+	}
+
 	// Dictionary of Logger instances
 	private Dictionary<Type, Logger> _loggers = new Dictionary<Type, Logger>();
 

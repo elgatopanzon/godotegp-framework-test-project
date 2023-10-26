@@ -15,6 +15,7 @@ public partial class Service : Node
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		_SetServiceReady(true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -25,19 +26,17 @@ public partial class Service : Node
 	// Called when service is registered in manager
 	public virtual void _OnServiceRegistered()
 	{
-		LoggerManager.LogDebug($"Service registered!", "", "service", this.GetType().Name);
 	}
 
 	// Called when service is deregistered from manager
 	public virtual void _OnServiceDeregistered()
 	{
-		LoggerManager.LogDebug($"Service deregistered!", "", "service", this.GetType().Name);
+		// LoggerManager.LogDebug($"Service deregistered!", "", "service", this.GetType().Name);
 	}
 
 	// Called when service is considered ready
 	public virtual void _OnServiceReady()
 	{
-		LoggerManager.LogDebug($"Service ready!", "", "service", this.GetType().Name);
 	}
 
 	// Sets service as ready
@@ -46,6 +45,7 @@ public partial class Service : Node
 		this.ServiceReady = readyState;
 
 		if (readyState)
-			this._OnServiceReady();
+			// this._OnServiceReady();
+			ServiceRegistry.Get<EventManager>().Emit(new EventServiceReady(this));
 	}
 }

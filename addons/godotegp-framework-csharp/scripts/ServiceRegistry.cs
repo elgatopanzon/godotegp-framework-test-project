@@ -1,6 +1,7 @@
 namespace Godot.EGP;
 
 using Godot;
+using Godot.EGP.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,8 @@ public partial class ServiceRegistry : Node
 	private ServiceRegistry() 
 	{
 		Instance = this;
+
+		Get<EventManager>().Subscribe(new EventSubscription<EventServiceReady>(this, __On_EventServiceReady, true));
 	}
 
 	// Called when the node enters the scene tree for the first time.
@@ -54,9 +57,21 @@ public partial class ServiceRegistry : Node
 
 		AddChild(serviceObj);
 
+		LoggerManager.LogDebug($"Service registered!", "", "service", serviceObj.GetType().Name);
+
 		serviceObj._OnServiceRegistered();
 
 		Get<EventManager>().Emit(new EventServiceRegistered(serviceObj));
+	}
+
+	public void __On_EventServiceReady(IEvent eventObj)
+	{
+		if (eventObj.Owner.TryCast(out Service s))
+		{
+			LoggerManager.LogDebug($"Service ready!", "", "service", s.GetType().Name);
+
+			s._OnServiceReady();
+		}
 	}
 
 	/// <summary>
