@@ -62,8 +62,11 @@ public partial class GodotEGP : Node
 		timer.WaitTime = 1.5;
 		timer.Start();
 
-		ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
-		ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
+		// ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
+		// ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
+
+		timer.SubscribeSignal("timeout", false, __On_Timer_timeout);
+		timer.SubscribeSignal("timeout", false, __On_Timer_timeout);
 
 		LoggerManager.LogDebug(ServiceRegistry.Get<NodeManager>().GetReady());
 

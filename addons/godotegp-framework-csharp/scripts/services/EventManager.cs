@@ -213,4 +213,15 @@ public static class EventManagerObjectExtensions
 	{
 		ServiceRegistry.Get<EventManager>().Subscribe(eventSubscription);
 	}
+
+
+	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, List<IEventFilter> eventFilters = null)
+	{
+		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, new EventSubscription<EventSignal>(obj, callbackMethod, isHighPriority, eventFilters));
+	}
+
+	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, IEventSubscription<Event> eventSubscription)
+	{
+		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, eventSubscription);
+	}
 }
