@@ -14,8 +14,17 @@ public class EventFilterSignal : IEventFilter
 
 	public bool Match(IEvent matchEvent)
 	{
-		EventSignal e = (EventSignal) matchEvent;
-		LoggerManager.LogDebug("match result", "", "result", e.SignalName == _matchSignal);
-		return e.SignalName == _matchSignal;
+		if (matchEvent is EventSignal)
+		{
+			EventSignal e = (EventSignal) matchEvent;
+
+			LoggerManager.LogDebug("match result", "", "result", e.SignalName == _matchSignal);
+
+			return e.SignalName == _matchSignal;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

@@ -3,6 +3,7 @@ namespace Godot.EGP;
 using Godot;
 using Godot.EGP.State;
 using System;
+using System.Collections.Generic;
 
 public partial class GodotEGP : Node
 {
@@ -47,7 +48,7 @@ public partial class GodotEGP : Node
 		// var sub = new EventSubscription<EventServiceRegistered>(this, false);
 		// ServiceRegistry.Get<EventManager>().Subscribe(sub);
 
-		var sub = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered, false);
+		var sub = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered, false, new List<IEventFilter> {new EventFilterSignal("test")});
 		var sub2 = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered_highpriority, true);
 
 		ServiceRegistry.Get<EventManager>().Subscribe(sub);
