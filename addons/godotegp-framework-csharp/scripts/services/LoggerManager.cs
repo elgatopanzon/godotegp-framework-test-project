@@ -91,7 +91,7 @@ public partial class LoggerManager : Service
 	*  Logging methods for LogLevels  *
 	***********************************/
 	public static void LogTrace( 
-			string logMessage = "", 
+			object logMessage, 
 			string logCustom = "", 
 			string logDataName = "", 
 			object logData = null,
@@ -99,10 +99,10 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Trace, logMessage, logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(LoggerMessage.LogLevel.Trace, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogDebug( 
-			string logMessage = "", 
+			object logMessage, 
 			string logCustom = "", 
 			string logDataName = "", 
 			object logData = null,
@@ -110,10 +110,10 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Debug, logMessage, logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(LoggerMessage.LogLevel.Debug, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogInfo( 
-			string logMessage = "", 
+			object logMessage, 
 			string logCustom = "", 
 			string logDataName = "", 
 			object logData = null,
@@ -121,10 +121,10 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Info, logMessage, logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(LoggerMessage.LogLevel.Info, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogWarning( 
-			string logMessage = "", 
+			object logMessage, 
 			string logCustom = "", 
 			string logDataName = "", 
 			object logData = null,
@@ -132,10 +132,10 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Warning, logMessage, logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(LoggerMessage.LogLevel.Warning, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogError( 
-			string logMessage = "", 
+			object logMessage, 
 			string logCustom = "", 
 			string logDataName = "", 
 			object logData = null,
@@ -143,10 +143,10 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Error, logMessage, logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(LoggerMessage.LogLevel.Error, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogCritical( 
-			string logMessage = "", 
+			object logMessage, 
 			string logCustom = "", 
 			string logDataName = "", 
 			object logData = null,
@@ -154,6 +154,6 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Critical, logMessage, logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(LoggerMessage.LogLevel.Critical, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 }
