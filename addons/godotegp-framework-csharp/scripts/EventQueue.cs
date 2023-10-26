@@ -29,7 +29,7 @@ public class EventQueue
 
 			if (eventFilters != null) 
 			{
-				foreach (IEventFilter eventFilter in eventFilters)
+				foreach (EventFilter eventFilter in eventFilters)
 				{
 					filtersMatch = eventFilter.Match(eventItem);
 

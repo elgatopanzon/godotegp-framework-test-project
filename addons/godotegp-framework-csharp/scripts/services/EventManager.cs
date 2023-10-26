@@ -122,16 +122,68 @@ public partial class EventManager : Service
 			{
 				if (eventObj.GetType() == eventSubscription.EventType && eventSubscription.IsHighPriority == broadcastHighPriority)
 				{
-					LoggerManager.LogDebug($"Broadcasting {(broadcastHighPriority ? "high-priority" : "deferred")} event", "", "broadcast", new Dictionary<string, object> {{ "eventType", eventObj.GetType().Name }, { "subscriberType", eventSubscription.Subscriber.GetType().Name }, { "highPriority", broadcastHighPriority } });
 
-					eventSubscription.CallbackMethod(eventObj);
+					bool filtersMatch = true;
 
-					eventConsumed = true;
+					if (eventSubscription.EventFilters != null) 
+					{
+						foreach (IEventFilter eventFilter in eventSubscription.EventFilters)
+						{
+							filtersMatch = eventFilter.Match(eventObj);
+
+							// stop validating if one of them fails
+							if (!filtersMatch)
+							{
+								break;
+							}
+						}
+					}
+
+					if (filtersMatch)
+					{
+						LoggerManager.LogDebug($"Broadcasting {(broadcastHighPriority ? "high-priority" : "deferred")} event", "", "broadcast", new Dictionary<string, object> {{ "eventType", eventObj.GetType().Name }, { "subscriberType", eventSubscription.Subscriber.GetType().Name }, { "highPriority", broadcastHighPriority } });
+
+						eventSubscription.CallbackMethod(eventObj);
+
+						eventConsumed = true;
+					}
 				}
 			}
 		}
 		
 		return eventConsumed;
+	}
+
+	public void SubscribeSignal(GodotObject connectObject, string signalName, bool hasParams, IEventSubscription<Event> eventSubscription)
+	{
+		Action callback = () => __On_Signal(connectObject, signalName);
+		Action<Variant[]> callbackParams = (p) => __On_Signal(connectObject, signalName, p);
+
+		Callable cb;
+
+		if (hasParams)
+		{
+			cb = Callable.From(callbackParams);
+		}
+		else
+		{
+			cb = Callable.From(callback);
+		}
+
+		if (!connectObject.IsConnected(signalName, cb))
+		{
+			connectObject.Connect(signalName, cb);
+		}
+
+		eventSubscription.EventFilters.Add(new EventFilterOwner(connectObject));
+		eventSubscription.EventFilters.Add(new EventFilterSignal(signalName));
+
+		Subscribe(eventSubscription);
+	}
+
+	public void __On_Signal(GodotObject connectObject, string signalName, Variant[] signalParams = null)
+	{
+		ServiceRegistry.Get<EventManager>().Emit(new EventSignal(connectObject, signalName, signalParams));
 	}
 }
 

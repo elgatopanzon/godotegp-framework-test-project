@@ -55,7 +55,12 @@ public partial class GodotEGP : Node
 
 		Node obj = ServiceRegistry.Get<ObjectPoolService>().Get<Node>();
 
-		var random1 = ServiceRegistry.Get<RandomService>().Get();
+		Timer timer = new Timer();
+		AddChild(timer);
+		timer.WaitTime = 1.5;
+		timer.Start();
+
+		ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(timer, __On_Timer_timeout));
 
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
@@ -249,5 +254,10 @@ public partial class GodotEGP : Node
 	{
 		LoggerManager.LogDebug("Received high priority event!", "", "eventType", eventObj.GetType().Name);		
 		LoggerManager.LogDebug("", "", "eventOwner", eventObj.Owner.GetType().Name);		
+	}
+
+	public void __On_Timer_timeout(IEvent eventObj)
+	{
+		LoggerManager.LogDebug("Timeout!");
 	}
 }
