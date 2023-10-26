@@ -2,6 +2,7 @@ namespace Godot.EGP;
 
 using Godot;
 using System;
+using Godot.EGP.Extensions;
 
 public class EventFilterSignal : IEventFilter
 {
@@ -14,17 +15,13 @@ public class EventFilterSignal : IEventFilter
 
 	public bool Match(IEvent matchEvent)
 	{
-		if (matchEvent is EventSignal)
+		if (matchEvent.TryCast(out EventSignal e))
 		{
-			EventSignal e = (EventSignal) matchEvent;
-
 			LoggerManager.LogDebug("match result", "", "result", e.SignalName == _matchSignal);
 
 			return e.SignalName == _matchSignal;
 		}
-		else
-		{
-			return false;
-		}
+
+		return false;
 	}
 }
