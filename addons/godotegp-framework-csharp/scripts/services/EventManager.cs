@@ -89,19 +89,7 @@ public partial class EventManager : Service
 
 	public void Emit(IEvent eventObj)
 	{
-		// emit the event to high-priority subscribers
-		if (_eventSubscriptions.TryGetValue(eventObj.GetType(), out List<IEventSubscription<Event>> subList))
-		{
-			foreach (IEventSubscription<Event> eventSubscription in subList)
-			{
-				if (eventObj.GetType() == eventSubscription.EventType && eventSubscription.IsHighPriority)
-				{
-					LoggerManager.LogDebug("Broadcasting high-priority event", "", "broadcast", new Dictionary<string, object> {{ "eventType", eventObj.GetType().Name }, { "subscriberType", eventSubscription.Subscriber.GetType().Name } });
-
-					eventSubscription.CallbackMethod(eventObj);
-				}
-			}
-		}
+		bool eventConsumed = BroadcastEvent(eventObj, true);
 
 		// queue event for low-priority subscribers
 		GetQueue<EventQueueDeferred>().Queue(eventObj);
@@ -117,28 +105,33 @@ public partial class EventManager : Service
 			// remove item from the queue
 			eventObj = eventQueue.Dequeue();
 
-			bool eventConsumed = false;
-
-			// process the event if there's a matching sub for the event type
-			if (_eventSubscriptions.TryGetValue(eventObj.GetType(), out List<IEventSubscription<Event>> subList))
-			{
-				foreach (IEventSubscription<Event> eventSubscription in subList)
-				{
-					// only act upon subscription if it's not high priority
-					if (!eventSubscription.IsHighPriority)
-					{
-						LoggerManager.LogDebug("Broadcasting deferred event", "", "broadcast", new Dictionary<string, object> {{ "eventType", eventObj.GetType().Name }, { "subscriberType", eventSubscription.Subscriber.GetType().Name } });
-
-						eventSubscription.CallbackMethod(eventObj);
-
-						eventConsumed = true;
-					}
-				}
-				
-			}
+			bool eventConsumed = BroadcastEvent(eventObj, false);
 
 			LoggerManager.LogDebug("Deferred event consumed state", "", "consumed", eventConsumed);
 		}
+	}
+
+	public bool BroadcastEvent(IEvent eventObj, bool broadcastHighPriority = false)
+	{
+		bool eventConsumed = false;
+
+		// emit the event to high-priority subscribers
+		if (_eventSubscriptions.TryGetValue(eventObj.GetType(), out List<IEventSubscription<Event>> subList))
+		{
+			foreach (IEventSubscription<Event> eventSubscription in subList)
+			{
+				if (eventObj.GetType() == eventSubscription.EventType && eventSubscription.IsHighPriority == broadcastHighPriority)
+				{
+					LoggerManager.LogDebug($"Broadcasting {(broadcastHighPriority ? "high-priority" : "deferred")} event", "", "broadcast", new Dictionary<string, object> {{ "eventType", eventObj.GetType().Name }, { "subscriberType", eventSubscription.Subscriber.GetType().Name }, { "highPriority", broadcastHighPriority } });
+
+					eventSubscription.CallbackMethod(eventObj);
+
+					eventConsumed = true;
+				}
+			}
+		}
+		
+		return eventConsumed;
 	}
 }
 
