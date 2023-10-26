@@ -31,11 +31,13 @@ public partial class Service : Node
 	// Called when service is deregistered from manager
 	public virtual void _OnServiceDeregistered()
 	{
+		LoggerManager.LogDebug($"Service deregistered!", "", "service", this.GetType().Name);
 	}
 
 	// Called when service is considered ready
 	public virtual void _OnServiceReady()
 	{
+		LoggerManager.LogDebug($"Service ready!", "", "service", this.GetType().Name);
 	}
 
 	// Sets service as ready
