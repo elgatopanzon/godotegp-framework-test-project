@@ -201,3 +201,16 @@ public class EventQueueDeferred : EventQueue
 {
 	
 }
+
+public static class EventManagerObjectExtensions
+{
+	public static void Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, List<IEventFilter> eventFilters = null) where T : Event
+	{
+		ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<T>(obj, callbackMethod, isHighPriority, eventFilters));
+	}
+
+	public static void Subscribe(this object obj, IEventSubscription<Event> eventSubscription)
+	{
+		ServiceRegistry.Get<EventManager>().Subscribe(eventSubscription);
+	}
+}

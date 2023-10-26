@@ -7,7 +7,9 @@ using System.Collections.Generic;
 
 public partial class NodeManager : Service
 {
-	public override void _Process(double delta)
+	private Dictionary<string, List<Node>> _registeredNodes = new Dictionary<string, List<Node>>();
+	
+	public override void _Ready()
 	{
 		if (!GetReady())
 		{
@@ -15,8 +17,11 @@ public partial class NodeManager : Service
 
 			// subscribe to Events related to nodes being added and removed with
 			// high priority
-			ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventNodeAdded>(this, __On_EventNodeAdded, true));
-			ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventNodeRemoved>(this, __On_EventNodeRemoved, true));
+			// ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventNodeAdded>(this, __On_EventNodeAdded, true));
+			// ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventNodeRemoved>(this, __On_EventNodeRemoved, true));
+			this.Subscribe<EventNodeAdded>(__On_EventNodeAdded, true);
+			this.Subscribe<EventNodeRemoved>(__On_EventNodeRemoved, true);
+
 			// connect to SceneTree node_added and node_removed signals
 			GetTree().Connect("node_added", new Callable(this, "__On_Signal_node_added"));
 			GetTree().Connect("node_removed", new Callable(this, "__On_Signal_node_removed"));
@@ -29,23 +34,67 @@ public partial class NodeManager : Service
 	}
 
 	// signal callbacks for node_* events, used as rebroadcasters
-	public void __On_Signal_node_added(GodotObject nodeObj)
+	public void __On_Signal_node_added(Node nodeObj)
 	{
-		ServiceRegistry.Get<EventManager>().Emit(new EventNodeAdded(this, nodeObj));
+		ServiceRegistry.Get<EventManager>().Emit(new EventNodeAdded(nodeObj, nodeObj));
 	}
-	public void __On_Signal_node_removed(GodotObject nodeObj)
+	public void __On_Signal_node_removed(Node nodeObj)
 	{
-		ServiceRegistry.Get<EventManager>().Emit(new EventNodeAdded(this, nodeObj));
+		ServiceRegistry.Get<EventManager>().Emit(new EventNodeAdded(nodeObj, nodeObj));
 	}
 
 	// process node added and removed Event objects
 	public void __On_EventNodeAdded(IEvent eventObj)
 	{
-		LoggerManager.LogDebug("TODO: register the added node", "", "event", eventObj.ToStringDictionary());
+		EventNodeAdded e = (EventNodeAdded) eventObj;
+
+		RegisterNode(e.Node, GetNodeID(e.Node));
 	}
 	public void __On_EventNodeRemoved(IEvent eventObj)
 	{
-		LoggerManager.LogDebug("TODO: deregister the removed node", "", "event", eventObj.ToStringDictionary());
+		EventNodeAdded e = (EventNodeAdded) eventObj;
+		
+		DeregisterNode(e.Node);
+	}
+
+	public void RegisterNode(Node node, string nodeId, bool registerGroups = true)
+	{
+		_registeredNodes.TryAdd(nodeId, new List<Node>());
+
+		if (!_registeredNodes[nodeId].Contains(node))
+		{
+			_registeredNodes[nodeId].Add(node);
+
+			LoggerManager.LogDebug("Registered node", "", "node", new List<string>() {node.GetType().Name, nodeId});
+		}
+
+		if (registerGroups)
+		{
+			foreach (string group in node.GetGroups())
+			{
+				RegisterNode(node, $"group_{group}", false);
+			}
+
+			RegisterNode(node, node.GetPath(), false);
+		}
+	}
+
+	public void DeregisterNode(Node node)
+	{
+		foreach (KeyValuePair<string, List<Node>> nodeList in _registeredNodes)
+		{
+			nodeList.Value.RemoveAll((n) => {
+				if (n.Equals(node))
+				{
+					_registeredNodes[nodeList.Key].Remove(node);
+
+					LoggerManager.LogDebug("Deregistered node", "", "node", new List<string>() {node.GetType().Name, GetNodeID(node), nodeList.Key});
+					return true;
+				}
+
+				return false;
+			});
+		}
 	}
 
 	public void RegisterExistingNodes()
@@ -74,14 +123,32 @@ public partial class NodeManager : Service
 		return nodesArray;
 	}
 
-	// func add_scene_tree_nodes():
-	// 	for node in get_all_scene_tree_nodes():
-	// 		if get_node_id(node):
-	// 			_on_node_added(node)
-    //
-	// func get_all_scene_tree_nodes(node = get_tree().root, all_nodes = []):
-	// 	all_nodes.append(node)
-	// 	for chid_node in node.get_children():
-	// 		get_all_scene_tree_nodes(chid_node, all_nodes)
-	// 	return all_nodes
+	public string GetNodeID(Node node)
+	{
+		if (node.HasMeta("id"))
+		{
+			return (string) node.GetMeta("id");
+		}
+		else
+		{
+			return node.Name;
+		}
+	}
+
+	public bool TryGetNode(string nodeId, out Node node)
+	{
+		node = null;
+
+		if (_registeredNodes.TryGetValue(nodeId, out List<Node> nodes))
+		{
+			if (nodes.Count > 0)
+			{
+				node = nodes[nodes.Count - 1];
+			}
+
+			return true;
+		}
+
+		return false;
+	}
 }

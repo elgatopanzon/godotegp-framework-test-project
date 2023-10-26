@@ -1,6 +1,7 @@
 namespace Godot.EGP;
 
 using Godot;
+using Godot.EGP.Extensions;
 using Godot.EGP.State;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,32 @@ public partial class GodotEGP : Node
 		ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
 
 		LoggerManager.LogDebug(ServiceRegistry.Get<NodeManager>().GetReady());
+
+		Timer timer2 = new Timer();
+		timer2.Name = "timer2";
+
+		// ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventServiceReady>(this, (e) => {
+		// 	ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventNodeAdded>(this, (e) => {
+		// 			if (ServiceRegistry.Get<NodeManager>().TryGetNode("timer2", out Node n))
+		// 			{
+		// 				LoggerManager.LogDebug("Timer node exists", "", "timer", n.ToString());
+		// 			}
+		// 		}, true, new List<IEventFilter>() {new EventFilterOwner(timer2)}));
+        //
+		// 	AddChild(timer2);
+		// 	}, true, new List<IEventFilter>() {new EventFilterOwner(ServiceRegistry.Get<NodeManager>())}));
+
+		this.Subscribe<EventServiceReady>((e) => {
+			this.Subscribe<EventNodeAdded>((e) => {
+					if (ServiceRegistry.Get<NodeManager>().TryGetNode("timer2", out Node n))
+					{
+						LoggerManager.LogDebug("Timer node exists", "", "timer", n.ToString());
+					}
+				}, true, new List<IEventFilter>() {new EventFilterOwner(timer2)});
+
+			AddChild(timer2);
+			}, true, new List<IEventFilter>() {new EventFilterOwner(ServiceRegistry.Get<NodeManager>())});
+
 
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());

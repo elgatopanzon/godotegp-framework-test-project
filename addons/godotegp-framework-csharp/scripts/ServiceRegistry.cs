@@ -32,7 +32,8 @@ public partial class ServiceRegistry : Node
 	{
 		Instance = this;
 
-		Get<EventManager>().Subscribe(new EventSubscription<EventServiceReady>(this, __On_EventServiceReady, true));
+		// Get<EventManager>().Subscribe(new EventSubscription<EventServiceReady>(this, __On_EventServiceReady, true));
+		this.Subscribe<EventServiceReady>(__On_EventServiceReady, true);
 	}
 
 	// Called when the node enters the scene tree for the first time.
