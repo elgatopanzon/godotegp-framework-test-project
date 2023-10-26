@@ -64,6 +64,8 @@ public partial class GodotEGP : Node
 		ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
 		ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
 
+		LoggerManager.LogDebug(ServiceRegistry.Get<NodeManager>().GetReady());
+
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Instance["Test"].GetReady());
