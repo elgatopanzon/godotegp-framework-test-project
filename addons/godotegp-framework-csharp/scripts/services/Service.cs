@@ -7,6 +7,11 @@ public partial class Service : Node
 {
 	public bool ServiceReady { get; set; }
 
+	public Service()
+	{
+		Name = this.GetType().Name;
+	}
+
 	public bool GetReady()
 	{
 		return ServiceReady;
