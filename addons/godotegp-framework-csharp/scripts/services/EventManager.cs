@@ -10,6 +10,8 @@ public partial class EventManager : Service
 
 	private Dictionary<Type, EventQueue> _eventQueues = new Dictionary<Type, EventQueue>();
 
+	private Dictionary<GodotObject, string> _connectedSignals = new Dictionary<GodotObject, string>();
+
 	public EventManager()
 	{
 	}
@@ -170,10 +172,17 @@ public partial class EventManager : Service
 			cb = Callable.From(callback);
 		}
 
-		if (!connectObject.IsConnected(signalName, cb))
+		if (_connectedSignals.TryAdd(connectObject, signalName))
 		{
 			connectObject.Connect(signalName, cb);
+
+			LoggerManager.LogDebug("Connecting to godot signal", "", "signal", new Dictionary<string, string> { {"objectType", connectObject.GetType().Name}, {"signalName", signalName}  });
 		}
+		else
+		{
+			LoggerManager.LogWarning("Signal already connected", "", "signal", new Dictionary<string, string> { {"objectType", connectObject.GetType().Name}, {"signalName", signalName}  });
+		}
+
 
 		eventSubscription.EventFilters.Add(new EventFilterOwner(connectObject));
 		eventSubscription.EventFilters.Add(new EventFilterSignal(signalName));
