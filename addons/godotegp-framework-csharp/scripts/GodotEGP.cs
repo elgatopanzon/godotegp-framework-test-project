@@ -57,7 +57,12 @@ public partial class GodotEGP : Node
 
 		Node obj = ServiceRegistry.Get<ObjectPoolService>().Get<Node>();
 
+
+		ServiceRegistry.Get<NodeManager>().SubscribeSignal("group_test_group", "timeout", false, __On_Timer_timeout);
+
 		Timer timer = new Timer();
+		timer.Name = "timer1";
+		timer.AddToGroup("test_group");
 		AddChild(timer);
 		timer.WaitTime = 1.5;
 		timer.Start();
@@ -65,13 +70,15 @@ public partial class GodotEGP : Node
 		// ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
 		// ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
 
-		timer.SubscribeSignal("timeout", false, __On_Timer_timeout);
-		timer.SubscribeSignal("timeout", false, __On_Timer_timeout);
+		// timer.SubscribeSignal("timeout", false, __On_Timer_timeout);
+		// timer.SubscribeSignal("timeout", false, __On_Timer_timeout);
 
 		LoggerManager.LogDebug(ServiceRegistry.Get<NodeManager>().GetReady());
 
+
 		Timer timer2 = new Timer();
 		timer2.Name = "timer2";
+		timer2.AddToGroup("test_group");
 
 		// ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventServiceReady>(this, (e) => {
 		// 	ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventNodeAdded>(this, (e) => {

@@ -8,7 +8,9 @@ using System.Collections.Generic;
 public partial class NodeManager : Service
 {
 	private Dictionary<string, List<Node>> _registeredNodes = new Dictionary<string, List<Node>>();
-	
+
+	private Dictionary<string, List<DeferredSignalSubscription>> _deferredSignalSubscriptions = new Dictionary<string, List<DeferredSignalSubscription>>();
+
 	public override void _Ready()
 	{
 		if (!GetReady())
@@ -77,6 +79,8 @@ public partial class NodeManager : Service
 
 			RegisterNode(node, node.GetPath(), false);
 		}
+
+		ProcessDeferredSignalSubscriptions(nodeId);
 	}
 
 	public void DeregisterNode(Node node)
@@ -150,5 +154,87 @@ public partial class NodeManager : Service
 		}
 
 		return false;
+	}
+
+	public bool TryGetNodes(string nodeId, out List<Node> nodes)
+	{
+		nodes = null;
+
+		if (_registeredNodes.TryGetValue(nodeId, out List<Node> nodesList))
+		{
+			nodes = nodesList;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, List<IEventFilter> eventFilters = null)
+	{
+		// converts params to object
+		DeferredSignalSubscription deferredSignalSubscription = new DeferredSignalSubscription(nodeId, signalName, hasParams, callbackMethod, isHighPriority, eventFilters);
+
+		// add the object to a list, creating if needed
+		if (!_deferredSignalSubscriptions.TryGetValue(nodeId, out List<DeferredSignalSubscription> subs))
+		{
+			subs = new List<DeferredSignalSubscription>();
+			_deferredSignalSubscriptions.Add(nodeId, subs);
+		}
+
+		// add the deferred signal subscription
+		_deferredSignalSubscriptions[nodeId].Add(deferredSignalSubscription);
+
+		// process existing nodes to make the signal subscription
+		ProcessDeferredSignalSubscriptions(nodeId);
+	}
+
+	public void ProcessDeferredSignalSubscriptions(string nodeId)
+	{
+		// check for any subs matching the nodeId
+		if (_deferredSignalSubscriptions.TryGetValue(nodeId, out List<DeferredSignalSubscription> subs))
+		{
+			if (TryGetNodes(nodeId, out List<Node> nodes))
+			{
+				foreach (DeferredSignalSubscription sub in subs)
+				{
+					foreach (Node node in nodes)
+					{
+						if (!sub.ConnectedTo.Contains(node))
+						{
+							LoggerManager.LogDebug("Subscribing deferred to node signal", "", "subscribe", $"{nodeId}: {node} {sub.SignalName}");
+
+							sub.ConnectedTo.Add(node);
+
+							node.SubscribeSignal(sub.SignalName, sub.HasParams, sub.CallbackMethod, sub.IsHighPriority, sub.EventFilters);		
+						}
+					}
+				}
+			}
+			
+		}
+	}
+
+	public class DeferredSignalSubscription
+	{
+		public string NodeId;
+		public string SignalName;
+		public bool HasParams;
+		public Action<IEvent> CallbackMethod;
+		public bool IsHighPriority;
+		public List<IEventFilter> EventFilters;
+		public List<Node> ConnectedTo;
+
+		public DeferredSignalSubscription(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority, List<IEventFilter> eventFilters)
+		{
+			this.NodeId = nodeId;
+			this.SignalName = signalName;
+			this.HasParams = hasParams;
+			this.CallbackMethod = callbackMethod;
+			this.IsHighPriority = isHighPriority;
+			this.EventFilters = eventFilters;
+
+			this.ConnectedTo = new List<Node>();
+		}
 	}
 }
