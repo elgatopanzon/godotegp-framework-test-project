@@ -10,10 +10,19 @@ using System.Linq;
 public class ValidatedValue<T>
 {
 	protected T _value;
+	protected T _default;
 
 	public T Value
 	{
-		get { return _value; }
+		get { 
+			// return _default in place of value
+			if (_value == null && _default != null)
+			{
+				return _default;
+			}
+
+			return _value;
+		}
 		set { 
 			_value = ValidateValue(value);
 		}
@@ -27,7 +36,7 @@ public class ValidatedValue<T>
 
 	public virtual ValidatedValue<T> Default(T defaultValue)
 	{
-		Value = defaultValue;
+		_default = ValidateValue(defaultValue);
 		return this;
 	}
 
@@ -59,11 +68,11 @@ public class ValidatedValue<T>
 
 	public virtual ValidatedValue<T> Prototype(ValidatedValue<T> from)
 	{
+		_default = from._default;
+
 		foreach (ValidatedValueConstraint<T> constraint in from._constraints)
 		{
 			_constraints.Add(constraint);
-
-			Value = from.Value;
 		}
 
 		return this;
@@ -73,9 +82,9 @@ public class ValidatedValue<T>
 	{
 		_constraints.Add(constraint);
 
-		if (_value != null)
+		if (!Value.Equals(default(T)))
 		{
-			ValidateValue(_value);
+			ValidateValue(Value);
 		}
 
 		return this;
@@ -83,6 +92,8 @@ public class ValidatedValue<T>
 
 	public virtual T ValidateValue(T value)
 	{
+		LoggerManager.LogDebug("Validating value", "", "value", new Dictionary<string, string> { { "value", value?.ToString() } , { "default", _default?.ToString() }, { "type", value?.GetType().Name } });
+
 		foreach (ValidatedValueConstraint<T> constraint in _constraints)
 		{
 			constraint.Validate(value);
