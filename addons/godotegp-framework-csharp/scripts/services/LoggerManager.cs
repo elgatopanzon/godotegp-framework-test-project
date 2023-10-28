@@ -4,6 +4,7 @@ using Godot;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
+using Godot.EGP.Extensions;
 
 /// <summary>
 /// Manage instances of <c>Logger</c> objects based on class type.
@@ -40,7 +41,13 @@ public partial class LoggerManager : Service
 		set { _loggerDestinationCollectionDefault = value; }
 	}
 
-	private LoggerManager() { }
+	private LoggerManager() {
+		AppDomain.CurrentDomain.FirstChanceException += (sender, eventArgs) =>
+		{
+			LogError(eventArgs.Exception.GetType().Name, eventArgs.Exception.TargetSite.Name, "exceptionData", eventArgs.Exception.Data);
+			LogError(eventArgs.Exception.Message, eventArgs.Exception.TargetSite.Name, "stackTrace", eventArgs.Exception.StackTrace);
+		};
+	}
 
 	public override void _Ready()
 	{
