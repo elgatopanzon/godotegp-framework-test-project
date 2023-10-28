@@ -288,6 +288,57 @@ public class ValidationConstraintMinMaxValue<T> : ValidatedValueConstraint<T>
 	}
 }
 
+public class ValidationConstraintVector2MinMaxValue<T> : ValidatedValueConstraint<T>
+{
+	private ValidationConstraintMinMaxValue<double> _xConstraint;
+	private ValidationConstraintMinMaxValue<double> _yConstraint;
+
+	public ValidationConstraintVector2MinMaxValue(double minXValue, double maxXValue, double minYValue, double maxYValue)
+	{
+		_xConstraint = new ValidationConstraintMinMaxValue<double>(minXValue, maxXValue);
+		_yConstraint = new ValidationConstraintMinMaxValue<double>(minYValue, maxYValue);
+	}
+
+	// validate method
+	public override bool Validate(T value)
+	{
+		if (value is Vector2 v2)
+		{
+			try
+			{
+				_xConstraint.Validate(v2.X);
+			}
+			catch (System.Exception ei)
+			{
+				Exception e = new ValidationXValueException(ei.Message);
+				throw e;
+			}
+
+			try
+			{
+				_yConstraint.Validate(v2.Y);
+			}
+			catch (System.Exception ei)
+			{
+				Exception e = new ValidationYValueException(ei.Message);
+				throw e;
+			}
+		}
+		return true;
+	}
+
+	// exceptions
+	public class ValidationXValueException : Exception
+	{
+		public ValidationXValueException(string message) : base(message) {}
+	}
+
+	public class ValidationYValueException : Exception
+	{
+		public ValidationYValueException(string message) : base(message) {}
+	}
+}
+
 public class ValidationConstraintAllowedValues<T> : ValidatedValueConstraint<T>
 {
 	private IList _allowedValues;
@@ -385,5 +436,6 @@ public class ValidatedObjectTest
 	
 	public ValidatedValue<Vector2> Vector2Test = new ValidatedValue<Vector2>()
 		.Default(new Vector2(1, 2))
+		.AddConstraint(new ValidationConstraintVector2MinMaxValue<Vector2>(1, 1, 1, 1))
 		;
 }
