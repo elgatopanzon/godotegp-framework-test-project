@@ -435,7 +435,7 @@ public class ValidatedObjectTest
 	// 	;
 	
 	public ValidatedValue<Vector2> Vector2Test = new ValidatedValue<Vector2>()
-		.Default(new Vector2(1, 2))
+		.Default(new Vector2(1, 1))
 		.AddConstraint(new ValidationConstraintVector2MinMaxValue<Vector2>(1, 1, 1, 1))
 		;
 }

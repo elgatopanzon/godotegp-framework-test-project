@@ -6,6 +6,7 @@ using Godot.EGP.State;
 using System;
 using System.Collections.Generic;
 using Godot.EGP.ValidatedObject;
+using Newtonsoft.Json;
 
 public partial class GodotEGP : Node
 {
@@ -106,7 +107,16 @@ public partial class GodotEGP : Node
 		// validated objects testing
 		ValidatedObjectTest vObj = new ValidatedObjectTest();
 
-		LoggerManager.LogDebug(vObj.StringTest.Value);
+		// string vObjJson = Newtonsoft.Json.JsonConvert.SerializeObject(vObj);
+		// LoggerManager.LogDebug(vObjJson);
+        //
+		// vObjJson = "{\"String\":{\"Value\":[\"d\",\"e\",\"f\"]},\"DictionarySizeTest\":{\"Value\":{\"d\":\"123\",\"e\":1,\"f\":1}},\"StringTest\":{\"Value\":\"string2\"},\"IntTest\":{\"Value\":5},\"DoubleTestt\":{\"Value\":5.0},\"UlongTestt\":{\"Value\":5},\"IntArrayTestt\":{\"Value\":[1,2,3]},\"Vector2Testt\":{\"Value\":{\"X\":2.0,\"Y\":2.0}}}";
+		// LoggerManager.LogDebug(vObjJson);
+		// ValidatedObjectTest vObj2 = Newtonsoft.Json.JsonConvert.DeserializeObject<ValidatedObjectTest>(vObjJson);
+        //
+		// LoggerManager.LogDebug(vObj2.StringTest.Value);
+        //
+		// LoggerManager.LogDebug(vObj.StringTest.Value);
 		// try
 		// {
 		// 	vObj.StringTest.Value = "xxx";
@@ -120,10 +130,11 @@ public partial class GodotEGP : Node
 		// 	LoggerManager.LogDebug(vObj.StringTest.Value);
 		// }
 		// LoggerManager.LogDebug(vObj.StringTest.Value);
-		LoggerManager.LogDebug(vObj.IntTest.Value);
-		LoggerManager.LogDebug(vObj.DoubleTest.Value);
-		LoggerManager.LogDebug(vObj.UlongTest.Value);
-		LoggerManager.LogDebug(vObj.Vector2Test.Value);
+		// LoggerManager.LogDebug(vObj.IntTest.Value);
+		// LoggerManager.LogDebug(vObj.DoubleTest.Value);
+		// LoggerManager.LogDebug(vObj.UlongTest.Value);
+		// LoggerManager.LogDebug(vObj.Vector2Test.Value);
+
 
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
