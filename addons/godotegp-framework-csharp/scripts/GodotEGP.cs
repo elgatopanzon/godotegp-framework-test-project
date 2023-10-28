@@ -5,6 +5,7 @@ using Godot.EGP.Extensions;
 using Godot.EGP.State;
 using System;
 using System.Collections.Generic;
+using Godot.EGP.ValidatedObject;
 
 public partial class GodotEGP : Node
 {
@@ -102,6 +103,10 @@ public partial class GodotEGP : Node
 			AddChild(timer2);
 			}, true, new List<IEventFilter>() {new EventFilterOwner(ServiceRegistry.Get<NodeManager>())});
 
+		// validated objects testing
+		ValidatedObjectTest vObj = new ValidatedObjectTest();
+
+		LoggerManager.LogDebug(vObj.StringTest.Value);
 
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
