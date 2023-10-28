@@ -15,12 +15,6 @@ public class ValidatedValue<T>
 	public T Value
 	{
 		get { 
-			// return _default in place of value
-			if (_value == null && _default != null)
-			{
-				return _default;
-			}
-
 			return _value;
 		}
 		set { 
@@ -37,8 +31,20 @@ public class ValidatedValue<T>
 	public virtual ValidatedValue<T> Default(T defaultValue)
 	{
 		_default = ValidateValue(defaultValue);
+		_value = defaultValue;
+
+		LoggerManager.LogDebug("Setting default value", "", "default", defaultValue);
+		LoggerManager.LogDebug("", "", "current", Value);
 		return this;
 	}
+
+	public virtual ValidatedValue<T> Reset()
+	{
+		LoggerManager.LogDebug("Resetting value");
+
+		return Default(_default);
+	}
+	
 
 	// constraint classes to activate constraints on an object
 	public virtual ValidatedValue<T> AllowedLength(int minLength = 0, int maxLength = 0)
@@ -376,4 +382,8 @@ public class ValidatedObjectTest
 	// 	.Prototype(IntArrayTest)
 	// 	.Default(new int[] {1,2,3,4})
 	// 	;
+	
+	public ValidatedValue<Vector2> Vector2Test = new ValidatedValue<Vector2>()
+		.Default(new Vector2(1, 2))
+		;
 }

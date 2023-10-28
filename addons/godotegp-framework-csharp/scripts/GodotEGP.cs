@@ -107,22 +107,23 @@ public partial class GodotEGP : Node
 		ValidatedObjectTest vObj = new ValidatedObjectTest();
 
 		LoggerManager.LogDebug(vObj.StringTest.Value);
-		try
-		{
-			vObj.StringTest.Value = "xxx";
-		}
-		catch (System.Exception)
-		{
-			throw;
-		}
-		finally
-		{
-			LoggerManager.LogDebug(vObj.StringTest.Value);
-		}
-		LoggerManager.LogDebug(vObj.StringTest.Value);
+		// try
+		// {
+		// 	vObj.StringTest.Value = "xxx";
+		// }
+		// catch (System.Exception)
+		// {
+		// 	throw;
+		// }
+		// finally
+		// {
+		// 	LoggerManager.LogDebug(vObj.StringTest.Value);
+		// }
+		// LoggerManager.LogDebug(vObj.StringTest.Value);
 		LoggerManager.LogDebug(vObj.IntTest.Value);
 		LoggerManager.LogDebug(vObj.DoubleTest.Value);
 		LoggerManager.LogDebug(vObj.UlongTest.Value);
+		LoggerManager.LogDebug(vObj.Vector2Test.Value);
 
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
