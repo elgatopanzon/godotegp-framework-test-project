@@ -350,7 +350,7 @@ public partial class GodotEGP : Node
 		MyBackgroundJob bgj = new MyBackgroundJob();
 
 		// this.Subscribe<EventBackgroundJobComplete>(__On_Event, true, true, new List<IEventFilter> {new EventFilterOwner(bgj)});
-		this.Subscribe<EventBackgroundJobComplete>(__On_Event, true, true).Filters(new EventFilterOwner(bgj));
+		this.Subscribe<EventBackgroundJobComplete>(__On_Event, isHighPriority:false, oneshot:true).Filters(new EventFilterOwner(bgj));
 
 		// bgj.OnComplete = (RunWorkerCompletedEventArgs e) => {
 		// 	bgj.Emit<Event>((ev) => ev.SetData(bgj.Result));
