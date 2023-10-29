@@ -112,33 +112,36 @@ public partial class GodotEGP : Node
 			}, true, false, new List<IEventFilter>() {new EventFilterOwner(ServiceRegistry.Get<NodeManager>())});
 
 		// validated objects testing
-		// ValidatedObjectTest vObj = new ValidatedObjectTest();
+		ValidatedObjectTest vObj = new ValidatedObjectTest();
+		// LoggerManager.LogDebug(vObj);
         //
         //
-		// string vObjJson = Newtonsoft.Json.JsonConvert.SerializeObject(vObj);
-		// LoggerManager.LogDebug(vObjJson);
-        //
+		string vObjJson = Newtonsoft.Json.JsonConvert.SerializeObject(vObj);
+		LoggerManager.LogDebug(vObjJson);
+
+		// vObjJson = "{'StringListTest':[1,2,3],'DictionarySizeTest':{'a':1,'b':1,'c':1},'StringTest':'string','IntTest':5,'DoubleTest':5.0,'UlongTest':5,'IntArrayTest':[1,2,3],'Vector2Test':{'X':1.0,'Y':1.0}}";
 		// vObjJson = "{\"StringListTest\":{\"Value\":[\"d\",\"e\",\"f\"]},\"DictionarySizeTest\":{\"Value\":{\"d\":\"123\",\"e\":1,\"f\":1}},\"StringTest\":{\"Value\":\"string\"},\"IntTest\":{\"Value\":5},\"DoubleTestt\":{\"Value\":5.0},\"UlongTestt\":{\"Value\":5},\"IntArrayTest\":{\"Value\":[\"123\",2,3]},\"Vector2Testt\":{\"Value\":{\"X\":2.0,\"Y\":2.0}}}";
-		// LoggerManager.LogDebug(vObjJson);
-        //
-		// List<string> errors = new List<string>();
-        //
-		// ValidatedObjectTest vObj2 = Newtonsoft.Json.JsonConvert.DeserializeObject<ValidatedObjectTest>(vObjJson,
-		// 		new JsonSerializerSettings
-    	// 			{
-        // 				Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
-        // 				{
-        //     				errors.Add(args.ErrorContext.Error.Message);
-        //     				args.ErrorContext.Handled = true;
-        // 				}
-    	// 			}
-		// 		);
-        //
-		// LoggerManager.LogDebug(vObj2.StringTest.Value);
-		// foreach (string error in errors)
-		// {
-		// 	LoggerManager.LogDebug(error);
-		// }
+		LoggerManager.LogDebug(vObjJson);
+
+		List<string> errors = new List<string>();
+
+		ValidatedObjectTest vObj2 = Newtonsoft.Json.JsonConvert.DeserializeObject<ValidatedObjectTest>(vObjJson,
+				new JsonSerializerSettings
+    				{
+        				Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
+        				{
+            				errors.Add(args.ErrorContext.Error.Message);
+            				args.ErrorContext.Handled = true;
+        				}
+    				}
+				);
+
+		LoggerManager.LogDebug(vObj.StringTest);
+		LoggerManager.LogDebug(vObj2.StringTest);
+		foreach (string error in errors)
+		{
+			LoggerManager.LogDebug(error);
+		}
         //
 		// LoggerManager.LogDebug(vObj.StringTest.Value);
 		// try

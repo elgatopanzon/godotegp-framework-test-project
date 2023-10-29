@@ -6,11 +6,19 @@ using System.Collections.Generic;
 using System.Collections;
 using Godot.EGP.Extensions;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
-public class ValidatedValue<T>
+public interface IValidatedValue
+{
+	bool Validate();
+}
+
+public class ValidatedValue<T> : IValidatedValue
 {
 	protected T _value;
 	protected T _default;
+	protected bool NullAllowed = true;
 
 	public T Value
 	{
@@ -18,6 +26,7 @@ public class ValidatedValue<T>
 			return _value;
 		}
 		set { 
+			LoggerManager.LogDebug($"Setting value {this.GetType().Name}<{this.GetType().GetTypeInfo().GenericTypeArguments[0]}>", "", "value", value);
 			_value = ValidateValue(value);
 		}
 	}
@@ -88,7 +97,7 @@ public class ValidatedValue<T>
 	{
 		_constraints.Add(constraint);
 
-		if (!Value.Equals(default(T)))
+		if (Value != null && !Value.Equals(default(T)))
 		{
 			ValidateValue(Value);
 		}
@@ -96,15 +105,43 @@ public class ValidatedValue<T>
 		return this;
 	}
 
+	public ValidatedValue<T> NotNull()
+	{
+		NullAllowed = false;
+		return this;
+	}
+
 	public virtual T ValidateValue(T value)
 	{
 		LoggerManager.LogDebug("Validating value", "", "value", new Dictionary<string, string> { { "value", value?.ToString() } , { "default", _default?.ToString() }, { "type", value?.GetType().Name } });
+
+		if (!NullAllowed && value == null)
+		{
+			throw new ValidationValueIsNullException($"The {typeof(T)} value is null and NullAllowed is false");
+		}
 
 		foreach (ValidatedValueConstraint<T> constraint in _constraints)
 		{
 			constraint.Validate(value);
 		}
 		return value;
+	}
+
+	public virtual bool Validate()
+	{
+		ValidateValue(_value);
+		return true;
+	}
+
+	public class ValidationValueIsNullException : Exception
+	{
+		public ValidationValueIsNullException() { }
+		public ValidationValueIsNullException(string message) : base(message) { }
+		public ValidationValueIsNullException(string message, Exception inner) : base(message, inner) { }
+		protected ValidationValueIsNullException(
+			System.Runtime.Serialization.SerializationInfo info,
+			System.Runtime.Serialization.StreamingContext context)
+				: base(info, context) { }
 	}
 }
 
@@ -389,53 +426,135 @@ public class ValidationConstraintAllowedValues<T> : ValidatedValueConstraint<T>
 	}
 }
 
-public class ValidatedObjectTest
+public class ValidatedObject
 {
-	public ValidatedValue<List<string>> StringListTest = new ValidatedValue<List<string>>()
-		.Default(new List<string> {"a", "b", "c"})
+	public ValidatedObject()
+	{
+		ValidateFields();
+	}
+
+	public void ValidateFields()
+	{
+		Type t = this.GetType();
+
+		LoggerManager.LogDebug($"Validating object fields for {t.Name}");
+
+		foreach (FieldInfo field in t.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
+		{
+			LoggerManager.LogDebug($"Validating object field {field.Name}");
+
+			if (field.GetType().GetMethod("Validate") != null)
+			{
+				if (field.GetValue(this) is IValidatedValue vv)
+				{
+					vv.Validate();
+				}
+			}
+		}
+	}
+}
+
+public class ValidatedObjectTest : ValidatedObject
+{
+	private ValidatedValue<List<string>> _stringListTest = new ValidatedValue<List<string>>()
+		// .Default(new List<string> {"a", "b", "c"})
 		.AllowedSize(3, 8)
+		.NotNull()
 		;
 
-	public ValidatedValue<Dictionary<string, int>> DictionarySizeTest = new ValidatedValue<Dictionary<string, int>>()
+	public List<string> StringListTest
+	{
+		get { return _stringListTest.Value; }
+		set { _stringListTest.Value = value; }
+	}
+
+	private ValidatedValue<Dictionary<string, int>> _dictionarySizeTest = new ValidatedValue<Dictionary<string, int>>()
 		.Default(new Dictionary<string, int> {{"a", 1}, {"b", 1}, {"c", 1}})
 		.AllowedSize(3, 8)
 		;
 
-	public ValidatedValue<string> StringTest = new ValidatedValue<string>()
+	public Dictionary<string, int> DictionarySizeTest
+	{
+		get { return _dictionarySizeTest.Value; }
+		set { _dictionarySizeTest.Value = value; }
+	}
+
+	private ValidatedValue<string> _stringTest = new ValidatedValue<string>()
 		.Default("string")
 		.AllowedLength(5, 15)
 		.AllowedValues(new string[] {"string"})
 		;
 
-	public ValidatedValue<int> IntTest = new ValidatedValue<int>()
+	public string StringTest
+	{
+		get { return _stringTest.Value; }
+		set { _stringTest.Value = value; }
+	}
+
+	private ValidatedValue<int> _intTest = new ValidatedValue<int>()
 		.Default(5)
 		.AllowedRange(2, 8)
 		;
 
-	public ValidatedValue<double> DoubleTest = new ValidatedValue<double>()
+	public int IntTest
+	{
+		get { return _intTest.Value; }
+		set { _intTest.Value = value; }
+	}
+
+	private ValidatedValue<double> _doubleTest = new ValidatedValue<double>()
 		.Default(5)
 		.AllowedRange(2.5, 8.8)
 		;
 
-	public ValidatedValue<ulong> UlongTest = new ValidatedValue<ulong>()
+	public double DoubleTest
+	{
+		get { return _doubleTest.Value; }
+		set { _doubleTest.Value = value; }
+	}
+
+	private ValidatedValue<ulong> _ulongTest = new ValidatedValue<ulong>()
 		.Default(5)
 		.AllowedRange(2, 8)
 		;
 
-	public ValidatedValue<int[]> IntArrayTest = new ValidatedValue<int[]>()
+	public ulong UlongTest
+	{
+		get { return _ulongTest.Value; }
+		set { _ulongTest.Value = value; }
+	}
+
+	private ValidatedValue<int[]> _intArrayTest = new ValidatedValue<int[]>()
 		.Default(new int[] {1,2,3})
 		.AllowedSize(3, 8)
 		.AllowedValues(new List<int> {1,2,3})
 		.UniqueItems()
 		;
 
+	public int[] IntArrayTest
+	{
+		get { return _intArrayTest.Value; }
+		set { _intArrayTest.Value = value; }
+	}
+
 	// public ValidatedValue<int[]> IntPrototypeTest = new ValidatedValue<int[]>()
 	// 	.Prototype(IntArrayTest)
 	// 	.Default(new int[] {1,2,3,4})
 	// 	;
-	
-	public ValidatedValue<Vector2> Vector2Test = new ValidatedValue<Vector2>()
+
+	private ValidatedValue<Vector2> _vector2Test = new ValidatedValue<Vector2>()
 		.Default(new Vector2(1, 1))
 		.AddConstraint(new ValidationConstraintVector2MinMaxValue<Vector2>(1, 1, 1, 1))
 		;
+
+	public Vector2 Vector2Test
+	{
+		get { return _vector2Test.Value; }
+		set { _vector2Test.Value = value; }
+	}
+
+	// public ValidatedObjectTest(List<string> stringListTest)
+	// {
+	// 	StringListTest = stringListTest;
+	// }
 }
