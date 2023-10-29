@@ -368,7 +368,7 @@ public partial class GodotEGP : Node
     		var res = reader.ReadToEnd();
     		System.Threading.Thread.Sleep(2000);
 
-			ServiceRegistry.Get<EventManager>().Emit(new Event(this, res));
+			this.Emit<Event>((e) => e.SetData(res));
 
     		LoggerManager.LogDebug($"Cat fact from thread: {res}");
 
@@ -376,7 +376,7 @@ public partial class GodotEGP : Node
         }
         catch (System.Exception e)
         {
-			ServiceRegistry.Get<EventManager>().Emit(new Event(this, e.Message));
+			this.Emit<Event>((ee) => ee.SetData(e.Message));
         }
 	}
 

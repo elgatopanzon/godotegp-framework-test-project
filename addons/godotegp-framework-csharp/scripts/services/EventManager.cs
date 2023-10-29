@@ -193,7 +193,7 @@ public partial class EventManager : Service
 
 	public void __On_Signal(GodotObject connectObject, string signalName, Variant[] signalParams = null)
 	{
-		ServiceRegistry.Get<EventManager>().Emit(new EventSignal(connectObject, signalName, signalParams));
+		connectObject.Emit<EventSignal>((e) => e.SetSignalName(signalName).SetSignalParams(signalParams));
 	}
 }
 
@@ -223,5 +223,19 @@ public static class EventManagerObjectExtensions
 	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, IEventSubscription<Event> eventSubscription)
 	{
 		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, eventSubscription);
+	}
+
+	public static T Emit<T>(this object obj, Action<T> preinvokeHook = null) where T : Event, new()
+	{
+		T e = new T().SetOwner(obj);
+
+		if (preinvokeHook != null)
+		{
+			preinvokeHook(e);
+		}
+
+		e.Invoke();
+
+		return e;
 	}
 }

@@ -62,7 +62,8 @@ public partial class ServiceRegistry : Node
 
 		serviceObj._OnServiceRegistered();
 
-		Get<EventManager>().Emit(new EventServiceRegistered(serviceObj));
+		// Get<EventManager>().Emit(new EventServiceRegistered().SetOwner(serviceObj));
+		serviceObj.Emit<EventServiceRegistered>();
 	}
 
 	public void __On_EventServiceReady(IEvent eventObj)

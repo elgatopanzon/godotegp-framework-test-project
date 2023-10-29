@@ -50,7 +50,6 @@ public partial class Service : Node
 		this.ServiceReady = readyState;
 
 		if (readyState)
-			// this._OnServiceReady();
-			ServiceRegistry.Get<EventManager>().Emit(new EventServiceReady(this));
+			this.Emit<EventServiceReady>();
 	}
 }

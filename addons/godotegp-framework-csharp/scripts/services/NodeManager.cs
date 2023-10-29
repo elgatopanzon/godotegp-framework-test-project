@@ -19,8 +19,6 @@ public partial class NodeManager : Service
 
 			// subscribe to Events related to nodes being added and removed with
 			// high priority
-			// ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventNodeAdded>(this, __On_EventNodeAdded, true));
-			// ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<EventNodeRemoved>(this, __On_EventNodeRemoved, true));
 			this.Subscribe<EventNodeAdded>(__On_EventNodeAdded, true);
 			this.Subscribe<EventNodeRemoved>(__On_EventNodeRemoved, true);
 
@@ -38,11 +36,11 @@ public partial class NodeManager : Service
 	// signal callbacks for node_* events, used as rebroadcasters
 	public void __On_Signal_node_added(Node nodeObj)
 	{
-		ServiceRegistry.Get<EventManager>().Emit(new EventNodeAdded(nodeObj, nodeObj));
+		nodeObj.Emit<EventNodeAdded>((e) => e.SetNode(nodeObj));
 	}
 	public void __On_Signal_node_removed(Node nodeObj)
 	{
-		ServiceRegistry.Get<EventManager>().Emit(new EventNodeAdded(nodeObj, nodeObj));
+		nodeObj.Emit<EventNodeRemoved>((e) => e.SetNode(nodeObj));
 	}
 
 	// process node added and removed Event objects
