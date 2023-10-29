@@ -457,7 +457,7 @@ public class ValidatedObject
 public class ValidatedObjectTest : ValidatedObject
 {
 	private ValidatedValue<List<string>> _stringListTest = new ValidatedValue<List<string>>()
-		// .Default(new List<string> {"a", "b", "c"})
+		.Default(new List<string> {"a", "b", "c"})
 		.AllowedSize(3, 8)
 		.NotNull()
 		;
