@@ -121,7 +121,7 @@ public partial class EventManager : Service
 		// emit the event to high-priority subscribers
 		if (_eventSubscriptions.TryGetValue(eventObj.GetType(), out List<IEventSubscription<Event>> subList))
 		{
-			foreach (IEventSubscription<Event> eventSubscription in subList)
+			foreach (IEventSubscription<Event> eventSubscription in subList.ToArray())
 			{
 				if (eventObj.GetType() == eventSubscription.EventType && eventSubscription.IsHighPriority == broadcastHighPriority)
 				{
@@ -149,6 +149,11 @@ public partial class EventManager : Service
 						eventSubscription.CallbackMethod(eventObj);
 
 						eventConsumed = true;
+
+						if (eventSubscription.Oneshot)
+						{
+							Unsubscribe(eventSubscription);
+						}
 					}
 				}
 			}
@@ -204,9 +209,9 @@ public class EventQueueDeferred : EventQueue
 
 public static class EventManagerObjectExtensions
 {
-	public static void Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, List<IEventFilter> eventFilters = null) where T : Event
+	public static void Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null) where T : Event
 	{
-		ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<T>(obj, callbackMethod, isHighPriority, eventFilters));
+		ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<T>(obj, callbackMethod, isHighPriority, oneshot, eventFilters));
 	}
 
 	public static void Subscribe(this object obj, IEventSubscription<Event> eventSubscription)
@@ -215,9 +220,9 @@ public static class EventManagerObjectExtensions
 	}
 
 
-	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, List<IEventFilter> eventFilters = null)
+	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null)
 	{
-		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, new EventSubscription<EventSignal>(obj, callbackMethod, isHighPriority, eventFilters));
+		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, new EventSubscription<EventSignal>(obj, callbackMethod, isHighPriority, oneshot, eventFilters));
 	}
 
 	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, IEventSubscription<Event> eventSubscription)

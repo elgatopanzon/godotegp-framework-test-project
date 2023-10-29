@@ -58,7 +58,7 @@ public partial class GodotEGP : Node
 		// var sub = new EventSubscription<EventServiceRegistered>(this, false);
 		// ServiceRegistry.Get<EventManager>().Subscribe(sub);
 
-		var sub = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered, false, new List<IEventFilter> {new EventFilterSignal("test")});
+		var sub = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered, false, false, new List<IEventFilter> {new EventFilterSignal("test")});
 		var sub2 = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered_highpriority, true);
 
 		ServiceRegistry.Get<EventManager>().Subscribe(sub);
@@ -67,7 +67,7 @@ public partial class GodotEGP : Node
 		Node obj = ServiceRegistry.Get<ObjectPoolService>().Get<Node>();
 
 
-		ServiceRegistry.Get<NodeManager>().SubscribeSignal("group_test_group", "timeout", false, __On_Timer_timeout);
+		ServiceRegistry.Get<NodeManager>().SubscribeSignal("group_test_group", "timeout", false, __On_Timer_timeout, false, true);
 
 		Godot.Timer timer = new Godot.Timer();
 		timer.Name = "timer1";
@@ -106,10 +106,10 @@ public partial class GodotEGP : Node
 					{
 						LoggerManager.LogDebug("Timer node exists", "", "timer", n.ToString());
 					}
-				}, true, new List<IEventFilter>() {new EventFilterOwner(timer2)});
+				}, true, false, new List<IEventFilter>() {new EventFilterOwner(timer2)});
 
 			AddChild(timer2);
-			}, true, new List<IEventFilter>() {new EventFilterOwner(ServiceRegistry.Get<NodeManager>())});
+			}, true, false, new List<IEventFilter>() {new EventFilterOwner(ServiceRegistry.Get<NodeManager>())});
 
 		// validated objects testing
 		ValidatedObjectTest vObj = new ValidatedObjectTest();

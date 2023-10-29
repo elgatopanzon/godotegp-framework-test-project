@@ -168,10 +168,10 @@ public partial class NodeManager : Service
 		return false;
 	}
 
-	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, List<IEventFilter> eventFilters = null)
+	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null)
 	{
 		// converts params to object
-		DeferredSignalSubscription deferredSignalSubscription = new DeferredSignalSubscription(nodeId, signalName, hasParams, callbackMethod, isHighPriority, eventFilters);
+		DeferredSignalSubscription deferredSignalSubscription = new DeferredSignalSubscription(nodeId, signalName, hasParams, callbackMethod, isHighPriority, oneshot, eventFilters);
 
 		// add the object to a list, creating if needed
 		if (!_deferredSignalSubscriptions.TryGetValue(nodeId, out List<DeferredSignalSubscription> subs))
@@ -204,7 +204,7 @@ public partial class NodeManager : Service
 
 							sub.ConnectedTo.Add(node);
 
-							node.SubscribeSignal(sub.SignalName, sub.HasParams, sub.CallbackMethod, sub.IsHighPriority, sub.EventFilters);		
+							node.SubscribeSignal(sub.SignalName, sub.HasParams, sub.CallbackMethod, sub.IsHighPriority, sub.Oneshot, sub.EventFilters);		
 						}
 					}
 				}
@@ -220,16 +220,18 @@ public partial class NodeManager : Service
 		public bool HasParams;
 		public Action<IEvent> CallbackMethod;
 		public bool IsHighPriority;
+		public bool Oneshot;
 		public List<IEventFilter> EventFilters;
 		public List<Node> ConnectedTo;
 
-		public DeferredSignalSubscription(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority, List<IEventFilter> eventFilters)
+		public DeferredSignalSubscription(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority, bool oneshot, List<IEventFilter> eventFilters)
 		{
 			this.NodeId = nodeId;
 			this.SignalName = signalName;
 			this.HasParams = hasParams;
 			this.CallbackMethod = callbackMethod;
 			this.IsHighPriority = isHighPriority;
+			this.Oneshot = oneshot;
 			this.EventFilters = eventFilters;
 
 			this.ConnectedTo = new List<Node>();
