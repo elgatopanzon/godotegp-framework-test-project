@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Text;
 using System.IO;
 using System.Threading;
+using System.ComponentModel;
 
 public partial class GodotEGP : Node
 {
@@ -344,8 +345,15 @@ public partial class GodotEGP : Node
 		LoggerManager.LogDebug("Timeout!");
 		LoggerManager.LogDebug($"Previous cat fact: {previousCatFact}");
 
-		Thread t = new Thread(new ThreadStart(FetchCatFact));
-		t.Start();
+		// Thread t = new Thread(new ThreadStart(FetchCatFact));
+		// t.Start();
+		MyBackgroundJob bgj = new MyBackgroundJob();
+
+		bgj.OnComplete = (RunWorkerCompletedEventArgs e) => {
+			bgj.Emit<Event>((ev) => ev.SetData(bgj.Result));
+		};
+
+		bgj.Run();
 	}
 
 	public void FetchCatFact()
@@ -382,6 +390,129 @@ public partial class GodotEGP : Node
 
 	public void __On_Event(IEvent e)
 	{
-		LoggerManager.LogDebug($"Event data: {e.Data}");
+		if (e.Data is object[] a)
+		{
+			LoggerManager.LogDebug($"Event data: {a[0]}");
+		}
+	}
+}
+
+public class BackgroundJob
+{
+	BackgroundWorker worker = new BackgroundWorker();
+	public Action<DoWorkEventArgs> OnWorking;
+	public Action<ProgressChangedEventArgs> OnProgress;
+	public Action<RunWorkerCompletedEventArgs> OnComplete;
+
+	public BackgroundJob()
+	{
+	}
+
+	public void _setup()
+	{
+		worker.DoWork += new DoWorkEventHandler(_On_DoWork);
+		worker.ProgressChanged += new ProgressChangedEventHandler(_On_ProgressChanged);
+		worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(_On_RunWorkerCompleted);
+		worker.WorkerReportsProgress = true;
+		worker.WorkerSupportsCancellation = true;
+	}
+
+	public virtual void Run()
+	{
+		_setup();
+		worker.RunWorkerAsync();
+	}
+
+	// handlers for background worker events
+	public virtual void _On_DoWork(object sender, DoWorkEventArgs e)
+	{
+		if (OnWorking != null)
+		{
+			OnWorking(e);
+		}
+
+		DoWork(sender, e);
+	}
+
+	public virtual void _On_ProgressChanged(object sender, ProgressChangedEventArgs e)
+	{
+		if (OnProgress != null)
+		{
+			OnProgress(e);
+		}
+
+		ProgressChanged(sender, e);
+	}
+
+	public virtual void _On_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+	{
+		if (OnComplete != null)
+		{
+			OnComplete(e);
+		}
+
+		RunWorkerCompleted(sender, e);
+	}
+
+	// override these to do the work
+	public virtual void DoWork(object sender, DoWorkEventArgs e)
+	{
+		LoggerManager.LogDebug("Working!");
+
+		System.Threading.Thread.Sleep(1000);
+
+		worker.ReportProgress(50);
+
+		LoggerManager.LogDebug("More work!");
+
+		System.Threading.Thread.Sleep(1000);
+	}
+
+	public virtual void ProgressChanged(object sender, ProgressChangedEventArgs e)
+	{
+		LoggerManager.LogDebug("Job progress", "", "progress", e.ProgressPercentage);
+	}
+
+	public virtual void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+	{
+		LoggerManager.LogDebug("Done!");
+	}
+}
+
+public class MyBackgroundJob : BackgroundJob
+{
+	public string Result;
+
+	public override void DoWork(object sender, DoWorkEventArgs e)
+	{
+		// testing loading from web urls
+		LoggerManager.LogDebug("Fetching cat fact");
+		var client = new System.Net.Http.HttpClient();
+            
+        try
+        {
+    		var webRequest = new HttpRequestMessage(HttpMethod.Get, "https://catfact.ninja/fact")
+    		{
+        		Content = new StringContent("{ 'some': 'value' }", Encoding.UTF8, "application/json")
+    		};
+
+    		var response = client.Send(webRequest);
+
+    		using var reader = new StreamReader(response.Content.ReadAsStream());
+            		
+    		var res = reader.ReadToEnd();
+    		System.Threading.Thread.Sleep(2000);
+
+    		Result = res;
+        }
+        catch (System.Exception ex)
+        {
+			throw;
+        }
+	}
+
+	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+	{
+    	LoggerManager.LogDebug($"Cat fact from worker: {Result}");
 	}
 }
