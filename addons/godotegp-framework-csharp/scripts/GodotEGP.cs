@@ -7,6 +7,10 @@ using System;
 using System.Collections.Generic;
 using Godot.EGP.ValidatedObject;
 using Newtonsoft.Json;
+using System.Net.Http;
+using System.Text;
+using System.IO;
+using System.Threading;
 
 public partial class GodotEGP : Node
 {
@@ -16,6 +20,8 @@ public partial class GodotEGP : Node
 		State20,
 		State30
 	}
+
+	string previousCatFact = "";
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -62,7 +68,7 @@ public partial class GodotEGP : Node
 
 		ServiceRegistry.Get<NodeManager>().SubscribeSignal("group_test_group", "timeout", false, __On_Timer_timeout);
 
-		Timer timer = new Timer();
+		Godot.Timer timer = new Godot.Timer();
 		timer.Name = "timer1";
 		timer.AddToGroup("test_group");
 		AddChild(timer);
@@ -78,7 +84,7 @@ public partial class GodotEGP : Node
 		LoggerManager.LogDebug(ServiceRegistry.Get<NodeManager>().GetReady());
 
 
-		Timer timer2 = new Timer();
+		Godot.Timer timer2 = new Godot.Timer();
 		timer2.Name = "timer2";
 		timer2.AddToGroup("test_group");
 
@@ -106,6 +112,7 @@ public partial class GodotEGP : Node
 
 		// validated objects testing
 		ValidatedObjectTest vObj = new ValidatedObjectTest();
+
 
 		// string vObjJson = Newtonsoft.Json.JsonConvert.SerializeObject(vObj);
 		// LoggerManager.LogDebug(vObjJson);
@@ -300,6 +307,8 @@ public partial class GodotEGP : Node
 		// LoggerManager.LogDebug($"Random seed/state test: randi_range", "", "value", random2.RandiRange(0, 10));
         //
 		// LoggerManager.LogDebug($"Random seed/state test: randfn", "", "value", random2.Randfn());
+
+		this.Subscribe<Event>(__On_Event);
 	}
 
 	public class MoveState : HStateMachine { }
@@ -333,5 +342,46 @@ public partial class GodotEGP : Node
 	public void __On_Timer_timeout(IEvent eventObj)
 	{
 		LoggerManager.LogDebug("Timeout!");
+		LoggerManager.LogDebug($"Previous cat fact: {previousCatFact}");
+
+		Thread t = new Thread(new ThreadStart(FetchCatFact));
+		t.Start();
+	}
+
+	public void FetchCatFact()
+	{
+		// testing loading from web urls
+		LoggerManager.LogDebug("Fetching cat fact");
+		var client = new System.Net.Http.HttpClient();
+            
+        try
+        {
+    		var webRequest = new HttpRequestMessage(HttpMethod.Get, "https://catfact.ninja/fact")
+    		{
+        		Content = new StringContent("{ 'some': 'value' }", Encoding.UTF8, "application/json")
+    		};
+
+    		var response = client.Send(webRequest);
+
+    		using var reader = new StreamReader(response.Content.ReadAsStream());
+            		
+    		var res = reader.ReadToEnd();
+    		System.Threading.Thread.Sleep(2000);
+
+			ServiceRegistry.Get<EventManager>().Emit(new Event(this, res));
+
+    		LoggerManager.LogDebug($"Cat fact from thread: {res}");
+
+    		previousCatFact = res;
+        }
+        catch (System.Exception e)
+        {
+			ServiceRegistry.Get<EventManager>().Emit(new Event(this, e.Message));
+        }
+	}
+
+	public void __On_Event(IEvent e)
+	{
+		LoggerManager.LogDebug($"Event data: {e.Data}");
 	}
 }

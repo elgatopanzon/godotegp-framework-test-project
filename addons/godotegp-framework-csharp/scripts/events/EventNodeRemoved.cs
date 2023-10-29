@@ -7,7 +7,7 @@ public class EventNodeRemoved : Event
 {
 	public Node Node { get; set; }
 
-	public EventNodeRemoved(object ownerObj, Node nodeObj) : base(ownerObj)
+	public EventNodeRemoved(object ownerObj, Node nodeObj) : base(ownerObj, nodeObj)
 	{
 		Node = nodeObj;
 	}

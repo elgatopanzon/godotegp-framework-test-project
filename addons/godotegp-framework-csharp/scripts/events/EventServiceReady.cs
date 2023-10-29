@@ -5,7 +5,7 @@ using Godot;
 
 public class EventServiceReady : Event
 {
-	public EventServiceReady(object ownerObj) : base(ownerObj)
+	public EventServiceReady(object ownerObj) : base(ownerObj, null)
 	{
 	}
 }

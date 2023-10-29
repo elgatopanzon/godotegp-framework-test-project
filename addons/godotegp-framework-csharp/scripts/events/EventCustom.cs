@@ -5,7 +5,7 @@ using Godot;
 
 public class EventCustom : Event
 {
-	public EventCustom(object ownerObj) : base(ownerObj)
+	public EventCustom(object ownerObj) : base(ownerObj, null)
 	{
 		
 	}
