@@ -374,9 +374,9 @@ public partial class GodotEGP : Node
 
     		previousCatFact = res;
         }
-        catch (System.Exception e)
+        catch (System.Exception ex)
         {
-			this.Emit<Event>((ee) => ee.SetData(e.Message));
+			this.Emit<Event>((e) => e.SetData(ex.Message));
         }
 	}
 
