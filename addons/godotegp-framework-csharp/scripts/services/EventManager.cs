@@ -209,14 +209,19 @@ public class EventQueueDeferred : EventQueue
 
 public static class EventManagerObjectExtensions
 {
-	public static void Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null) where T : Event
+	public static EventSubscription<T> Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null) where T : Event
 	{
-		ServiceRegistry.Get<EventManager>().Subscribe(new EventSubscription<T>(obj, callbackMethod, isHighPriority, oneshot, eventFilters));
+		EventSubscription<T> subscription = new EventSubscription<T>(obj, callbackMethod, isHighPriority, oneshot, eventFilters);
+		ServiceRegistry.Get<EventManager>().Subscribe(subscription);
+
+		return subscription;
 	}
 
-	public static void Subscribe(this object obj, IEventSubscription<Event> eventSubscription)
+	public static IEventSubscription<Event> Subscribe(this object obj, IEventSubscription<Event> eventSubscription)
 	{
 		ServiceRegistry.Get<EventManager>().Subscribe(eventSubscription);
+
+		return eventSubscription;
 	}
 
 

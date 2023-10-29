@@ -11,7 +11,7 @@ public interface IEventSubscription<in T> where T : Event
 	Type EventType { get; }
 	bool IsHighPriority { get; }
 	bool Oneshot { get; }
-	List<IEventFilter> EventFilters { get; }
+	List<IEventFilter> EventFilters { get; set; }
 }
 
 public class EventSubscription<T> : IEventSubscription<Event>
@@ -21,7 +21,7 @@ public class EventSubscription<T> : IEventSubscription<Event>
     public bool IsHighPriority { get; }
     public bool Oneshot { get; set; }
     public Type EventType { get; }
-    public List<IEventFilter> EventFilters { get; }
+    public List<IEventFilter> EventFilters { get; set; }
 
     public EventSubscription(object subscriberObj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null)
     {
@@ -40,3 +40,14 @@ public class EventSubscription<T> : IEventSubscription<Event>
     }
 }
 
+public static class EventSubscriptionExtensionMethods
+{
+	public static IEventSubscription<Event> Filters(this IEventSubscription<Event> obj, params IEventFilter[] filters)
+	{
+		foreach (IEventFilter filter in filters)
+		{
+			obj.EventFilters.Add(filter);
+		}
+		return obj;
+	}
+}
