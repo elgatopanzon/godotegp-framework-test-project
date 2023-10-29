@@ -3,6 +3,8 @@ namespace Godot.EGP;
 using System;
 using System.Collections.Generic;
 using Godot;
+using System.Threading;
+using System.ComponentModel;
 
 public class Event : IEvent
 {
@@ -92,5 +94,47 @@ public class EventNodeRemoved : EventNode
 
 
 public class EventServiceReady : Event
+{
+}
+
+
+public class EventBackgroundJob : Event
+{
+	public object JobOwner;
+	public DoWorkEventArgs DoWorkEventArgs;
+	public ProgressChangedEventArgs ProgressChangedEventArgs;
+	public RunWorkerCompletedEventArgs RunWorkerCompletedEventArgs;
+}
+static class EventBackgroundJobExtensionMethods
+{
+	static public T SetJobOwner<T>(this T o, object jobOwner) where T : EventBackgroundJob
+    {
+		o.JobOwner = jobOwner;
+        return o;
+    }
+	static public T SetDoWorkEventArgs<T>(this T o, DoWorkEventArgs e) where T : EventBackgroundJob
+    {
+		o.DoWorkEventArgs = e;
+        return o;
+    }
+	static public T SetProgressChangesEventArgs<T>(this T o, ProgressChangedEventArgs e) where T : EventBackgroundJob
+    {
+		o.ProgressChangedEventArgs = e;
+        return o;
+    }
+	static public T SetRunWorkerCompletedEventArgs<T>(this T o, RunWorkerCompletedEventArgs e) where T : EventBackgroundJob
+    {
+		o.RunWorkerCompletedEventArgs = e;
+        return o;
+    }
+}
+
+public class EventBackgroundJobWorking : EventBackgroundJob
+{
+}
+public class EventBackgroundJobProgress : EventBackgroundJob
+{
+}
+public class EventBackgroundJobComplete : EventBackgroundJob
 {
 }

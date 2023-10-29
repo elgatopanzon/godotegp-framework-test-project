@@ -349,9 +349,11 @@ public partial class GodotEGP : Node
 		// t.Start();
 		MyBackgroundJob bgj = new MyBackgroundJob();
 
-		bgj.OnComplete = (RunWorkerCompletedEventArgs e) => {
-			bgj.Emit<Event>((ev) => ev.SetData(bgj.Result));
-		};
+		this.Subscribe<EventBackgroundJobComplete>(__On_Event, true, true, new List<IEventFilter> {new EventFilterOwner(bgj)});
+
+		// bgj.OnComplete = (RunWorkerCompletedEventArgs e) => {
+		// 	bgj.Emit<Event>((ev) => ev.SetData(bgj.Result));
+		// };
 
 		bgj.Run();
 	}
@@ -390,9 +392,9 @@ public partial class GodotEGP : Node
 
 	public void __On_Event(IEvent e)
 	{
-		if (e.Data is object[] a)
+		if (e is EventBackgroundJobComplete ev)
 		{
-			LoggerManager.LogDebug($"Event data: {a[0]}");
+			LoggerManager.LogDebug($"Event data: {ev.RunWorkerCompletedEventArgs.Result}");
 		}
 	}
 }
@@ -431,6 +433,8 @@ public class BackgroundJob
 			OnWorking(e);
 		}
 
+		this.Emit<EventBackgroundJobWorking>((ev) => ev.SetDoWorkEventArgs(e));
+
 		DoWork(sender, e);
 	}
 
@@ -440,6 +444,8 @@ public class BackgroundJob
 		{
 			OnProgress(e);
 		}
+
+		this.Emit<EventBackgroundJobProgress>((ev) => ev.SetProgressChangesEventArgs(e));
 
 		ProgressChanged(sender, e);
 	}
@@ -452,7 +458,10 @@ public class BackgroundJob
 		}
 
 		RunWorkerCompleted(sender, e);
+
+		this.Emit<EventBackgroundJobComplete>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
 	}
+
 
 	// override these to do the work
 	public virtual void DoWork(object sender, DoWorkEventArgs e)
@@ -481,8 +490,6 @@ public class BackgroundJob
 
 public class MyBackgroundJob : BackgroundJob
 {
-	public string Result;
-
 	public override void DoWork(object sender, DoWorkEventArgs e)
 	{
 		// testing loading from web urls
@@ -503,7 +510,7 @@ public class MyBackgroundJob : BackgroundJob
     		var res = reader.ReadToEnd();
     		System.Threading.Thread.Sleep(2000);
 
-    		Result = res;
+    		e.Result = res;
         }
         catch (System.Exception ex)
         {
@@ -513,6 +520,6 @@ public class MyBackgroundJob : BackgroundJob
 
 	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
-    	LoggerManager.LogDebug($"Cat fact from worker: {Result}");
+    	LoggerManager.LogDebug($"Cat fact from worker: {e.Result}");
 	}
 }
