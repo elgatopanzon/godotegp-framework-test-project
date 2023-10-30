@@ -119,25 +119,30 @@ public partial class GodotEGP : Node
 		string vObjJson = Newtonsoft.Json.JsonConvert.SerializeObject(vObj);
 		LoggerManager.LogDebug(vObjJson);
 
-		// vObjJson = "{'StringListTest':[1,2,3],'DictionarySizeTest':{'a':1,'b':1,'c':1},'StringTest':'string','IntTest':5,'DoubleTest':5.0,'UlongTest':5,'IntArrayTest':[1,2,3],'Vector2Test':{'X':1.0,'Y':1.0}}";
+		vObjJson = "{'StringListTest':[1,2,3],'DictionarySizeTest':{'a':1,'b':1,'c':1},'StringTest':'string','IntTest':5,'DoubleTest':5.0,'UlongTest':5,'IntArrayTest':[1,2,3],'Vector2Test':{'X':1.0,'Y':1.0}}";
 		// vObjJson = "{\"StringListTest\":{\"Value\":[\"d\",\"e\",\"f\"]},\"DictionarySizeTest\":{\"Value\":{\"d\":\"123\",\"e\":1,\"f\":1}},\"StringTest\":{\"Value\":\"string\"},\"IntTest\":{\"Value\":5},\"DoubleTestt\":{\"Value\":5.0},\"UlongTestt\":{\"Value\":5},\"IntArrayTest\":{\"Value\":[\"123\",2,3]},\"Vector2Testt\":{\"Value\":{\"X\":2.0,\"Y\":2.0}}}";
 		LoggerManager.LogDebug(vObjJson);
 
 		List<string> errors = new List<string>();
 
-		ValidatedObjectTest vObj2 = Newtonsoft.Json.JsonConvert.DeserializeObject<ValidatedObjectTest>(vObjJson,
+		// ValidatedObjectTest vObj2 = Newtonsoft.Json.JsonConvert.DeserializeObject<ValidatedObjectTest>(vObjJson,
+		Newtonsoft.Json.JsonConvert.PopulateObject(vObjJson, vObj,
 				new JsonSerializerSettings
     				{
         				Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
         				{
             				errors.Add(args.ErrorContext.Error.Message);
             				args.ErrorContext.Handled = true;
-        				}
+        				},
+        				ObjectCreationHandling = ObjectCreationHandling.Replace
     				}
 				);
 
+		vObjJson = Newtonsoft.Json.JsonConvert.SerializeObject(vObj);
+		LoggerManager.LogDebug(vObjJson);
+
 		LoggerManager.LogDebug(vObj.StringTest);
-		LoggerManager.LogDebug(vObj2.StringTest);
+		// LoggerManager.LogDebug(vObj2.StringTest);
 		foreach (string error in errors)
 		{
 			LoggerManager.LogDebug(error);
