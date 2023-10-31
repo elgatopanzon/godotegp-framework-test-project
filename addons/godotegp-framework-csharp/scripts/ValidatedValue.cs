@@ -6,11 +6,29 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Reflection;
 
-public class ValidatedValue<T> : IValidatedValue
+public abstract class ValidatedValue : IValidatedValue
+{
+	public abstract bool Validate();
+	public abstract bool IsDefault();
+	public abstract bool IsNull();
+
+	internal abstract object RawValue {set; get;}
+}
+
+public class ValidatedValue<T> : ValidatedValue
 {
 	protected T _value;
 	protected T _default;
 	protected bool NullAllowed = true;
+
+	internal override object RawValue {
+		get {
+			return Value;
+		}
+		set {
+			Value = (T) value;
+		}
+	}
 
 	public T Value
 	{
@@ -27,6 +45,20 @@ public class ValidatedValue<T> : IValidatedValue
 
 	public ValidatedValue()
 	{
+	}
+	
+	public override bool IsDefault()
+	{
+		return (_default != null && _value != null && _value.Equals(_default));
+	}
+	public override bool IsNull()
+	{
+		return (_value == null);
+	}
+
+	public T GetDefault()
+	{
+		return _default;
 	}
 
 	public virtual ValidatedValue<T> Default(T defaultValue)
@@ -119,7 +151,7 @@ public class ValidatedValue<T> : IValidatedValue
 		return value;
 	}
 
-	public virtual bool Validate()
+	public override bool Validate()
 	{
 		ValidateValue(_value);
 		return true;
@@ -137,3 +169,22 @@ public class ValidatedValue<T> : IValidatedValue
 	}
 }
 
+public class ValidatedNative<T> : ValidatedValue<T> where T : ValidatedObject
+{
+	public override ValidatedNative<T> Default(T defaultValue)
+	{
+		_default = ValidateValue(defaultValue);
+		_value = defaultValue;
+
+		LoggerManager.LogDebug("Setting default value", "", "default", defaultValue);
+		LoggerManager.LogDebug("", "", "current", Value);
+		return this;
+	}
+
+	public override ValidatedNative<T> Reset()
+	{
+		LoggerManager.LogDebug("Resetting value");
+
+		return Default(_default);
+	}
+}
