@@ -141,3 +141,16 @@ public class EventBackgroundJobComplete : EventBackgroundJob
 public class EventBackgroundJobError : EventBackgroundJob
 {
 }
+
+public class EventDataOperationWorking : EventBackgroundJob
+{
+}
+public class EventDataOperationProgress : EventBackgroundJob
+{
+}
+public class EventDataOperationComplete : EventBackgroundJob
+{
+}
+public class EventDataOperationError : EventBackgroundJob
+{
+}
