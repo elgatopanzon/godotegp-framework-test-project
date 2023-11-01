@@ -110,7 +110,7 @@ public partial class EventManager : Service
 
 			bool eventConsumed = BroadcastEvent(eventObj, false);
 
-			LoggerManager.LogDebug("Deferred event consumed state", "", "consumed", eventConsumed);
+			LoggerManager.LogDebug("Deferred event consumed state", "", "event", new Dictionary<string, string> { { "eventType", eventObj.GetType().Name }, {"consumed", eventConsumed.ToString() } });
 		}
 	}
 
