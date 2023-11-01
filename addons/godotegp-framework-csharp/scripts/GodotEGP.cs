@@ -471,6 +471,8 @@ public class BackgroundJob
 	public Action<RunWorkerCompletedEventArgs> OnComplete;
 	public Action<RunWorkerCompletedEventArgs> OnError;
 
+	public bool IsCompleted { get; set; }
+
 	public BackgroundJob()
 	{
 	}
@@ -532,6 +534,8 @@ public class BackgroundJob
 		}
 
 		this.Emit<EventBackgroundJobComplete>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
+
+		IsCompleted = true;
 	}
 
 	public virtual void _On_RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
@@ -549,30 +553,18 @@ public class BackgroundJob
 	// override these to do the work
 	public virtual void DoWork(object sender, DoWorkEventArgs e)
 	{
-		LoggerManager.LogDebug("Working!");
-
-		System.Threading.Thread.Sleep(1000);
-
-		worker.ReportProgress(50);
-
-		LoggerManager.LogDebug("More work!");
-
-		System.Threading.Thread.Sleep(1000);
 	}
 
 	public virtual void ProgressChanged(object sender, ProgressChangedEventArgs e)
 	{
-		LoggerManager.LogDebug("Job progress", "", "progress", e.ProgressPercentage);
 	}
 
 	public virtual void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
-		LoggerManager.LogDebug("Done!");
 	}
 
 	public virtual void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
 	{
-		LoggerManager.LogDebug("Error occured during background job!");
 	}
 }
 
