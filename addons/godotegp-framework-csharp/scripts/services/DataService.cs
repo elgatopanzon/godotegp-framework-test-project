@@ -18,8 +18,6 @@ public partial class DataService : Service
 		// trigger the load request
 		dataOperation.Load();
 
-		// TODO: subscribe to EventBackgroundJobComplete and Error to populate
-		// DataOperationResult<T> object and create a T
 		dataOperation.OnComplete = (e) => {
 			LoggerManager.LogDebug("DataService load result", "", "result", e.Result);
 		};

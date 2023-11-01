@@ -419,13 +419,22 @@ public partial class GodotEGP : Node
 
 		// bgj.Run();
 
-		ServiceRegistry.Get<DataService>()
+		LoggerManager.LogDebug("DataLoadTest: requesting load object");
+		DataOperation dataOperation = ServiceRegistry.Get<DataService>()
 			.Load(
 					new DataOperationFile<CoreEngineConfig>(
 						new DataEndpointFile("config/CoreEngineConfig.json")
 					)
 				)
 			;
+		dataOperation.Subscribe<EventDataOperationComplete>((e) => {
+				if (e is EventDataOperationComplete ee)
+				{
+					LoggerManager.LogDebug("DataLoadTest: My loaded object!", "", "object", ee.RunWorkerCompletedEventArgs.Result);
+				}
+			}, oneshot: true, isHighPriority: true)
+			.Owner(dataOperation);
+
 
 	}
 
