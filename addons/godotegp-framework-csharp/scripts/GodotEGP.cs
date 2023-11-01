@@ -419,7 +419,14 @@ public partial class GodotEGP : Node
 
 		// bgj.Run();
 
-		ServiceRegistry.Get<DataService>().Load(new DataOperationFile<CoreEngineConfig>(new DataEndpointFile("config/CoreEngineConfig.json")));
+		ServiceRegistry.Get<DataService>()
+			.Load(
+					new DataOperationFile<CoreEngineConfig>(
+						new DataEndpointFile("config/CoreEngineConfig.json")
+					)
+				)
+			;
+
 	}
 
 	public void FetchCatFact()

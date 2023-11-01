@@ -18,10 +18,16 @@ public partial class DataService : Service
 		// trigger the load request
 		dataOperation.Load();
 
-		// return operation object
-		return dataOperation;
+		// TODO: subscribe to EventBackgroundJobComplete and Error to populate
+		// DataOperationResult<T> object and create a T
+		dataOperation.OnComplete = (e) => {
+			LoggerManager.LogDebug("DataService load result", "", "result", e.Result);
+		};
+		dataOperation.OnError = (e) => {
+			LoggerManager.LogDebug("DataService load error", "", "result", e.Error);
+		};
 
-		// TODO: subscribe to EventBackgroundJobComplete and Error
+		return dataOperation;
 	}
 }
 
@@ -168,18 +174,70 @@ public class DataOperatorFile : DataOperator, IDataOperator
 	}
 }
 
-// base class for operation classes interfacing with operator classes
-public abstract class DataOperation : BackgroundJob
+public interface IDataOperation
 {
-	public abstract IDataOperator CreateOperator();
-	public abstract DataOperator GetOperator();
+	public void Load();
+	public void Save();
 
+}
+
+public abstract class DataOperation : BackgroundJob, IDataOperation
+{
 	public abstract void Load();
 	public abstract void Save();
 }
 
+// base class for operation classes interfacing with operator classes
+public abstract class DataOperation<T> : DataOperation, IDataOperation
+{
+	public abstract IDataOperator CreateOperator();
+	public abstract DataOperator GetOperator();
+
+	protected RunWorkerCompletedEventArgs _completedArgs;
+
+	public void __On_OperatorComplete(RunWorkerCompletedEventArgs e)
+	{
+		// once operator worker is completed, run the operation worker
+		_completedArgs = e;
+		Run();
+	}
+	public void __On_OperatorError(RunWorkerCompletedEventArgs e)
+	{
+		// forward the completed args to simulate an error
+		_On_RunWorkerError(this, e);
+	}
+
+	// operation thread methods
+	public override void DoWork(object sender, DoWorkEventArgs e)
+	{
+		LoggerManager.LogDebug("Starting operation thread");
+
+		DataOperationResult<T> resultObj = new DataOperationResult<T>(_completedArgs.Result);
+		LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
+
+		e.Result = resultObj;
+
+		ReportProgress(100);
+	}
+
+	public override void ProgressChanged(object sender, ProgressChangedEventArgs e)
+	{
+		LoggerManager.LogDebug("Data operation thread progress", "", "progress", e.ProgressPercentage);
+	}
+
+	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+	{
+		LoggerManager.LogDebug("Data operation thread completed");
+	}
+
+	public override void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
+	{
+		LoggerManager.LogDebug("Data operation thread error");
+	}
+}
+
 // operation class for File operators
-class DataOperationFile<T> : DataOperation where T : ValidatedObject
+class DataOperationFile<T> : DataOperation<T>
 {
 	DataOperatorFile _dataOperator;
 
@@ -217,33 +275,32 @@ class DataOperationFile<T> : DataOperation where T : ValidatedObject
 	public override void Save() {
 		_dataOperator.Save();
 	}
+}
 
-	public void __On_OperatorComplete(RunWorkerCompletedEventArgs e)
+// accept a result object and create a ValidatedObject from T
+public class DataOperationResult<T>
+{
+	private T _resultObject;
+
+	public T ResultObject
 	{
-		// once operator worker is completed, run the operation worker
-		Run();
+		get { return _resultObject; }
+		set { _resultObject = value; }
 	}
-	public void __On_OperatorError(RunWorkerCompletedEventArgs e)
+
+	public DataOperationResult(object rawObject)
 	{
-		// forward the completed args to simulate an error
-		_On_RunWorkerError(this, e);
-	}
+		LoggerManager.LogDebug("Creating result object from raw data", "", "raw", rawObject);
 
-	// operation thread methods
-	public override void DoWork(object sender, DoWorkEventArgs e)
-	{
-		LoggerManager.LogDebug("Starting operation thread");
+		if (typeof(T).BaseType == typeof(ValidatedObject))
+		{
+			// hold deserialisation errors
+			List<string> errors = new List<string>();
 
-		// get the endpoint from the operator
-		DataEndpointFile endpoint = (DataEndpointFile) _dataOperator.GetDataEndpoint();
-
-		// hold deserialisation errors
-		List<string> errors = new List<string>();
-
-		// create deserialised T object
-		T deserialisedObj = Newtonsoft.Json.JsonConvert.DeserializeObject<T>((string) _dataOperator.CompletedArgs.Result,
-
-			new JsonSerializerSettings
+			// create deserialised T object, for now it only supports strings of
+			// JSON
+			T deserialisedObj = Newtonsoft.Json.JsonConvert.DeserializeObject<T>((string) rawObject,
+				new JsonSerializerSettings
     			{
         			Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
         			{
@@ -253,24 +310,13 @@ class DataOperationFile<T> : DataOperation where T : ValidatedObject
         			ObjectCreationHandling = ObjectCreationHandling.Replace
     			}
 			);
+			
+			LoggerManager.LogDebug($"{typeof(T).BaseType} object deserialised as {typeof(T).Name}", "", "object", deserialisedObj);
 
-		LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", deserialisedObj);
+			// store the deserialsed object
+			ResultObject = deserialisedObj;
+		}
 
-		ReportProgress(100);
-	}
-
-	public override void ProgressChanged(object sender, ProgressChangedEventArgs e)
-	{
-		LoggerManager.LogDebug("Data operation thread progress", "", "progress", e.ProgressPercentage);
-	}
-
-	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-	{
-		LoggerManager.LogDebug("Data operation thread completed");
-	}
-
-	public override void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
-	{
-		LoggerManager.LogDebug("Data operation thread error");
+		// TODO: implement different types of raw result to T stuff?
 	}
 }
