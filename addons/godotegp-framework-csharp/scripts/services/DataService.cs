@@ -13,10 +13,10 @@ using Newtonsoft.Json;
 public partial class DataService : Service
 {
 	// load data from an endpoint object into a validated T object
-	public DataOperation Load<T>(DataOperation dataOperation) where T : ValidatedObject, new()
+	public DataOperation Load(DataOperation dataOperation)
 	{
 		// trigger the load request
-		dataOperation.Load<T>();
+		dataOperation.Load();
 
 		// return operation object
 		return dataOperation;
@@ -174,12 +174,12 @@ public abstract class DataOperation : BackgroundJob
 	public abstract IDataOperator CreateOperator();
 	public abstract DataOperator GetOperator();
 
-	public abstract void Load<T>();
+	public abstract void Load();
 	public abstract void Save();
 }
 
 // operation class for File operators
-class DataOperationFile : DataOperation
+class DataOperationFile<T> : DataOperation where T : ValidatedObject
 {
 	DataOperatorFile _dataOperator;
 
@@ -209,7 +209,7 @@ class DataOperationFile : DataOperation
 		_dataOperator.SetDataEndpoint(fileEndpoint);
 	}
 
-	public override void Load<T>() {
+	public override void Load() {
 		_operationType = 0;
 
 		Run();
@@ -217,28 +217,6 @@ class DataOperationFile : DataOperation
 		// hook into the operator worker to use it's e.Result and continue the
 		// operation to deserialise as T
 		_dataOperator.OnWorking = (e) => {
-			ReportProgress(50);
-
-			DataEndpointFile endpoint = (DataEndpointFile) _dataOperator.GetDataEndpoint();
-
-			List<string> errors = new List<string>();
-
-			T deserialisedObj = Newtonsoft.Json.JsonConvert.DeserializeObject<T>((string) e.Result,
-
-				new JsonSerializerSettings
-    				{
-        				Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
-        				{
-            				errors.Add(args.ErrorContext.Error.Message);
-            				args.ErrorContext.Handled = true;
-        				},
-        				ObjectCreationHandling = ObjectCreationHandling.Replace
-    				}
-				);
-
-			LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", deserialisedObj);
-
-			ReportProgress(100);
 		};
 	}
 
@@ -265,11 +243,36 @@ class DataOperationFile : DataOperation
 				break;
 		}
 
+		// wait for operator thread to complete
 		while (!_dataOperator.IsCompleted)
 		{
 		}
 
-		LoggerManager.LogDebug("Operator thread completed");
+		LoggerManager.LogDebug("Resuming operation thread");
+
+		// get the endpoint from the operator
+		DataEndpointFile endpoint = (DataEndpointFile) _dataOperator.GetDataEndpoint();
+
+		// hold deserialisation errors
+		List<string> errors = new List<string>();
+
+		// create deserialised T object
+		T deserialisedObj = Newtonsoft.Json.JsonConvert.DeserializeObject<T>((string) _dataOperator.CompletedArgs.Result,
+
+			new JsonSerializerSettings
+    			{
+        			Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
+        			{
+            			errors.Add(args.ErrorContext.Error.Message);
+            			args.ErrorContext.Handled = true;
+        			},
+        			ObjectCreationHandling = ObjectCreationHandling.Replace
+    			}
+			);
+
+		LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", deserialisedObj);
+
+		ReportProgress(100);
 	}
 
 	public override void ProgressChanged(object sender, ProgressChangedEventArgs e)

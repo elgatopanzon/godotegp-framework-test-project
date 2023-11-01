@@ -419,7 +419,7 @@ public partial class GodotEGP : Node
 
 		// bgj.Run();
 
-		ServiceRegistry.Get<DataService>().Load<CoreEngineConfig>(new DataOperationFile(new DataEndpointFile("config/CoreEngineConfig.json")));
+		ServiceRegistry.Get<DataService>().Load(new DataOperationFile<CoreEngineConfig>(new DataEndpointFile("config/CoreEngineConfig.json")));
 	}
 
 	public void FetchCatFact()
@@ -473,6 +473,12 @@ public class BackgroundJob
 
 	public bool IsCompleted { get; set; }
 
+	private RunWorkerCompletedEventArgs _completedArgs;
+
+	public RunWorkerCompletedEventArgs CompletedArgs {
+		get { return _completedArgs; }
+	}
+
 	public BackgroundJob()
 	{
 	}
@@ -525,6 +531,8 @@ public class BackgroundJob
 
 	public virtual void _On_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
+	 	_completedArgs = e;
+
 		if (e.Error != null)
 		{
 			_On_RunWorkerError(sender, e);
