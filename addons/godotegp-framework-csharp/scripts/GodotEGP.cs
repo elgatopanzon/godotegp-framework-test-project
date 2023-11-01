@@ -492,6 +492,11 @@ public class BackgroundJob
 		worker.RunWorkerAsync();
 	}
 
+	public virtual void ReportProgress(int progress)
+	{
+		worker.ReportProgress(progress);
+	}
+
 	// handlers for background worker events
 	public virtual void _On_DoWork(object sender, DoWorkEventArgs e)
 	{

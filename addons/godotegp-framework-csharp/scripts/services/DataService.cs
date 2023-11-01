@@ -135,6 +135,7 @@ public class DataOperatorFile : DataOperator, IDataOperator
     	using (StreamReader reader = new StreamReader(_fileEndpoint.Path))
     	{
     		e.Result = reader.ReadToEnd();
+    		ReportProgress(100);
     	}
 	}
 
@@ -216,6 +217,8 @@ class DataOperationFile : DataOperation
 		// hook into the operator worker to use it's e.Result and continue the
 		// operation to deserialise as T
 		_dataOperator.OnWorking = (e) => {
+			ReportProgress(50);
+
 			DataEndpointFile endpoint = (DataEndpointFile) _dataOperator.GetDataEndpoint();
 
 			List<string> errors = new List<string>();
@@ -234,6 +237,8 @@ class DataOperationFile : DataOperation
 				);
 
 			LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", deserialisedObj);
+
+			ReportProgress(100);
 		};
 	}
 
@@ -269,6 +274,7 @@ class DataOperationFile : DataOperation
 
 	public override void ProgressChanged(object sender, ProgressChangedEventArgs e)
 	{
+		LoggerManager.LogDebug("Data operation thread progress", "", "progress", e.ProgressPercentage);
 	}
 
 	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
