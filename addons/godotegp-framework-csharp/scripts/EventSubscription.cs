@@ -50,4 +50,11 @@ public static class EventSubscriptionExtensionMethods
 		}
 		return obj;
 	}
+
+	public static IEventSubscription<Event> Owner(this IEventSubscription<Event> obj, object ownerObject)
+	{
+		obj.Filters(new EventFilterOwner(ownerObject));
+
+		return obj;
+	}
 }
