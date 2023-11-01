@@ -1,4 +1,4 @@
-namespace Godot.EGP.ValidatedObject;
+namespace Godot.EGP.ValidatedObjects;
 
 using Godot;
 using System;

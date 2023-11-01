@@ -138,3 +138,6 @@ public class EventBackgroundJobProgress : EventBackgroundJob
 public class EventBackgroundJobComplete : EventBackgroundJob
 {
 }
+public class EventBackgroundJobError : EventBackgroundJob
+{
+}

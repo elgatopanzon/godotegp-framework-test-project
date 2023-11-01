@@ -5,13 +5,14 @@ using Godot.EGP.Extensions;
 using Godot.EGP.State;
 using System;
 using System.Collections.Generic;
-using Godot.EGP.ValidatedObject;
+using Godot.EGP.ValidatedObjects;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
 using System.IO;
 using System.Threading;
 using System.ComponentModel;
+using Godot.EGP.Config;
 
 public partial class GodotEGP : Node
 {
@@ -346,6 +347,30 @@ public partial class GodotEGP : Node
 		// LoggerManager.LogDebug($"Random seed/state test: randfn", "", "value", random2.Randfn());
 
 		this.Subscribe<Event>(__On_Event);
+
+		// config object test
+		// LoggerManager.LogDebug("Creating CoreEngineConfig instance");
+		// CoreEngineConfig engineConfig = new CoreEngineConfig();
+        //
+		// string engineConfigJson = Newtonsoft.Json.JsonConvert.SerializeObject(engineConfig);
+		// LoggerManager.LogDebug(engineConfigJson);
+        //
+		// CoreEngineConfig engineConfig2 = Newtonsoft.Json.JsonConvert.DeserializeObject<CoreEngineConfig>(engineConfigJson,
+		// // Newtonsoft.Json.JsonConvert.PopulateObject(vObjJson, vObj,
+		// 		new JsonSerializerSettings
+    	// 			{
+        // 				Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
+        // 				{
+        //     				errors.Add(args.ErrorContext.Error.Message);
+        //     				args.ErrorContext.Handled = true;
+        // 				},
+        // 				ObjectCreationHandling = ObjectCreationHandling.Replace
+    	// 			}
+		// 		);
+        //
+		// engineConfigJson = Newtonsoft.Json.JsonConvert.SerializeObject(engineConfig);
+		// LoggerManager.LogDebug(engineConfigJson);
+
 	}
 
 	public class MoveState : HStateMachine { }
@@ -383,16 +408,18 @@ public partial class GodotEGP : Node
 
 		// Thread t = new Thread(new ThreadStart(FetchCatFact));
 		// t.Start();
-		MyBackgroundJob bgj = new MyBackgroundJob();
+		// MyBackgroundJob bgj = new MyBackgroundJob();
 
 		// this.Subscribe<EventBackgroundJobComplete>(__On_Event, true, true, new List<IEventFilter> {new EventFilterOwner(bgj)});
-		this.Subscribe<EventBackgroundJobComplete>(__On_Event, isHighPriority:false, oneshot:true).Filters(new EventFilterOwner(bgj));
+		// this.Subscribe<EventBackgroundJobComplete>(__On_Event, isHighPriority:false, oneshot:true).Filters(new EventFilterOwner(bgj));
 
 		// bgj.OnComplete = (RunWorkerCompletedEventArgs e) => {
 		// 	bgj.Emit<Event>((ev) => ev.SetData(bgj.Result));
 		// };
 
-		bgj.Run();
+		// bgj.Run();
+
+		ServiceRegistry.Get<DataService>().Load<CoreEngineConfig>(new DataOperationFile(new DataEndpointFile("config/CoreEngineConfig.json")));
 	}
 
 	public void FetchCatFact()
@@ -442,6 +469,7 @@ public class BackgroundJob
 	public Action<DoWorkEventArgs> OnWorking;
 	public Action<ProgressChangedEventArgs> OnProgress;
 	public Action<RunWorkerCompletedEventArgs> OnComplete;
+	public Action<RunWorkerCompletedEventArgs> OnError;
 
 	public BackgroundJob()
 	{
@@ -465,18 +493,20 @@ public class BackgroundJob
 	// handlers for background worker events
 	public virtual void _On_DoWork(object sender, DoWorkEventArgs e)
 	{
+		DoWork(sender, e);
+
 		if (OnWorking != null)
 		{
 			OnWorking(e);
 		}
 
 		this.Emit<EventBackgroundJobWorking>((ev) => ev.SetDoWorkEventArgs(e));
-
-		DoWork(sender, e);
 	}
 
 	public virtual void _On_ProgressChanged(object sender, ProgressChangedEventArgs e)
 	{
+		ProgressChanged(sender, e);
+
 		if (OnProgress != null)
 		{
 			OnProgress(e);
@@ -484,21 +514,37 @@ public class BackgroundJob
 
 		this.Emit<EventBackgroundJobProgress>((ev) => ev.SetProgressChangesEventArgs(e));
 
-		ProgressChanged(sender, e);
 	}
 
 	public virtual void _On_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
+		if (e.Error != null)
+		{
+			_On_RunWorkerError(sender, e);
+			return;
+		}
+
+		RunWorkerCompleted(sender, e);
+
 		if (OnComplete != null)
 		{
 			OnComplete(e);
 		}
 
-		RunWorkerCompleted(sender, e);
-
 		this.Emit<EventBackgroundJobComplete>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
 	}
 
+	public virtual void _On_RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
+	{
+		RunWorkerError(sender, e);
+
+		if (OnError != null)
+		{
+			OnError(e);
+		}
+
+		this.Emit<EventBackgroundJobError>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
+	}
 
 	// override these to do the work
 	public virtual void DoWork(object sender, DoWorkEventArgs e)
@@ -522,6 +568,11 @@ public class BackgroundJob
 	public virtual void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
 		LoggerManager.LogDebug("Done!");
+	}
+
+	public virtual void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
+	{
+		LoggerManager.LogDebug("Error occured during background job!");
 	}
 }
 
