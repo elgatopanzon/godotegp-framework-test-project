@@ -189,6 +189,9 @@ class DataOperationFile<T> : DataOperation where T : ValidatedObject
 	{
 		var dataOperator = new DataOperatorFile();
 
+		dataOperator.OnComplete = __On_OperatorComplete;
+		dataOperator.OnError = __On_OperatorError;
+
 		return dataOperator;
 	}
 
@@ -212,43 +215,47 @@ class DataOperationFile<T> : DataOperation where T : ValidatedObject
 	public override void Load() {
 		_operationType = 0;
 
-		Run();
-
-		// hook into the operator worker to use it's e.Result and continue the
-		// operation to deserialise as T
-		_dataOperator.OnWorking = (e) => {
-		};
+		_dataOperator.Load();
 	}
 
 	public override void Save() {
 		_operationType = 1;
 		
-		Run();
+		_dataOperator.Save();
+	}
 
-		// TODO: implement save result processing
+	public void __On_OperatorComplete(RunWorkerCompletedEventArgs e)
+	{
+		// once operator worker is completed, run the operation worker
+		Run();
+	}
+	public void __On_OperatorError(RunWorkerCompletedEventArgs e)
+	{
+		// forward the completed args to simulate an error
+		_On_RunWorkerError(this, e);
 	}
 
 	// operation thread methods
 	public override void DoWork(object sender, DoWorkEventArgs e)
 	{
-		switch (_operationType)
-		{
-			case 0:
-				_dataOperator.Load();
-				break;
-			case 1:
-				_dataOperator.Save();
-				break;
-			default:
-				break;
-		}
+		// switch (_operationType)
+		// {
+		// 	case 0:
+		// 		_dataOperator.Load();
+		// 		break;
+		// 	case 1:
+		// 		_dataOperator.Save();
+		// 		break;
+		// 	default:
+		// 		break;
+		// }
+        //
+		// // wait for operator thread to complete
+		// while (!_dataOperator.IsCompleted)
+		// {
+		// }
 
-		// wait for operator thread to complete
-		while (!_dataOperator.IsCompleted)
-		{
-		}
-
-		LoggerManager.LogDebug("Resuming operation thread");
+		LoggerManager.LogDebug("Starting operation thread");
 
 		// get the endpoint from the operator
 		DataEndpointFile endpoint = (DataEndpointFile) _dataOperator.GetDataEndpoint();

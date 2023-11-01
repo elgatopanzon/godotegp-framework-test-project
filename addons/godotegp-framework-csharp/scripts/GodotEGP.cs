@@ -465,7 +465,7 @@ public partial class GodotEGP : Node
 
 public class BackgroundJob
 {
-	BackgroundWorker worker = new BackgroundWorker();
+	protected BackgroundWorker worker = new BackgroundWorker();
 	public Action<DoWorkEventArgs> OnWorking;
 	public Action<ProgressChangedEventArgs> OnProgress;
 	public Action<RunWorkerCompletedEventArgs> OnComplete;
