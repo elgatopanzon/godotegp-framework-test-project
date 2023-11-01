@@ -183,8 +183,6 @@ class DataOperationFile<T> : DataOperation where T : ValidatedObject
 {
 	DataOperatorFile _dataOperator;
 
-	private int _operationType;
-
 	public override IDataOperator CreateOperator()
 	{
 		var dataOperator = new DataOperatorFile();
@@ -213,14 +211,10 @@ class DataOperationFile<T> : DataOperation where T : ValidatedObject
 	}
 
 	public override void Load() {
-		_operationType = 0;
-
 		_dataOperator.Load();
 	}
 
 	public override void Save() {
-		_operationType = 1;
-		
 		_dataOperator.Save();
 	}
 
@@ -238,23 +232,6 @@ class DataOperationFile<T> : DataOperation where T : ValidatedObject
 	// operation thread methods
 	public override void DoWork(object sender, DoWorkEventArgs e)
 	{
-		// switch (_operationType)
-		// {
-		// 	case 0:
-		// 		_dataOperator.Load();
-		// 		break;
-		// 	case 1:
-		// 		_dataOperator.Save();
-		// 		break;
-		// 	default:
-		// 		break;
-		// }
-        //
-		// // wait for operator thread to complete
-		// while (!_dataOperator.IsCompleted)
-		// {
-		// }
-
 		LoggerManager.LogDebug("Starting operation thread");
 
 		// get the endpoint from the operator
