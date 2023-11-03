@@ -346,7 +346,7 @@ public partial class GodotEGP : Node
         //
 		// LoggerManager.LogDebug($"Random seed/state test: randfn", "", "value", random2.Randfn());
 
-		this.Subscribe<Event>(__On_Event);
+		this.Subscribe<EventBackgroundJobComplete>(__On_Event);
 
 		// config object test
 		// LoggerManager.LogDebug("Creating CoreEngineConfig instance");
@@ -403,22 +403,6 @@ public partial class GodotEGP : Node
 
 	public void __On_Timer_timeout(IEvent eventObj)
 	{
-		LoggerManager.LogDebug("Timeout!");
-		LoggerManager.LogDebug($"Previous cat fact: {previousCatFact}");
-
-		// Thread t = new Thread(new ThreadStart(FetchCatFact));
-		// t.Start();
-		// MyBackgroundJob bgj = new MyBackgroundJob();
-
-		// this.Subscribe<EventBackgroundJobComplete>(__On_Event, true, true, new List<IEventFilter> {new EventFilterOwner(bgj)});
-		// this.Subscribe<EventBackgroundJobComplete>(__On_Event, isHighPriority:false, oneshot:true).Filters(new EventFilterOwner(bgj));
-
-		// bgj.OnComplete = (RunWorkerCompletedEventArgs e) => {
-		// 	bgj.Emit<Event>((ev) => ev.SetData(bgj.Result));
-		// };
-
-		// bgj.Run();
-
 		LoggerManager.LogDebug("DataLoadTest: requesting load object");
 		DataOperation dataOperation = ServiceRegistry.Get<DataService>()
 			.Load(
@@ -438,38 +422,6 @@ public partial class GodotEGP : Node
 
 	}
 
-	public void FetchCatFact()
-	{
-		// testing loading from web urls
-		LoggerManager.LogDebug("Fetching cat fact");
-		var client = new System.Net.Http.HttpClient();
-            
-        try
-        {
-    		var webRequest = new HttpRequestMessage(HttpMethod.Get, "https://catfact.ninja/fact")
-    		{
-        		Content = new StringContent("{ 'some': 'value' }", Encoding.UTF8, "application/json")
-    		};
-
-    		var response = client.Send(webRequest);
-
-    		using var reader = new StreamReader(response.Content.ReadAsStream());
-            		
-    		var res = reader.ReadToEnd();
-    		System.Threading.Thread.Sleep(2000);
-
-			this.Emit<Event>((e) => e.SetData(res));
-
-    		LoggerManager.LogDebug($"Cat fact from thread: {res}");
-
-    		previousCatFact = res;
-        }
-        catch (System.Exception ex)
-        {
-			this.Emit<Event>((e) => e.SetData(ex.Message));
-        }
-	}
-
 	public void __On_Event(IEvent e)
 	{
 		if (e is EventBackgroundJobComplete ev)
@@ -479,38 +431,71 @@ public partial class GodotEGP : Node
 	}
 }
 
-public class MyBackgroundJob : BackgroundJob
-{
-	public override void DoWork(object sender, DoWorkEventArgs e)
-	{
-		// testing loading from web urls
-		LoggerManager.LogDebug("Fetching cat fact");
-		var client = new System.Net.Http.HttpClient();
-            
-        try
-        {
-    		var webRequest = new HttpRequestMessage(HttpMethod.Get, "https://catfact.ninja/fact")
-    		{
-        		Content = new StringContent("{ 'some': 'value' }", Encoding.UTF8, "application/json")
-    		};
 
-    		var response = client.Send(webRequest);
-
-    		using var reader = new StreamReader(response.Content.ReadAsStream());
-            		
-    		var res = reader.ReadToEnd();
-    		System.Threading.Thread.Sleep(2000);
-
-    		e.Result = res;
-        }
-        catch (System.Exception ex)
-        {
-			throw;
-        }
-	}
-
-	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-	{
-    	LoggerManager.LogDebug($"Cat fact from worker: {e.Result}");
-	}
-}
+// 	public void FetchCatFact()
+// 	{
+// 		// testing loading from web urls
+// 		LoggerManager.LogDebug("Fetching cat fact");
+// 		var client = new System.Net.Http.HttpClient();
+//             
+//         try
+//         {
+//     		var webRequest = new HttpRequestMessage(HttpMethod.Get, "https://catfact.ninja/fact")
+//     		{
+//         		Content = new StringContent("{ 'some': 'value' }", Encoding.UTF8, "application/json")
+//     		};
+//
+//     		var response = client.Send(webRequest);
+//
+//     		using var reader = new StreamReader(response.Content.ReadAsStream());
+//             		
+//     		var res = reader.ReadToEnd();
+//     		System.Threading.Thread.Sleep(2000);
+//
+// 			this.Emit<Event>((e) => e.SetData(res));
+//
+//     		LoggerManager.LogDebug($"Cat fact from thread: {res}");
+//
+//     		previousCatFact = res;
+//         }
+//         catch (System.Exception ex)
+//         {
+// 			this.Emit<Event>((e) => e.SetData(ex.Message));
+//         }
+// 	}
+//
+// public class MyBackgroundJob : BackgroundJob
+// {
+// 	public override void DoWork(object sender, DoWorkEventArgs e)
+// 	{
+// 		// testing loading from web urls
+// 		LoggerManager.LogDebug("Fetching cat fact");
+// 		var client = new System.Net.Http.HttpClient();
+//             
+//         try
+//         {
+//     		var webRequest = new HttpRequestMessage(HttpMethod.Get, "https://catfact.ninja/fact")
+//     		{
+//         		Content = new StringContent("{ 'some': 'value' }", Encoding.UTF8, "application/json")
+//     		};
+//
+//     		var response = client.Send(webRequest);
+//
+//     		using var reader = new StreamReader(response.Content.ReadAsStream());
+//             		
+//     		var res = reader.ReadToEnd();
+//     		System.Threading.Thread.Sleep(2000);
+//
+//     		e.Result = res;
+//         }
+//         catch (System.Exception ex)
+//         {
+// 			throw;
+//         }
+// 	}
+//
+// 	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+// 	{
+//     	LoggerManager.LogDebug($"Cat fact from worker: {e.Result}");
+// 	}
+// }
