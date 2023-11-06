@@ -16,7 +16,8 @@ public class CoreEngineConfig : ValidatedObject
 	public CoreEngineConfig()
 	{
         _loggerConfig = AddValidatedNative<LoggerConfig>()
-        	.Default(new LoggerConfig());
+        	.Default(new LoggerConfig())
+        	.ChangeEventsEnabled();
 	}
 }
 
@@ -35,6 +36,7 @@ public class LoggerConfig : ValidatedObject
         _logLevel = AddValidatedValue<LoggerMessage.LogLevel>()
             .Default(LoggerMessage.LogLevel.Debug)
             .AllowedValues(LoggerMessage.LogLevel.GetValues<LoggerMessage.LogLevel>())
+        	.ChangeEventsEnabled()
             ;
 	}
 }

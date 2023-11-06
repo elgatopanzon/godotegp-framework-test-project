@@ -154,3 +154,33 @@ public class EventDataOperationComplete : EventBackgroundJob
 public class EventDataOperationError : EventBackgroundJob
 {
 }
+
+// events for ValidatedValue<T> objects
+public class EventValidatedValue : Event
+{
+	public object Value;
+	public object PrevValue;
+}
+
+static public class EventValidatedValueExtensions
+{
+	static public T SetValue<T>(this T o, object value) where T : EventValidatedValue
+    {
+        o.Value = value;
+        return o;
+    }
+
+	static public T SetPrevValue<T>(this T o, object value) where T : EventValidatedValue
+    {
+        o.PrevValue = value;
+        return o;
+    }
+}
+
+public class EventValidatedValueChanged : EventValidatedValue
+{
+}
+
+public class EventValidatedValueSet : EventValidatedValue
+{
+}

@@ -20,6 +20,7 @@ public class ValidatedValue<T> : ValidatedValue
 	protected T _value;
 	protected T _default;
 	protected bool NullAllowed = true;
+	protected bool ChangeEventsState = false;
 
 	internal override object RawValue {
 		get {
@@ -36,9 +37,24 @@ public class ValidatedValue<T> : ValidatedValue
 			return _value;
 		}
 		set { 
-			LoggerManager.LogDebug($"Setting value {this.GetType().Name}<{this.GetType().GetTypeInfo().GenericTypeArguments[0]}>", "", "value", value);
-			_value = ValidateValue(value);
+			_SetValue(value);
 		}
+	}
+	private void _SetValue(T newValue)
+	{
+		LoggerManager.LogDebug($"Setting value {this.GetType().Name}<{this.GetType().GetTypeInfo().GenericTypeArguments[0]}>", "", "value", newValue);
+
+		newValue = ValidateValue(newValue);
+
+		if (ChangeEventsState)
+		{
+			this.Emit<EventValidatedValueChanged>((e) => {
+				e.SetValue(newValue);
+				e.SetPrevValue(_value);
+			});
+		}
+
+		_value = newValue;
 	}
 
 	protected List<ValidatedValueConstraint<T>> _constraints = new List<ValidatedValueConstraint<T>>();
@@ -135,6 +151,12 @@ public class ValidatedValue<T> : ValidatedValue
 		return this;
 	}
 
+	public virtual ValidatedValue<T> ChangeEventsEnabled(bool changeEventsState = true)
+	{
+		ChangeEventsState = changeEventsState;
+		return this;
+	}
+
 	public virtual T ValidateValue(T value)
 	{
 		LoggerManager.LogDebug("Validating value", "", "value", new Dictionary<string, string> { { "value", value?.ToString() } , { "default", _default?.ToString() }, { "type", value?.GetType().Name } });
@@ -186,5 +208,11 @@ public class ValidatedNative<T> : ValidatedValue<T> where T : ValidatedObject
 		LoggerManager.LogDebug("Resetting value");
 
 		return Default(_default);
+	}
+
+	public override ValidatedNative<T> ChangeEventsEnabled(bool changeEventsState = true)
+	{
+		ChangeEventsState = changeEventsState;
+		return this;
 	}
 }
