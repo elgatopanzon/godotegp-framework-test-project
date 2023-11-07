@@ -347,6 +347,7 @@ public partial class GodotEGP : Node
 		// LoggerManager.LogDebug($"Random seed/state test: randfn", "", "value", random2.Randfn());
 
 		this.Subscribe<EventBackgroundJobComplete>(__On_Event);
+		this.Subscribe<EventValidatedValueChanged>(__On_Event);
 
 		// config object test
 		// LoggerManager.LogDebug("Creating CoreEngineConfig instance");
@@ -432,6 +433,12 @@ public partial class GodotEGP : Node
 		if (e is EventBackgroundJobComplete ev)
 		{
 			LoggerManager.LogDebug($"Event data: {ev.RunWorkerCompletedEventArgs.Result}");
+		}
+		if (e is EventValidatedValueChanged evv)
+		{
+			LoggerManager.LogDebug($"Event data: {evv.Owner}", "", "data", evv.Owner.GetType());
+			LoggerManager.LogDebug($"Event data: {evv.Value}", "", "data", evv);
+			LoggerManager.LogDebug($"Event data: {evv.PrevValue}");
 		}
 	}
 }
