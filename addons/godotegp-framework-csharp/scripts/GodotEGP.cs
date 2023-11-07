@@ -405,13 +405,10 @@ public partial class GodotEGP : Node
 	public void __On_Timer_timeout(IEvent eventObj)
 	{
 		LoggerManager.LogDebug("DataLoadTest: requesting load object");
+
 		DataOperation dataOperation = ServiceRegistry.Get<DataService>()
-			.Load(
-					new DataOperationFile<CoreEngineConfig>(
-						new DataEndpointFile("config/CoreEngineConfig.json")
-					)
-				)
-			;
+			.Load(dataOperation: new DataOperationFile<CoreEngineConfig>(fileEndpoint: new DataEndpointFile("config/CoreEngineConfig.json")));
+
 		dataOperation.Subscribe<EventDataOperationComplete>((e) => {
 				if (e is EventDataOperationComplete ee)
 				{
@@ -420,6 +417,13 @@ public partial class GodotEGP : Node
 					if (ee.RunWorkerCompletedEventArgs.Result is DataOperationResult<CoreEngineConfig> cecr)
 					{
 						cecr.ResultObject.LoggerConfig.LogLevel = LoggerMessage.LogLevel.Info;
+
+						// data save operation
+						DataOperation dataOperation = ServiceRegistry.Get<DataService>()
+							.Save(dataOperation: new DataOperationFile<CoreEngineConfig>(
+										fileEndpoint: new DataEndpointFile("config/CoreEngineConfig2.json"), 
+										dataObject: cecr.ResultObject
+									));
 					}
 				}
 			}, oneshot: true, isHighPriority: true)

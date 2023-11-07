@@ -27,6 +27,22 @@ public partial class DataService : Service
 
 		return dataOperation;
 	}
+
+	// save data from an object to a file
+	public DataOperation Save(DataOperation dataOperation)
+	{
+		// trigger the load request
+		dataOperation.Save();
+
+		dataOperation.OnComplete = (e) => {
+			LoggerManager.LogDebug("DataService save result", "", "result", e.Result);
+		};
+		dataOperation.OnError = (e) => {
+			LoggerManager.LogDebug("DataService save error", "", "result", e.Error);
+		};
+
+		return dataOperation;
+	}
 }
 
 // holds information about an endpoint to be read/write
@@ -78,7 +94,7 @@ public interface IDataOperator
 {
 	void SetDataEndpoint(IDataEndpointObject dataEndpoint);
 	void Load();
-	void Save();
+	void Save(object dataObj);
 }
 
 public abstract class DataOperator : BackgroundJob
@@ -92,6 +108,8 @@ public class DataOperatorFile : DataOperator, IDataOperator
 	private DataEndpointFile _fileEndpoint;
 	private int _operationType;
 
+	private object _dataObject;
+
 	public void Load()
 	{
 		LoggerManager.LogDebug($"Load from endpoint", "", "endpoint", _fileEndpoint);
@@ -101,9 +119,12 @@ public class DataOperatorFile : DataOperator, IDataOperator
 		Run();
 	}
 
-	public void Save()
+	public void Save(object dataObj)
 	{
 		LoggerManager.LogDebug($"Save to endpoint", "", "endpoint", _fileEndpoint);
+		LoggerManager.LogDebug($"", "", "dataObj", dataObj);
+
+		_dataObject = dataObj;
 
 		_operationType = 1;
 
@@ -128,6 +149,8 @@ public class DataOperatorFile : DataOperator, IDataOperator
 				LoadOperationDoWork(sender, e);
 				break;
 			case 1:
+				SaveOperationDoWork(sender, e);
+				break;
 			default:
 				break;
 		}
@@ -139,6 +162,23 @@ public class DataOperatorFile : DataOperator, IDataOperator
     	using (StreamReader reader = new StreamReader(_fileEndpoint.Path))
     	{
     		e.Result = reader.ReadToEnd();
+    		ReportProgress(100);
+    	}
+	}
+
+	public void SaveOperationDoWork(object sender, DoWorkEventArgs e)
+	{
+		LoggerManager.LogDebug("Save operation starting", "", "object", _dataObject);
+
+    	using (StreamWriter writer = new StreamWriter(_fileEndpoint.Path))
+    	{
+			// for now, serialise the object as json
+			var jsonString = JsonConvert.SerializeObject(
+        	_dataObject, Formatting.Indented);
+
+    		writer.WriteLine(jsonString);
+
+    		e.Result = true;
     		ReportProgress(100);
     	}
 	}
@@ -156,6 +196,8 @@ public class DataOperatorFile : DataOperator, IDataOperator
 				LoadOperationRunWorkerCompleted(sender, e);
 				break;
 			case 1:
+				SaveOperationRunWorkerCompleted(sender, e);
+				break;
 			default:
 				break;
 		}
@@ -164,6 +206,10 @@ public class DataOperatorFile : DataOperator, IDataOperator
 	public void LoadOperationRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
 		LoggerManager.LogDebug("Load operation completed", "", "result", e.Result);
+	}
+	public void SaveOperationRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+	{
+		LoggerManager.LogDebug("Save operation completed", "", "result", e.Result);
 	}
 
 	public override void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
@@ -176,6 +222,7 @@ public interface IDataOperation
 {
 	public void Load();
 	public void Save();
+
 
 }
 
@@ -192,6 +239,8 @@ public abstract class DataOperation<T> : DataOperation, IDataOperation
 	public abstract DataOperator GetOperator();
 
 	protected RunWorkerCompletedEventArgs _completedArgs;
+
+	protected object _dataObject;
 
 	public void __On_OperatorComplete(RunWorkerCompletedEventArgs e)
 	{
@@ -210,10 +259,20 @@ public abstract class DataOperation<T> : DataOperation, IDataOperation
 	{
 		LoggerManager.LogDebug("Starting operation thread");
 
-		DataOperationResult<T> resultObj = new DataOperationResult<T>(_completedArgs.Result);
-		LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
+		// for now, if the _dataObject is null then we can assume that this is a
+		// load request, therefore we proceed to create the loaded instance
+		if (_dataObject == null)
+		{
+			DataOperationResult<T> resultObj = new DataOperationResult<T>(_completedArgs.Result);
+			LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
 
-		e.Result = resultObj;
+			e.Result = resultObj;
+		}
+		else
+		{
+			// copy over the completed args from the operator thread
+			e.Result = _completedArgs.Result;
+		}
 
 		ReportProgress(100);
 	}
@@ -275,10 +334,12 @@ class DataOperationFile<T> : DataOperation<T>
 		return _dataOperator;
 	}
 
-	public DataOperationFile(DataEndpointFile fileEndpoint)
+	public DataOperationFile(DataEndpointFile fileEndpoint, object dataObject = null)
 	{
 		LoggerManager.LogDebug($"Creating instance");
 		LoggerManager.LogDebug($"fileEndpoint {fileEndpoint}");
+
+		_dataObject = dataObject;
 
 		// create instance of the operator
 		_dataOperator = (DataOperatorFile) CreateOperator();
@@ -292,7 +353,7 @@ class DataOperationFile<T> : DataOperation<T>
 	}
 
 	public override void Save() {
-		_dataOperator.Save();
+		_dataOperator.Save(_dataObject);
 	}
 }
 
