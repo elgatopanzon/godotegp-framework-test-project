@@ -415,6 +415,11 @@ public partial class GodotEGP : Node
 				if (e is EventDataOperationComplete ee)
 				{
 					LoggerManager.LogDebug("DataLoadTest: My loaded object!", "", "object", ee.RunWorkerCompletedEventArgs.Result);
+
+					if (ee.RunWorkerCompletedEventArgs.Result is DataOperationResult<CoreEngineConfig> cecr)
+					{
+						cecr.ResultObject.LoggerConfig.LogLevel = LoggerMessage.LogLevel.Info;
+					}
 				}
 			}, oneshot: true, isHighPriority: true)
 			.Owner(dataOperation);

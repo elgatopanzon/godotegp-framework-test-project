@@ -13,6 +13,7 @@ public abstract class ValidatedValue : IValidatedValue
 	public abstract bool IsNull();
 
 	internal abstract object RawValue {set; get;}
+	internal abstract object Parent {set; get;}
 }
 
 public class ValidatedValue<T> : ValidatedValue
@@ -21,6 +22,18 @@ public class ValidatedValue<T> : ValidatedValue
 	protected T _default;
 	protected bool NullAllowed = true;
 	protected bool ChangeEventsState = false;
+
+	private object _parent;
+	internal override object Parent {
+		set
+		{
+			_parent = value;
+		}
+		get
+		{
+			return _parent;
+		}
+	}
 
 	internal override object RawValue {
 		get {
@@ -48,10 +61,11 @@ public class ValidatedValue<T> : ValidatedValue
 
 		if (ChangeEventsState)
 		{
-			this.Emit<EventValidatedValueChanged>((e) => {
-				e.SetValue(newValue);
-				e.SetPrevValue(_value);
-			});
+			Type root = this.Parent.GetType().BaseType;
+			if (this.Parent is ValidatedObject vo)
+			{
+				vo._onValueChange(this, _value, newValue);
+			}
 		}
 
 		_value = newValue;

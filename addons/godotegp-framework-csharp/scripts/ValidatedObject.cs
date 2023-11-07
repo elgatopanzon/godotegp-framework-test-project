@@ -9,23 +9,30 @@ using System.Linq;
 
 public class ValidatedObject
 {
+	protected ValidatedObject _parent;
+
 	protected List<ValidatedValue> Properties { get; } = new List<ValidatedValue>();
-    protected ValidatedValue<T> AddValidatedValue<T>()
+    protected ValidatedValue<T> AddValidatedValue<T>(object parent = null)
         {
             var val = new ValidatedValue<T>();
+            val.Parent = parent;
+
             Properties.Add(val);
             return val;
         }
 
-    protected ValidatedNative<T> AddValidatedNative<T>() where T : ValidatedObject
+    protected ValidatedNative<T> AddValidatedNative<T>(object parent = null) where T : ValidatedObject
         {
             var val = new ValidatedNative<T>();
+            val.Parent = parent;
+
             Properties.Add(val);
             return val;
         }
 
-	public ValidatedObject()
+	public ValidatedObject(ValidatedObject parent = null)
 	{
+		_parent = parent;
 		ValidateFields();
 	}
 
@@ -91,6 +98,24 @@ public class ValidatedObject
 	public List<ValidatedValue> GetProperties()
 	{
 		return Properties;
+	}
+
+	public void _onValueChange(object o, object v, object nv)
+	{
+		LoggerManager.LogDebug("Value changed in object", "", "owner", this.GetType().Name);
+		LoggerManager.LogDebug("", "", "vo", o.GetType().FullName);
+		LoggerManager.LogDebug("", "", "value", v);
+		LoggerManager.LogDebug("", "", "newValue", nv);
+
+		this.Emit<EventValidatedValueChanged>((e) => {
+			e.SetValue(nv);
+			e.SetPrevValue(v);
+		});
+
+		if (_parent != null)
+		{
+			_parent._onValueChange(this, v, nv);
+		}
 	}
 }
 
