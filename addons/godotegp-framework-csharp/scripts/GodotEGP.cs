@@ -406,10 +406,7 @@ public partial class GodotEGP : Node
 	{
 		LoggerManager.LogDebug("DataLoadTest: requesting load object");
 
-		// DataOperation dataOperation = ServiceRegistry.Get<DataService>()
-		// 	.Load(dataOperation: new DataOperationFile<CoreEngineConfig>(fileEndpoint: new DataEndpointFile("config/CoreEngineConfig.json")));
-
-		DataOperation dataOperation = ServiceRegistry.Get<DataService>().LoadFromFile<CoreEngineConfig>("config/CoreEngineConfig.json", onCompleteCb: (e) => {
+		ServiceRegistry.Get<DataService>().LoadFromFile<CoreEngineConfig>("config/CoreEngineConfig.json", onCompleteCb: (e) => {
 				if (e is EventDataOperationComplete ee)
 				{
 					LoggerManager.LogDebug("DataLoadTest: My loaded object!", "", "object", ee.RunWorkerCompletedEventArgs.Result);
@@ -420,35 +417,12 @@ public partial class GodotEGP : Node
 
 						// data save operation
 						DataOperation dataOperation = ServiceRegistry.Get<DataService>()
-							.Save(dataOperation: new DataOperationFile<CoreEngineConfig>(
-								fileEndpoint: new DataEndpointFile("config/CoreEngineConfig2.json"), 
+							.SaveToFile<CoreEngineConfig>("config/CoreEngineConfig2.json", 
 								dataObject: cecr.ResultObject
-							));
+							);
 					}
 				}
 			});
-
-		// dataOperation.Subscribe<EventDataOperationComplete>((e) => {
-		// 		if (e is EventDataOperationComplete ee)
-		// 		{
-		// 			LoggerManager.LogDebug("DataLoadTest: My loaded object!", "", "object", ee.RunWorkerCompletedEventArgs.Result);
-        //
-		// 			if (ee.RunWorkerCompletedEventArgs.Result is DataOperationResult<CoreEngineConfig> cecr)
-		// 			{
-		// 				cecr.ResultObject.LoggerConfig.LogLevel = LoggerMessage.LogLevel.Info;
-        //
-		// 				// data save operation
-		// 				DataOperation dataOperation = ServiceRegistry.Get<DataService>()
-		// 					.Save(dataOperation: new DataOperationFile<CoreEngineConfig>(
-		// 						fileEndpoint: new DataEndpointFile("config/CoreEngineConfig2.json"), 
-		// 						dataObject: cecr.ResultObject
-		// 					));
-		// 			}
-		// 		}
-		// 	}, oneshot: true, isHighPriority: true)
-		// 	.Owner(dataOperation);
-
-
 	}
 
 	public void __On_Event(IEvent e)

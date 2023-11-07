@@ -12,106 +12,21 @@ using Newtonsoft.Json;
 
 public partial class DataService : Service
 {
-	// load data from an endpoint object into a validated T object
-	public DataOperation Load(DataOperation dataOperation)
-	{
-		// trigger the load request
-		dataOperation.Load();
-
-		dataOperation.OnComplete = (e) => {
-			LoggerManager.LogDebug("DataService load result", "", "result", e.Result);
-		};
-		dataOperation.OnError = (e) => {
-			LoggerManager.LogDebug("DataService load error", "", "result", e.Error);
-		};
-
-		return dataOperation;
-	}
-
-	// save data from an object to a file
-	public DataOperation Save(DataOperation dataOperation)
-	{
-		// trigger the load request
-		dataOperation.Save();
-
-		dataOperation.OnComplete = (e) => {
-			LoggerManager.LogDebug("DataService save result", "", "result", e.Result);
-		};
-		dataOperation.OnError = (e) => {
-			LoggerManager.LogDebug("DataService save error", "", "result", e.Error);
-		};
-
-		return dataOperation;
-	}
-
-	// shortcuts to load/save by endpoint type
+	// load/save to/from file endpoint
 	public DataOperation LoadFromFile<T>(string filePath, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null)
 	{
-		DataOperation dataOperation = OperationLoadFromFile<T>(filePath);
+		DataOperationProcessFile<T> dopf = new DataOperationProcessFile<T>(filePath, null, onWorkingCb, onProgressCb, onCompleteCb, onErrorCb);
+		dopf.Load();
 
-		if (onWorkingCb != null)
-		{
-			dataOperation.Subscribe<EventDataOperationWorking>(onWorkingCb, oneshot: true, isHighPriority: true)
-				.Owner(dataOperation);
-		}
-		if (onProgressCb != null)
-		{
-			dataOperation.Subscribe<EventDataOperationProgress>(onProgressCb, oneshot: true, isHighPriority: true)
-				.Owner(dataOperation);
-		}
-		if (onCompleteCb != null)
-		{
-			dataOperation.Subscribe<EventDataOperationComplete>(onCompleteCb, oneshot: true, isHighPriority: true)
-				.Owner(dataOperation);
-		}
-		if (onErrorCb != null)
-		{
-			dataOperation.Subscribe<EventDataOperationComplete>(onErrorCb, oneshot: true, isHighPriority: true)
-				.Owner(dataOperation);
-		}
-
-		return dataOperation;
-	}
-	public DataOperation OperationLoadFromFile<T>(string filePath)
-	{
-		return ServiceRegistry.Get<DataService>()
-			.Load(dataOperation: new DataOperationFile<T>(fileEndpoint: new DataEndpointFile(filePath)));
+		return dopf.DataOperation;
 	}
 
 	public DataOperation SaveToFile<T>(string filePath, object dataObject, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null)
 	{
-		DataOperation dataOperation = OperationSaveToFile<T>(filePath, dataObject);
+		DataOperationProcessFile<T> dopf = new DataOperationProcessFile<T>(filePath, dataObject, onWorkingCb, onProgressCb, onCompleteCb, onErrorCb);
+		dopf.Save();
 
-		if (onWorkingCb != null)
-		{
-			dataOperation.Subscribe<EventDataOperationWorking>(onWorkingCb, oneshot: true, isHighPriority: true)
-				.Owner(dataOperation);
-		}
-		if (onProgressCb != null)
-		{
-			dataOperation.Subscribe<EventDataOperationProgress>(onProgressCb, oneshot: true, isHighPriority: true)
-				.Owner(dataOperation);
-		}
-		if (onCompleteCb != null)
-		{
-			dataOperation.Subscribe<EventDataOperationComplete>(onCompleteCb, oneshot: true, isHighPriority: true)
-				.Owner(dataOperation);
-		}
-		if (onErrorCb != null)
-		{
-			dataOperation.Subscribe<EventDataOperationComplete>(onErrorCb, oneshot: true, isHighPriority: true)
-				.Owner(dataOperation);
-		}
-
-		return dataOperation;
-	}
-	public DataOperation OperationSaveToFile<T>(string filePath, object dataObject)
-	{
-		return ServiceRegistry.Get<DataService>()
-			.Save(dataOperation: new DataOperationFile<T>(
-				fileEndpoint: new DataEndpointFile(filePath), 
-				dataObject: dataObject
-		));
+		return dopf.DataOperation;
 	}
 }
 
@@ -605,6 +520,56 @@ public class BackgroundJob
 	}
 
 	public virtual void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
+	{
+	}
+}
+
+public class DataOperationProcess<T>
+{
+	protected object _dataObject;
+
+	public DataOperation<T> DataOperation;
+
+	public DataOperationProcess(DataOperation<T> dataOperation, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null)
+	{
+		DataOperation = dataOperation;
+
+		// subscribe to event subscriptions
+		if (onWorkingCb != null)
+		{
+			DataOperation.Subscribe<EventDataOperationWorking>(onWorkingCb, oneshot: true, isHighPriority: true)
+				.Owner(DataOperation);
+		}
+		if (onProgressCb != null)
+		{
+			DataOperation.Subscribe<EventDataOperationProgress>(onProgressCb, oneshot: true, isHighPriority: true)
+				.Owner(DataOperation);
+		}
+		if (onCompleteCb != null)
+		{
+			DataOperation.Subscribe<EventDataOperationComplete>(onCompleteCb, oneshot: true, isHighPriority: true)
+				.Owner(DataOperation);
+		}
+		if (onErrorCb != null)
+		{
+			DataOperation.Subscribe<EventDataOperationError>(onErrorCb, oneshot: true, isHighPriority: true)
+				.Owner(DataOperation);
+		}
+	}
+
+	public void Load()
+	{
+		DataOperation.Load();
+	}
+	public void Save()
+	{
+		DataOperation.Save();
+	}
+}
+
+public class DataOperationProcessFile<T> : DataOperationProcess<T>
+{
+	public DataOperationProcessFile(string filePath, object dataObject, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null) : base(new DataOperationFile<T>(new DataEndpointFile(filePath), dataObject), onWorkingCb, onProgressCb, onCompleteCb, onErrorCb)
 	{
 	}
 }
