@@ -43,6 +43,76 @@ public partial class DataService : Service
 
 		return dataOperation;
 	}
+
+	// shortcuts to load/save by endpoint type
+	public DataOperation LoadFromFile<T>(string filePath, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null)
+	{
+		DataOperation dataOperation = OperationLoadFromFile<T>(filePath);
+
+		if (onWorkingCb != null)
+		{
+			dataOperation.Subscribe<EventDataOperationWorking>(onWorkingCb, oneshot: true, isHighPriority: true)
+				.Owner(dataOperation);
+		}
+		if (onProgressCb != null)
+		{
+			dataOperation.Subscribe<EventDataOperationProgress>(onProgressCb, oneshot: true, isHighPriority: true)
+				.Owner(dataOperation);
+		}
+		if (onCompleteCb != null)
+		{
+			dataOperation.Subscribe<EventDataOperationComplete>(onCompleteCb, oneshot: true, isHighPriority: true)
+				.Owner(dataOperation);
+		}
+		if (onErrorCb != null)
+		{
+			dataOperation.Subscribe<EventDataOperationComplete>(onErrorCb, oneshot: true, isHighPriority: true)
+				.Owner(dataOperation);
+		}
+
+		return dataOperation;
+	}
+	public DataOperation OperationLoadFromFile<T>(string filePath)
+	{
+		return ServiceRegistry.Get<DataService>()
+			.Load(dataOperation: new DataOperationFile<T>(fileEndpoint: new DataEndpointFile(filePath)));
+	}
+
+	public DataOperation SaveToFile<T>(string filePath, object dataObject, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null)
+	{
+		DataOperation dataOperation = OperationSaveToFile<T>(filePath, dataObject);
+
+		if (onWorkingCb != null)
+		{
+			dataOperation.Subscribe<EventDataOperationWorking>(onWorkingCb, oneshot: true, isHighPriority: true)
+				.Owner(dataOperation);
+		}
+		if (onProgressCb != null)
+		{
+			dataOperation.Subscribe<EventDataOperationProgress>(onProgressCb, oneshot: true, isHighPriority: true)
+				.Owner(dataOperation);
+		}
+		if (onCompleteCb != null)
+		{
+			dataOperation.Subscribe<EventDataOperationComplete>(onCompleteCb, oneshot: true, isHighPriority: true)
+				.Owner(dataOperation);
+		}
+		if (onErrorCb != null)
+		{
+			dataOperation.Subscribe<EventDataOperationComplete>(onErrorCb, oneshot: true, isHighPriority: true)
+				.Owner(dataOperation);
+		}
+
+		return dataOperation;
+	}
+	public DataOperation OperationSaveToFile<T>(string filePath, object dataObject)
+	{
+		return ServiceRegistry.Get<DataService>()
+			.Save(dataOperation: new DataOperationFile<T>(
+				fileEndpoint: new DataEndpointFile(filePath), 
+				dataObject: dataObject
+		));
+	}
 }
 
 // holds information about an endpoint to be read/write
