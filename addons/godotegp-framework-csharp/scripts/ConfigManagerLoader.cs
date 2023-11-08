@@ -15,12 +15,14 @@ public class ConfigManagerLoader : BackgroundJob
 		return _loadQueue.Count;
 	} }
 
-	private List<ConfigFileObject> _loadedConfigObjects = new List<ConfigFileObject>();
-	public List<ConfigFileObject> ConfigObjects
-	{
-		get { return _loadedConfigObjects; }
-		set { _loadedConfigObjects = value; }
-	}
+	// private List<ConfigFileObject> _loadedConfigObjects = new List<ConfigFileObject>();
+	// public List<ConfigFileObject> ConfigObjects
+	// {
+	// 	get { return _loadedConfigObjects; }
+	// 	set { _loadedConfigObjects = value; }
+	// }
+
+	private Dictionary<Type, ConfigFileObject> _configObjects = new Dictionary<Type, ConfigFileObject>();
 
 	public ConfigManagerLoader(Queue<Dictionary<string, object>> loadQueue)
 	{
@@ -48,7 +50,14 @@ public class ConfigManagerLoader : BackgroundJob
 
 					// gets the existing object from the registry so we can
 					// merge with it
-					var obj = ServiceRegistry.Get<ConfigManager>().GetConfigObjectInstance(Type.GetType(queuedItem["configType"].ToString()));
+					// var obj = ServiceRegistry.Get<ConfigManager>().GetConfigObjectInstance(Type.GetType(queuedItem["configType"].ToString()));
+
+					// fetch any existing and known objects of the same type
+					// otherwise create a fresh one
+					if (!_configObjects.TryGetValue(Type.GetType(queuedItem["configType"].ToString()), out ConfigFileObject obj))
+					{
+						obj = ConfigFileObject.Create(queuedItem["configType"].ToString());
+					}
 
 
 					// set file path to current instance's path
@@ -68,7 +77,10 @@ public class ConfigManagerLoader : BackgroundJob
 					LoggerManager.LogDebug("Loading config item process finished", "", "config", queuedItem);
 
 					// add loaded object to list
-					_loadedConfigObjects.Add(_currentlyLoadingObj);
+					// _loadedConfigObjects.Add(_currentlyLoadingObj);
+					_configObjects.TryAdd(_currentlyLoadingObj.RawValue.GetType(), _currentlyLoadingObj);
+
+					e.Result = _configObjects;
 
 					// reset currently loading object
 					_currentlyLoadingObj = null;
@@ -93,15 +105,21 @@ public class ConfigManagerLoader : BackgroundJob
 	public override void ProgressChanged(object sender, ProgressChangedEventArgs e)
 	{
 		LoggerManager.LogDebug("Loading configs progress", "", "progress", e.ProgressPercentage);
+
+		this.Emit<EventConfigManagerLoaderProgress>((ee) => ee.SetProgressChangesEventArgs(e).SetProgressChangesEventArgs(e));
 	}
 
 	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
-		LoggerManager.LogDebug("Loading configs completed");
+		LoggerManager.LogDebug("Loading configs completed", "", "result", e.Result);
+
+		this.Emit<EventConfigManagerLoaderCompleted>((ee) => ee.SetConfigObjects(_configObjects).SetRunWorkerCompletedEventArgs(e));
 	}
 
 	public override void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
 	{
 		LoggerManager.LogDebug("Loading configs error");
+
+		this.Emit<EventConfigManagerLoaderError>((ee) => ee.SetConfigObjects(_configObjects).SetRunWorkerCompletedEventArgs(e));
 	}
 }

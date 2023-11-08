@@ -184,3 +184,27 @@ public class EventValidatedValueChanged : EventValidatedValue
 public class EventValidatedValueSet : EventValidatedValue
 {
 }
+
+public class EventConfigManagerLoader : EventBackgroundJob
+{
+	public Dictionary<Type, ConfigFileObject> ConfigObjects;
+	
+}
+static public class EventConfigManagerLoaderExtensions
+{
+	static public T SetConfigObjects<T>(this T o, Dictionary<Type, ConfigFileObject> configObjects) where T : EventConfigManagerLoader
+	{
+		o.ConfigObjects = configObjects;
+		return o;
+	}
+}
+
+public class EventConfigManagerLoaderProgress : EventConfigManagerLoader
+{
+}
+public class EventConfigManagerLoaderCompleted : EventConfigManagerLoader
+{
+}
+public class EventConfigManagerLoaderError : EventConfigManagerLoader
+{
+}

@@ -94,7 +94,46 @@ public partial class ConfigManager : Service
 		{
 			// load all the config objects using ConfigManagerLoader
 			ConfigManagerLoader configLoader = new ConfigManagerLoader(fileQueue);
+
+			configLoader.Subscribe<EventConfigManagerLoaderCompleted>(_On_ConfigManagerLoaderCompleted, oneshot: true, isHighPriority: true).Owner(configLoader);
+			configLoader.Subscribe<EventConfigManagerLoaderError>(_On_ConfigManagerLoaderError, oneshot: true, isHighPriority: true).Owner(configLoader);
 		}
+	}
+
+	public void _On_ConfigManagerLoaderCompleted(IEvent e)
+	{
+		if (e is EventConfigManagerLoaderCompleted ec)
+		{
+			LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "e", ec.ConfigObjects);	
+
+			MergeConfigObjects(ec.ConfigObjects);
+
+			_SetServiceReady(true);
+		}
+	}
+
+	public void _On_ConfigManagerLoaderError(IEvent e)
+	{
+		if (e is EventConfigManagerLoaderError ee)
+		{
+			throw ee.RunWorkerCompletedEventArgs.Error;
+		}
+	}
+
+	public void MergeConfigObjects(Dictionary<Type, ConfigFileObject> configObjects)
+	{
+    	foreach (KeyValuePair<Type, ConfigFileObject> pair in configObjects)
+    	{
+        	Type key = pair.Key;
+        	ConfigFileObject value = pair.Value;
+
+
+        	if (GetConfigObjectInstance(key).RawValue is ValidatedObject vo)
+        	{
+        		LoggerManager.LogDebug("Merging config object", "", "objType", key);
+        		vo.MergeFrom(value.RawValue as ValidatedObject);
+        	}
+    	}
 	}
 
 	public bool RegisterConfigObjectInstance(Type configInstanceType, ConfigFileObject configFileObject)
