@@ -7,24 +7,24 @@ public interface IConfigFileObject
 {
 }
 
-public abstract class ConfigFileObject : IConfigFileObject
+public abstract class ConfigObject : IConfigFileObject
 {
 	internal abstract object RawValue { get; set; }
-	internal abstract string FilePath { get; set; }
+	internal abstract IDataEndpointObject DataEndpoint { get; set; }
 	internal abstract bool Loading { get; set; }
 
 	public abstract void Load();
 	public abstract void Save();
 
-	public static ConfigFileObject Create(string parameterTypeName)
+	public static ConfigObject Create(string parameterTypeName)
     {
         Type parameterType = Type.GetType(parameterTypeName);
-        Type genericType = typeof(ConfigFileObject<>).MakeGenericType(parameterType);
-        return (ConfigFileObject) Activator.CreateInstance(genericType);
+        Type genericType = typeof(ConfigObject<>).MakeGenericType(parameterType);
+        return (ConfigObject) Activator.CreateInstance(genericType);
     }
 }
 
-public class ConfigFileObject<T> : ConfigFileObject where T : ValidatedObject, new()
+public class ConfigObject<T> : ConfigObject where T : ValidatedObject, new()
 {
 	private bool _loading;
 	internal override bool Loading
@@ -49,14 +49,14 @@ public class ConfigFileObject<T> : ConfigFileObject where T : ValidatedObject, n
 		}
 	}
 
-	private string _filePath;
-	internal override string FilePath
+	private IDataEndpointObject _dataEndpoint;
+	internal override IDataEndpointObject DataEndpoint
 	{
-		get { return _filePath; }
-		set { _filePath = value; }
+		get { return _dataEndpoint; }
+		set { _dataEndpoint = value; }
 	}
 
-	public ConfigFileObject()
+	public ConfigObject()
 	{
 		_validatedObject = new ValidatedNative<T>();
 		_validatedObject.Value = new T();
@@ -65,11 +65,13 @@ public class ConfigFileObject<T> : ConfigFileObject where T : ValidatedObject, n
 	public override void Load()
 	{
 		_loading = true;
-		ServiceRegistry.Get<DataService>().LoadFromFile<T>(_filePath, onCompleteCb: _OnCompleteCb, onErrorCb: _OnErrorCb);
+		var dopf = ServiceRegistry.Get<DataService>().DataOperationFromEndpoint<T>(_dataEndpoint, Value, onCompleteCb: _OnCompleteCb, onErrorCb: _OnErrorCb);
+		dopf.Load();
 	}
 	public override void Save()
 	{
-		ServiceRegistry.Get<DataService>().SaveToFile<T>(_filePath, dataObject: Value, onCompleteCb: _OnCompleteCb, onErrorCb: _OnErrorCb);
+		var dopf = ServiceRegistry.Get<DataService>().DataOperationFromEndpoint<T>(_dataEndpoint, Value, onCompleteCb: _OnCompleteCb, onErrorCb: _OnErrorCb);
+		dopf.Save();
 	}
 
 	public void _OnCompleteCb(IEvent e)

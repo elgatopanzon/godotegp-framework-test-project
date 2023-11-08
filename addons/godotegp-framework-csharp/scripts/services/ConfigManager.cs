@@ -18,7 +18,7 @@ public partial class ConfigManager : Service
 
 	private List<String> _configDataDirs { get; set; }
 
-	private Dictionary<Type, ConfigFileObject> _configObjects = new Dictionary<Type, ConfigFileObject>();
+	private Dictionary<Type, ConfigObject> _configObjects = new Dictionary<Type, ConfigObject>();
 
 	public ConfigManager() : base()
 	{
@@ -93,7 +93,7 @@ public partial class ConfigManager : Service
 		if (fileQueue.Count > 0)
 		{
 			// load all the config objects using ConfigManagerLoader
-			ConfigManagerLoader configLoader = new ConfigManagerLoader(fileQueue);
+			ConfigLoader configLoader = new ConfigLoader(fileQueue);
 
 			configLoader.Subscribe<EventConfigManagerLoaderCompleted>(_On_ConfigManagerLoaderCompleted, oneshot: true, isHighPriority: true).Owner(configLoader);
 			configLoader.Subscribe<EventConfigManagerLoaderError>(_On_ConfigManagerLoaderError, oneshot: true, isHighPriority: true).Owner(configLoader);
@@ -120,12 +120,12 @@ public partial class ConfigManager : Service
 		}
 	}
 
-	public void MergeConfigObjects(Dictionary<Type, ConfigFileObject> configObjects)
+	public void MergeConfigObjects(Dictionary<Type, ConfigObject> configObjects)
 	{
-    	foreach (KeyValuePair<Type, ConfigFileObject> pair in configObjects)
+    	foreach (KeyValuePair<Type, ConfigObject> pair in configObjects)
     	{
         	Type key = pair.Key;
-        	ConfigFileObject value = pair.Value;
+        	ConfigObject value = pair.Value;
 
 
         	if (GetConfigObjectInstance(key).RawValue is ValidatedObject vo)
@@ -136,7 +136,7 @@ public partial class ConfigManager : Service
     	}
 	}
 
-	public bool RegisterConfigObjectInstance(Type configInstanceType, ConfigFileObject configFileObject)
+	public bool RegisterConfigObjectInstance(Type configInstanceType, ConfigObject configFileObject)
 	{
 		// return true if we added the object
 		if (_configObjects.TryAdd(configInstanceType, configFileObject))
@@ -149,18 +149,18 @@ public partial class ConfigManager : Service
 		return false;
 	}
 
-	public void SetConfigObjectInstance(ConfigFileObject configFileObject)
+	public void SetConfigObjectInstance(ConfigObject configFileObject)
 	{
 		_configObjects[configFileObject.GetType()] = configFileObject;
 	}
 
-	public ConfigFileObject GetConfigObjectInstance(Type configInstanceType)
+	public ConfigObject GetConfigObjectInstance(Type configInstanceType)
 	{
-		if(!_configObjects.TryGetValue(configInstanceType, out ConfigFileObject obj))
+		if(!_configObjects.TryGetValue(configInstanceType, out ConfigObject obj))
 		{
 			LoggerManager.LogDebug("Creating config file object", "", "objType", configInstanceType.Name);
 
-			obj = ConfigFileObject.Create(configInstanceType.ToString());
+			obj = ConfigObject.Create(configInstanceType.ToString());
 			RegisterConfigObjectInstance(configInstanceType, obj);
 
 			return obj;
@@ -169,7 +169,7 @@ public partial class ConfigManager : Service
 		return obj;
 	}
 
-	public T Get<T>() where T : ConfigFileObject
+	public T Get<T>() where T : ConfigObject
 	{
 		return (T) GetConfigObjectInstance(typeof(T));
 	}

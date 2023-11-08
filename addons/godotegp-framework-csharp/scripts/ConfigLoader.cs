@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-public class ConfigManagerLoader : BackgroundJob
+public class ConfigLoader : BackgroundJob
 {
 	private Queue<Dictionary<string, object>> _loadQueue = new Queue<Dictionary<string, object>>();
 
-	private ConfigFileObject _currentlyLoadingObj;
+	private ConfigObject _currentlyLoadingObj;
 	private double _queueSize = 0;
 
 	private double _queueSizeCurrent { get {
@@ -22,9 +22,9 @@ public class ConfigManagerLoader : BackgroundJob
 	// 	set { _loadedConfigObjects = value; }
 	// }
 
-	private Dictionary<Type, ConfigFileObject> _configObjects = new Dictionary<Type, ConfigFileObject>();
+	private Dictionary<Type, ConfigObject> _configObjects = new Dictionary<Type, ConfigObject>();
 
-	public ConfigManagerLoader(Queue<Dictionary<string, object>> loadQueue)
+	public ConfigLoader(Queue<Dictionary<string, object>> loadQueue)
 	{
 		_loadQueue = loadQueue;
 
@@ -54,14 +54,14 @@ public class ConfigManagerLoader : BackgroundJob
 
 					// fetch any existing and known objects of the same type
 					// otherwise create a fresh one
-					if (!_configObjects.TryGetValue(Type.GetType(queuedItem["configType"].ToString()), out ConfigFileObject obj))
+					if (!_configObjects.TryGetValue(Type.GetType(queuedItem["configType"].ToString()), out ConfigObject obj))
 					{
-						obj = ConfigFileObject.Create(queuedItem["configType"].ToString());
+						obj = ConfigObject.Create(queuedItem["configType"].ToString());
 					}
 
 
-					// set file path to current instance's path
-					obj.FilePath = queuedItem["path"].ToString();
+					// set data endpoint to current instance's file path
+					obj.DataEndpoint = new DataEndpointFile(queuedItem["path"].ToString());
 					obj.Load();
 
 					_currentlyLoadingObj = obj;
