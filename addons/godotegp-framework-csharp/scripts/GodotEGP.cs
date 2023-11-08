@@ -416,10 +416,15 @@ public partial class GodotEGP : Node
 						cecr.ResultObject.LoggerConfig.LogLevel = LoggerMessage.LogLevel.Info;
 
 						// data save operation
-						DataOperation dataOperation = ServiceRegistry.Get<DataService>()
-							.SaveToFile<CoreEngineConfig>("config/CoreEngineConfig2.json", 
-								dataObject: cecr.ResultObject
-							);
+						// DataOperation dataOperation = ServiceRegistry.Get<DataService>()
+						// 	.SaveToFile<CoreEngineConfig>("config/CoreEngineConfig2.json", 
+						// 		dataObject: cecr.ResultObject
+						// 	);
+
+						// ServiceRegistry.Get<DataService>().HTTPRequest<ValidatedObject>("catfact.ninja", 443, "/fact", HttpMethod.Get);
+						// ServiceRegistry.Get<DataService>().HTTPRequest<ValidatedObject>("echo.free.beeceptor.com", 443, path: "/fact", requestMethod: HttpMethod.Get, dataObject: new StringContent("Some content"));
+						ServiceRegistry.Get<DataService>().HTTPRequest<HTTPEchoResult>("echo.free.beeceptor.com", 443, path: "/fact", requestMethod: HttpMethod.Get, dataObject: cecr.ResultObject);
+						// ServiceRegistry.Get<DataService>().HTTPRequest<ValidatedObject>("echo.free.beeceptor.com", 443, path: "/fact", requestMethod: HttpMethod.Get, urlParams: new Dictionary<string, object> { {"someParam", "someValue"},{"someParam2", "someValue2"} });
 					}
 				}
 			});
@@ -440,6 +445,53 @@ public partial class GodotEGP : Node
 	}
 }
 
+public class HTTPEchoResult : ValidatedObject
+{
+	private readonly ValidatedValue<string> _method;
+
+	public string Method
+	{
+		get { return _method.Value; }
+		set { _method.Value = value; }
+	}
+
+	private readonly ValidatedValue<string> _protocol;
+	public string Protocol
+	{
+		get { return _protocol.Value; }
+		set { _protocol.Value = value; }
+	}
+
+	private readonly ValidatedValue<string> _host;
+	public string Host
+	{
+		get { return _host.Value; }
+		set { _host.Value = value; }
+	}
+
+	private readonly ValidatedValue<string> _ip;
+	public string IP
+	{
+		get { return _ip.Value; }
+		set { _ip.Value = value; }
+	}
+
+	public HTTPEchoResult(ValidatedObject parent = null) : base(parent)
+	{
+        _method = AddValidatedValue<string>(this)
+            // .AllowedValues()
+            ;
+        _protocol = AddValidatedValue<string>(this)
+            // .AllowedValues()
+            ;
+        _host = AddValidatedValue<string>(this)
+            // .AllowedValues()
+            ;
+        _ip = AddValidatedValue<string>(this)
+            // .AllowedValues()
+            ;
+	}
+}
 
 // 	public void FetchCatFact()
 // 	{

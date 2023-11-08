@@ -2,6 +2,8 @@ namespace Godot.EGP;
 
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Net.Http;
 
 public partial class DataService : Service
 {
@@ -20,5 +22,13 @@ public partial class DataService : Service
 		dopf.Save();
 
 		return dopf.DataOperation;
+	}
+
+	public DataOperation HTTPRequest<T>(string hostname, int port = 443, string path = "/", Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null, object dataObject = null, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null)
+	{
+		DataOperationProcessHTTP<T> dataOperationProcessHTTP = new DataOperationProcessHTTP<T>(hostname, port, path, urlParams, requestMethod, verifySSL, timeout, headers, dataObject, onWorkingCb, onProgressCb, onCompleteCb, onErrorCb);
+		dataOperationProcessHTTP.Save();
+
+		return dataOperationProcessHTTP.DataOperation;
 	}
 }

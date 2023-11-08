@@ -37,14 +37,14 @@ public abstract class DataOperation<T> : DataOperation, IDataOperation
 
 		// for now, if the _dataObject is null then we can assume that this is a
 		// load request, therefore we proceed to create the loaded instance
-		if (_dataObject == null)
+		try
 		{
 			DataOperationResult<T> resultObj = new DataOperationResult<T>(_completedArgs.Result);
 			LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
 
 			e.Result = resultObj;
 		}
-		else
+		catch (System.Exception)
 		{
 			// copy over the completed args from the operator thread
 			e.Result = _completedArgs.Result;
