@@ -28,6 +28,7 @@ public partial class GodotEGP : Node
 	public override void _Ready()
 	{
 		ServiceRegistry.Get<ConfigManager>();
+		ServiceRegistry.Get<DataService>();
 		// ServiceRegistry.Instance.RegisterService(new EventService(), "Events");
         //
 		// ServiceRegistry.Instance.RegisterService(LoggerManager.Instance, "Log");
@@ -75,7 +76,7 @@ public partial class GodotEGP : Node
 		timer.Name = "timer1";
 		timer.AddToGroup("test_group");
 		AddChild(timer);
-		timer.WaitTime = 1.5;
+		timer.WaitTime = 5;
 		timer.Start();
 
 		// ServiceRegistry.Get<EventManager>().SubscribeSignal(timer, "timeout", false, new EventSubscription<EventSignal>(this, __On_Timer_timeout));
