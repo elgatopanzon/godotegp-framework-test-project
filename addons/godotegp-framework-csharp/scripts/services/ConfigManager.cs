@@ -36,7 +36,6 @@ public partial class ConfigManager : Service
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		// _SetServiceReady(true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -47,9 +46,6 @@ public partial class ConfigManager : Service
 	// Called when service is registered in manager
 	public override void _OnServiceRegistered()
 	{
-		// var obj = ValidatedObjectWrapper.Create("Godot.EGP.Config.CoreEngineConfig");
-		// LoggerManager.LogDebug("VVV", "", "obj", obj);
-		
 		Queue<Dictionary<string, object>> fileQueue = new Queue<Dictionary<string, object>>();
 
 		foreach (string configDataPath in _configDataDirs)
