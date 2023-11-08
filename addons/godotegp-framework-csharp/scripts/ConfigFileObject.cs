@@ -78,14 +78,12 @@ public class ConfigFileObject<T> : ConfigFileObject where T : ValidatedObject, n
 		{
 			if (ee.RunWorkerCompletedEventArgs.Result is DataOperationResult<T> resultObj)
 			{
-				var configObj = ServiceRegistry.Get<ConfigManager>().GetConfigObjectInstance(typeof(T));
-
-				if (configObj.RawValue is T co)
+				if (RawValue is T co)
 				{
 					co.MergeFrom((T) resultObj.ResultObject);
 				}
 
-				LoggerManager.LogDebug("Config object merged with registery object", "", "configObj", ServiceRegistry.Get<ConfigManager>().GetConfigObjectInstance(typeof(T)));
+				LoggerManager.LogDebug("Config object merged with registery object", "", "configObj", RawValue);
 
 				_loading = false;
 			}

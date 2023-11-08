@@ -46,6 +46,8 @@ public class ConfigManagerLoader : BackgroundJob
 				{
 					LoggerManager.LogDebug("Loading config item", "", "config", queuedItem);
 
+					// gets the existing object from the registry so we can
+					// merge with it
 					var obj = ServiceRegistry.Get<ConfigManager>().GetConfigObjectInstance(Type.GetType(queuedItem["configType"].ToString()));
 
 
