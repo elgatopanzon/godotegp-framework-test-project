@@ -96,8 +96,8 @@ public class ValidatedValue<T> : ValidatedValue
 		_default = ValidateValue(defaultValue);
 		_value = defaultValue;
 
-		LoggerManager.LogDebug("Setting default value", "", "default", defaultValue);
-		LoggerManager.LogDebug("", "", "current", Value);
+		// LoggerManager.LogDebug("Setting default value", "", "default", defaultValue);
+		// LoggerManager.LogDebug("", "", "current", Value);
 		return this;
 	}
 
@@ -173,7 +173,7 @@ public class ValidatedValue<T> : ValidatedValue
 
 	public virtual T ValidateValue(T value)
 	{
-		LoggerManager.LogDebug("Validating value", "", "value", new Dictionary<string, string> { { "value", value?.ToString() } , { "default", _default?.ToString() }, { "type", value?.GetType().Name } });
+		// LoggerManager.LogDebug("Validating value", "", "value", new Dictionary<string, string> { { "value", value?.ToString() } , { "default", _default?.ToString() }, { "type", value?.GetType().Name } });
 
 		if (!NullAllowed && value == null)
 		{

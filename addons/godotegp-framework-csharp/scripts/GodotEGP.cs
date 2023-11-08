@@ -27,6 +27,7 @@ public partial class GodotEGP : Node
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		ServiceRegistry.Get<ConfigManager>();
 		// ServiceRegistry.Instance.RegisterService(new EventService(), "Events");
         //
 		// ServiceRegistry.Instance.RegisterService(LoggerManager.Instance, "Log");
@@ -489,7 +490,7 @@ public class HTTPEchoResult : ValidatedObject
 		set { _ip.Value = value; }
 	}
 
-	public HTTPEchoResult(ValidatedObject parent = null) : base(parent)
+	public HTTPEchoResult()
 	{
         _method = AddValidatedValue<string>(this)
             // .AllowedValues()
@@ -505,6 +506,7 @@ public class HTTPEchoResult : ValidatedObject
             ;
 	}
 }
+
 
 // 	public void FetchCatFact()
 // 	{

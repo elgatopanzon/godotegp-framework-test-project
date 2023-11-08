@@ -44,7 +44,7 @@ public class ValidatedObject
 
 		foreach (FieldInfo field in t.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
 		{
-			LoggerManager.LogDebug($"Validating object field {field.Name}");
+			// LoggerManager.LogDebug($"Validating object field {field.Name}");
 
 			if (field.GetType().GetMethod("Validate") != null)
 			{
@@ -93,6 +93,8 @@ public class ValidatedObject
 			}
 
 		}
+
+		LoggerManager.LogDebug($"Merging {sourceObj.GetType().Name} finished", "", "obj", this);
 	}
 
 	public List<ValidatedValue> GetProperties()
