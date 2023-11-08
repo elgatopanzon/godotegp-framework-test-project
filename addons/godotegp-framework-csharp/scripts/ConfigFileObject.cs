@@ -11,7 +11,7 @@ public abstract class ConfigFileObject : IConfigFileObject
 {
 	internal abstract object RawValue { get; set; }
 	internal abstract string FilePath { get; set; }
-	public abstract bool Loading { get; set; }
+	internal abstract bool Loading { get; set; }
 
 	public abstract void Load();
 	public abstract void Save();
@@ -27,7 +27,7 @@ public abstract class ConfigFileObject : IConfigFileObject
 public class ConfigFileObject<T> : ConfigFileObject where T : ValidatedObject, new()
 {
 	private bool _loading;
-	public override bool Loading
+	internal override bool Loading
 	{
 		get { return _loading; }
 		set { _loading = value; }
