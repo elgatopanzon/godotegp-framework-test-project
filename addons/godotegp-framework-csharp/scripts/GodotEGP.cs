@@ -425,10 +425,23 @@ public partial class GodotEGP : Node
 						// ServiceRegistry.Get<DataService>().HTTPRequest<ValidatedObject>("echo.free.beeceptor.com", 443, path: "/fact", requestMethod: HttpMethod.Get, dataObject: new StringContent("Some content"));
 						ServiceRegistry.Get<DataService>().HTTPRequest<HTTPEchoResult>("echo.free.beeceptor.com", 443, path: "/fact", requestMethod: HttpMethod.Get, dataObject: cecr.ResultObject);
 						// ServiceRegistry.Get<DataService>().HTTPRequest<ValidatedObject>("echo.free.beeceptor.com", 443, path: "/fact", requestMethod: HttpMethod.Get, urlParams: new Dictionary<string, object> { {"someParam", "someValue"},{"someParam2", "someValue2"} });
+
+						ValidatedValue vv = CreateValidatedValue("System.String");
+
+						vv.RawValue = "asd";
+
+						LoggerManager.LogDebug("VVtest", "", "value", vv);
 					}
 				}
 			});
 	}
+
+	public ValidatedValue CreateValidatedValue(string parameterTypeName)
+    {
+        Type parameterType = Type.GetType(parameterTypeName);
+        Type genericType = typeof(ValidatedValue<>).MakeGenericType(parameterType);
+        return (ValidatedValue) Activator.CreateInstance(genericType);
+    }
 
 	public void __On_Event(IEvent e)
 	{
