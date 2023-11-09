@@ -34,7 +34,7 @@ public class LoggerConfig : ValidatedObject
 	public LoggerConfig(ValidatedObject parent = null) : base(parent)
 	{
         _logLevel = AddValidatedValue<LoggerMessage.LogLevel>(this)
-            .Default(LoggerMessage.LogLevel.Debug)
+            .Default((OS.IsDebugBuild()) ? LoggerMessage.LogLevel.Debug : LoggerMessage.LogLevel.Info)
             .AllowedValues(LoggerMessage.LogLevel.GetValues<LoggerMessage.LogLevel>())
         	.ChangeEventsEnabled()
             ;
