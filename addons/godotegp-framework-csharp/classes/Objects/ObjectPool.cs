@@ -29,13 +29,13 @@ public partial class ObjectPool<T> where T: class
 	{
 		if (_objects.Count > 0)
 		{
-			LoggerManager.LogDebug("Using instance from pool", typeof(T).ToString());
+			LoggerManager.LogDebug("Using instance from pool", typeof(T).Name);
 
 			return _objects.Pop();
 		}
 		else
 		{
-			LoggerManager.LogDebug("Creating new instance", typeof(T).ToString());
+			LoggerManager.LogDebug("Creating new instance", typeof(T).Name);
 
 			return (T) Activator.CreateInstance(typeof(T));
 		}
@@ -44,6 +44,8 @@ public partial class ObjectPool<T> where T: class
 	public void Return(T obj)
 	{
 		if (_objects.Count < _capacityMax)
+			LoggerManager.LogDebug("Returning instance", typeof(T).Name);
+
 			_objects.Push(obj);
 	}
 }

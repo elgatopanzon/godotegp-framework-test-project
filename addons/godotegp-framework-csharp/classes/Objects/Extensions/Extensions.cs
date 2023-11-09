@@ -101,7 +101,7 @@ public static partial class EventManagerObjectExtensions
 
 	public static T Emit<T>(this object obj, Action<T> preinvokeHook = null) where T : Event, new()
 	{
-		T e = new T().SetOwner(obj);
+		T e = ServiceRegistry.Get<ObjectPoolService>().Get<T>().SetOwner(obj);
 
 		if (preinvokeHook != null)
 		{
@@ -111,5 +111,38 @@ public static partial class EventManagerObjectExtensions
 		e.Invoke();
 
 		return e;
+	}
+}
+
+public static partial class ObjectPoolServiceObjectExtensions
+{
+
+	public abstract partial class ObjectPoolReturner
+	{
+		public abstract void Return(object obj);
+
+		public static ObjectPoolReturner Create(string parameterTypeName)
+    	{
+        	Type parameterType = Type.GetType(parameterTypeName);
+        	Type genericType = typeof(ObjectPoolReturner<>).MakeGenericType(parameterType);
+        	return (ObjectPoolReturner) Activator.CreateInstance(genericType);
+    	}
+	}
+	public partial class ObjectPoolReturner<T> : ObjectPoolReturner  where T : class
+	{
+		public override void Return(object obj)
+		{
+			ServiceRegistry.Get<ObjectPoolService>().Return<T>((T) obj);
+		}
+	}
+
+	public static void ReturnInstance<T>(this T obj) where T : class
+	{
+		ObjectPoolReturner.Create(obj.GetType().ToString()).Return(obj);
+	}
+
+	public static T CreateInstance<T>(this T obj) where T : class
+	{
+		return ServiceRegistry.Get<ObjectPoolService>().Get<T>();
 	}
 }
