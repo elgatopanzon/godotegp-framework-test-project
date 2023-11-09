@@ -91,8 +91,8 @@ public partial class ConfigManager : Service
 			// load all the config objects using ConfigManagerLoader
 			ConfigLoader configLoader = new ConfigLoader(fileQueue);
 
-			configLoader.Subscribe<EventConfigManagerLoaderCompleted>(_On_ConfigManagerLoaderCompleted, oneshot: true, isHighPriority: true).Owner(configLoader);
-			configLoader.Subscribe<EventConfigManagerLoaderError>(_On_ConfigManagerLoaderError, oneshot: true, isHighPriority: true).Owner(configLoader);
+			configLoader.SubscribeOwner<EventConfigManagerLoaderCompleted>(_On_ConfigManagerLoaderCompleted, oneshot: true, isHighPriority: true);
+			configLoader.SubscribeOwner<EventConfigManagerLoaderError>(_On_ConfigManagerLoaderError, oneshot: true, isHighPriority: true);
 		}
 	}
 

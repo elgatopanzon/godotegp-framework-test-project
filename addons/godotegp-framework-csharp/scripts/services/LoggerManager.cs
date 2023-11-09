@@ -174,6 +174,6 @@ public class LoggerManagerConfigHandler
 {
 	public LoggerManagerConfigHandler()
 	{
-		ServiceRegistry.Get<ConfigManager>().Subscribe<EventServiceReady>((e) => LoggerManager.LogDebug("LoggerManagerConfigHandler", "", "e", "e")).Owner(ServiceRegistry.Get<ConfigManager>());
+		ServiceRegistry.Get<ConfigManager>().SubscribeOwner<EventServiceReady>((e) => LoggerManager.LogDebug("LoggerManagerConfigHandler", "", "e", e));
 	}
 }

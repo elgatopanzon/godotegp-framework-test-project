@@ -217,6 +217,14 @@ public static class EventManagerObjectExtensions
 		return subscription;
 	}
 
+	public static EventSubscription<T> SubscribeOwner<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null) where T : Event
+	{
+		EventSubscription<T> subscription = obj.Subscribe<T>(callbackMethod, isHighPriority, oneshot, eventFilters);
+		subscription.Owner(obj);
+
+		return subscription;
+	}
+
 	public static IEventSubscription<Event> Subscribe(this object obj, IEventSubscription<Event> eventSubscription)
 	{
 		ServiceRegistry.Get<EventManager>().Subscribe(eventSubscription);

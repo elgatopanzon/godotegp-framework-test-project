@@ -17,23 +17,19 @@ public class DataOperationProcess<T>
 		// subscribe to event subscriptions
 		if (onWorkingCb != null)
 		{
-			DataOperation.Subscribe<EventDataOperationWorking>(onWorkingCb, oneshot: true, isHighPriority: true)
-				.Owner(DataOperation);
+			DataOperation.SubscribeOwner<EventDataOperationWorking>(onWorkingCb, oneshot: true, isHighPriority: true);
 		}
 		if (onProgressCb != null)
 		{
-			DataOperation.Subscribe<EventDataOperationProgress>(onProgressCb, oneshot: true, isHighPriority: true)
-				.Owner(DataOperation);
+			DataOperation.SubscribeOwner<EventDataOperationProgress>(onProgressCb, oneshot: true, isHighPriority: true);
 		}
 		if (onCompleteCb != null)
 		{
-			DataOperation.Subscribe<EventDataOperationComplete>(onCompleteCb, oneshot: true, isHighPriority: true)
-				.Owner(DataOperation);
+			DataOperation.SubscribeOwner<EventDataOperationComplete>(onCompleteCb, oneshot: true, isHighPriority: true);
 		}
 		if (onErrorCb != null)
 		{
-			DataOperation.Subscribe<EventDataOperationError>(onErrorCb, oneshot: true, isHighPriority: true)
-				.Owner(DataOperation);
+			DataOperation.SubscribeOwner<EventDataOperationError>(onErrorCb, oneshot: true, isHighPriority: true);
 		}
 	}
 
