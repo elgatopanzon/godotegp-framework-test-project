@@ -35,10 +35,9 @@ public partial class Main : Node
 	public override void _Ready()
 	{
 		AddChild(new ServiceRegistry());
+		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance);
 		ServiceRegistry.Get<ConfigManager>();
 		ServiceRegistry.Get<DataService>();
-
-		var lmch = new LoggerManagerConfigHandler();
 
 		// ServiceRegistry.Instance.RegisterService(new EventService(), "Events");
         //

@@ -10,6 +10,7 @@ using GodotEGP.Config;
 using GodotEGP.Service;
 using GodotEGP.Logging;
 using GodotEGP.Logging.Destination;
+using GodotEGP.Handler;
 using GodotEGP.Event.Events;
 
 /// <summary>
@@ -72,6 +73,9 @@ public partial class LoggerManager : Service
 	public override void _Ready()
 	{
 		_SetServiceReady(true);
+
+		// create instance of 
+		AddChild(new ConfigHandler());
 	}
 
 	// Dictionary of Logger instances
@@ -211,22 +215,3 @@ public partial class LoggerManager : Service
 	}
 }
 
-public partial class LoggerManagerConfigHandler
-{
-	public LoggerManagerConfigHandler()
-	{
-		ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().LoggerConfig.SubscribeOwner<ValidatedValueChanged>(_On_ConfigManager_ValueChanged);
-
-	}
-
-	private void _On_ConfigManager_ValueChanged(IEvent e)
-	{
-		if (e is ValidatedValueChanged ev)
-		{
-			if (ev.Owner is LoggerConfig cec)
-			{
-				LoggerManager.Instance.SetConfig(cec);
-			}
-		}
-	}
-}
