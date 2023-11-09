@@ -30,6 +30,20 @@ public class LoggerMessage
 		Critical = 5
 	}
 
+	public static LogLevel DefaultLogLevel
+	{
+		get { 
+			if (OS.IsDebugBuild())
+			{
+				return LogLevel.Debug;
+			}
+			else
+			{
+				return LogLevel.Info;
+			}
+		}
+	}
+
 	public LoggerMessage(LogLevel level, string message, string custom = "", string dataName = "", object data = null, string sourceName = "", string sourceMethodName = "", string sourceFilename = "", int sourceLineNumber = 0)
 	{
 		Created = DateTime.Now;

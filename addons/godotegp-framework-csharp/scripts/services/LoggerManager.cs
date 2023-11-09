@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using Godot.EGP.Extensions;
+using Godot.EGP.Config;
 
 /// <summary>
 /// Manage instances of <c>Logger</c> objects based on class type.
@@ -19,6 +20,19 @@ public partial class LoggerManager : Service
 
 	public static LoggerManager Instance {
 		get { return _instance.Value; }
+	}
+
+	private LoggerConfig _loggerConfig;
+	public LoggerConfig Config
+	{
+		get { 
+			return _loggerConfig;
+		}
+		set { 
+			_loggerConfig = value;
+
+			OnConfigObjectUpdated();
+		}
 	}
 
 	// Default LoggerDestinationCollection instance used for new Logger
@@ -42,6 +56,7 @@ public partial class LoggerManager : Service
 	}
 
 	private LoggerManager() {
+		// use default values for logger config
 		AppDomain.CurrentDomain.FirstChanceException += (sender, eventArgs) =>
 		{
 			LogError(eventArgs.Exception.GetType().Name, eventArgs.Exception.TargetSite.Name, "exceptionData", eventArgs.Exception.Data);
@@ -77,8 +92,18 @@ public partial class LoggerManager : Service
 		string sourceMethodName = frame.GetMethod().Name;
 		string sourceName = sourceType.Name;
 
-		// Queue the LoggerMessage object for logging
-		GetLoggerInstance(sourceType).ProcessLoggerMessage(new LoggerMessage(logLevel, logMessage, logCustom, logDataName, logData, sourceName, sourceMethodName, sourceFilename, sourceLineNumber));
+		// Queue the LoggerMessage object for logging if the message is within
+		// the allowed current log level value
+		var currentLogLevel = LoggerMessage.DefaultLogLevel;
+		if (Instance.Config != null)
+		{
+			currentLogLevel = Instance.Config.LogLevel;
+		}
+
+		if (logLevel >= currentLogLevel)
+		{
+			GetLoggerInstance(sourceType).ProcessLoggerMessage(new LoggerMessage(logLevel, logMessage, logCustom, logDataName, logData, sourceName, sourceMethodName, sourceFilename, sourceLineNumber));
+		}
 	}
 
 	public static Logger GetLoggerInstance(Type loggerType)
@@ -97,6 +122,12 @@ public partial class LoggerManager : Service
 	public static void SetLoggerDestinationCollection<T>(LoggerDestinationCollection ldc)
 	{
 		GetLoggerInstance(typeof(T)).LoggerDestinationCollection = ldc;
+	}
+
+	// update config object in various moving parts
+	public void OnConfigObjectUpdated()
+	{
+		LoggerManager.LogDebug("Updating config");
 	}
 
 	/***********************************
@@ -174,6 +205,18 @@ public class LoggerManagerConfigHandler
 {
 	public LoggerManagerConfigHandler()
 	{
-		ServiceRegistry.Get<ConfigManager>().SubscribeOwner<EventServiceReady>((e) => LoggerManager.LogDebug("LoggerManagerConfigHandler", "", "e", e));
+		ServiceRegistry.Get<ConfigManager>().Get<CoreEngineConfig>().SubscribeOwner<EventValidatedValueChanged>(_On_ConfigManager_ValueChanged);
+
+	}
+
+	private void _On_ConfigManager_ValueChanged(IEvent e)
+	{
+		if (e is EventValidatedValueChanged ev)
+		{
+			if (ev.Owner is CoreEngineConfig cec)
+			{
+				LoggerManager.Instance.Config = cec.LoggerConfig;
+			}
+		}
 	}
 }
