@@ -164,9 +164,14 @@ public partial class ConfigManager : Service
 		return obj;
 	}
 
-	public T Get<T>() where T : ConfigObject
+	public T GetConfigObjectValue<T>()
 	{
-		return (T) GetConfigObjectInstance(typeof(T));
+		return (T) GetConfigObjectInstance(typeof(T)).RawValue;
+	}
+
+	public T Get<T>() where T : ValidatedObject
+	{
+		return (T) GetConfigObjectValue<T>();
 	}
 
 	public void SaveConfigObjectInstance(Type configInstanceType, IDataEndpointObject dataEndpoint = null)
@@ -183,7 +188,7 @@ public partial class ConfigManager : Service
 		configObject.Save();
 	}
 
-	public void Save<T>(IDataEndpointObject dataEndpoint = null) where T : ConfigObject
+	public void Save<T>(IDataEndpointObject dataEndpoint = null) where T : ValidatedObject
 	{
 		SaveConfigObjectInstance(typeof(T), dataEndpoint);
 	}
