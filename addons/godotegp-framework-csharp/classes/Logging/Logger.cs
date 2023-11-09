@@ -1,22 +1,24 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging;
 
 using Godot;
 using System;
 
+using GodotEGP.Logging.Destination;
+
 public class Logger
 {
-	public LoggerMessage.LogLevel LogLevel = LoggerMessage.LogLevel.Debug; // debug by default
+	public Logging.Message.LogLevel LogLevel = Logging.Message.LogLevel.Debug; // debug by default
 
-	public LoggerDestinationCollection LoggerDestinationCollection { set; get; }
+	public DestinationCollection LoggerDestinationCollection { set; get; }
 
-	public Logger(LoggerDestinationCollection loggerDestinationCollection)
+	public Logger(DestinationCollection loggerDestinationCollection)
 	{
 		LoggerDestinationCollection = loggerDestinationCollection;
 	}
 
-	public void ProcessLoggerMessage(LoggerMessage loggerMessage)
+	public void ProcessLoggerMessage(Logging.Message loggerMessage)
 	{
-        foreach (ILoggerDestination loggerDestination in LoggerDestinationCollection.GetDestinations())
+        foreach (IDestination loggerDestination in LoggerDestinationCollection.GetDestinations())
         {
         	loggerDestination.Process(loggerMessage);
         }

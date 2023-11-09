@@ -1,8 +1,10 @@
-namespace Godot.EGP;
+namespace GodotEGP.Objects;
 
 using Godot;
 using System;
 using System.Collections.Generic;
+
+using GodotEGP.Logging;
 
 public class ObjectPool<T> where T: class
 {

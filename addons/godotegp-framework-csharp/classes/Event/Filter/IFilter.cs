@@ -1,6 +1,8 @@
-namespace Godot.EGP;
+namespace GodotEGP.Event.Filter;
 
-public interface IEventFilter
+using GodotEGP.Event.Events;
+
+public interface IFilter
 {
 	bool Match(IEvent matchEvent);
 }

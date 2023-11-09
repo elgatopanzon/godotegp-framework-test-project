@@ -1,9 +1,9 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging.Formatter;
 
 using Godot;
 using System;
 
-public interface ILoggerFormatter
+public interface IFormatter
 {
-	public object Format(LoggerMessage loggerMessage);
+	public object Format(Logging.Message loggerMessage);
 }

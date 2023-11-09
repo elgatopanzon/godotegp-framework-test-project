@@ -1,6 +1,8 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Operator;
 
-public abstract class DataOperator : BackgroundJob
+using GodotEGP.Threading;
+
+public abstract class Operator : BackgroundJob
 {
 
 }

@@ -1,11 +1,17 @@
-namespace Godot.EGP;
+namespace GodotEGP.Service;
 
 using Godot;
 using System;
 using System.IO;
 using System.Collections.Generic;
 
-using Godot.EGP.ValidatedObjects;
+using GodotEGP.Objects.Validated;
+using GodotEGP.Service;
+using GodotEGP.Logging;
+using GodotEGP.Config;
+using GodotEGP.Event.Events;
+using GodotEGP.Data.Endpoint;
+using GodotEGP.Objects.Extensions;
 
 public partial class ConfigManager : Service
 {
@@ -18,7 +24,7 @@ public partial class ConfigManager : Service
 
 	private List<String> _configDataDirs { get; set; }
 
-	private Dictionary<Type, ConfigObject> _configObjects = new Dictionary<Type, ConfigObject>();
+	private Dictionary<Type, Config.Object> _configObjects = new Dictionary<Type, Config.Object>();
 
 	public ConfigManager() : base()
 	{
@@ -65,7 +71,7 @@ public partial class ConfigManager : Service
 
 					// if it's a valid config object, and if the base type is
 					// ValidatedObject, then let's load the content
-					if (configDirType != null && configDirType.BaseType.Equals(typeof(ValidatedObject)))
+					if (configDirType != null && configDirType.BaseType.Equals(typeof(VObject)))
 					{
 						// trigger creation of base object in the register
 						// before queueing files for loading
@@ -89,16 +95,16 @@ public partial class ConfigManager : Service
 		if (fileQueue.Count > 0)
 		{
 			// load all the config objects using ConfigManagerLoader
-			ConfigLoader configLoader = new ConfigLoader(fileQueue);
+			Config.Loader configLoader = new Config.Loader(fileQueue);
 
-			configLoader.SubscribeOwner<EventConfigManagerLoaderCompleted>(_On_ConfigManagerLoaderCompleted, oneshot: true, isHighPriority: true);
-			configLoader.SubscribeOwner<EventConfigManagerLoaderError>(_On_ConfigManagerLoaderError, oneshot: true, isHighPriority: true);
+			configLoader.SubscribeOwner<ConfigManagerLoaderCompleted>(_On_ConfigManagerLoaderCompleted, oneshot: true, isHighPriority: true);
+			configLoader.SubscribeOwner<ConfigManagerLoaderError>(_On_ConfigManagerLoaderError, oneshot: true, isHighPriority: true);
 		}
 	}
 
 	public void _On_ConfigManagerLoaderCompleted(IEvent e)
 	{
-		if (e is EventConfigManagerLoaderCompleted ec)
+		if (e is ConfigManagerLoaderCompleted ec)
 		{
 			LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "e", ec.ConfigObjects);	
 
@@ -110,28 +116,28 @@ public partial class ConfigManager : Service
 
 	public void _On_ConfigManagerLoaderError(IEvent e)
 	{
-		if (e is EventConfigManagerLoaderError ee)
+		if (e is ConfigManagerLoaderError ee)
 		{
 			throw ee.RunWorkerCompletedEventArgs.Error;
 		}
 	}
 
-	public void MergeConfigObjects(List<ConfigObject> configObjects)
+	public void MergeConfigObjects(List<Config.Object> configObjects)
 	{
-    	foreach (ConfigObject obj in configObjects)
+    	foreach (Config.Object obj in configObjects)
     	{
         	Type type = obj.RawValue.GetType();
 
-        	if (GetConfigObjectInstance(type).RawValue is ValidatedObject vo)
+        	if (GetConfigObjectInstance(type).RawValue is VObject vo)
         	{
         		LoggerManager.LogDebug("Merging config object", "", "objType", type);
-        		vo.MergeFrom(obj.RawValue as ValidatedObject);
+        		vo.MergeFrom(obj.RawValue as VObject);
         		LoggerManager.LogDebug("Merged config object", "", "obj", vo);
         	}
     	}
 	}
 
-	public bool RegisterConfigObjectInstance(Type configInstanceType, ConfigObject configFileObject)
+	public bool RegisterConfigObjectInstance(Type configInstanceType, Config.Object configFileObject)
 	{
 		// return true if we added the object
 		if (_configObjects.TryAdd(configInstanceType, configFileObject))
@@ -144,18 +150,18 @@ public partial class ConfigManager : Service
 		return false;
 	}
 
-	public void SetConfigObjectInstance(ConfigObject configFileObject)
+	public void SetConfigObjectInstance(Config.Object configFileObject)
 	{
 		_configObjects[configFileObject.GetType()] = configFileObject;
 	}
 
-	public ConfigObject GetConfigObjectInstance(Type configInstanceType)
+	public Config.Object GetConfigObjectInstance(Type configInstanceType)
 	{
-		if(!_configObjects.TryGetValue(configInstanceType, out ConfigObject obj))
+		if(!_configObjects.TryGetValue(configInstanceType, out Config.Object obj))
 		{
 			LoggerManager.LogDebug("Creating config file object", "", "objType", configInstanceType.Name);
 
-			obj = ConfigObject.Create(configInstanceType.ToString());
+			obj = Config.Object.Create(configInstanceType.ToString());
 			RegisterConfigObjectInstance(configInstanceType, obj);
 
 			return obj;
@@ -169,26 +175,26 @@ public partial class ConfigManager : Service
 		return (T) GetConfigObjectInstance(typeof(T)).RawValue;
 	}
 
-	public T Get<T>() where T : ValidatedObject
+	public T Get<T>() where T : VObject
 	{
 		return (T) GetConfigObjectValue<T>();
 	}
 
-	public void SaveConfigObjectInstance(Type configInstanceType, IDataEndpointObject dataEndpoint = null)
+	public void SaveConfigObjectInstance(Type configInstanceType, IEndpoint dataEndpoint = null)
 	{
 		// generate default filepath for type we are saving
 		if (dataEndpoint == null)
 		{
-			dataEndpoint = new DataEndpointFile(Path.Combine(_configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, "config.json"));
+			dataEndpoint = new FileEndpoint(Path.Combine(_configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, "config.json"));
 		}
 
-		ConfigObject configObject = GetConfigObjectInstance(configInstanceType);
+		Config.Object configObject = GetConfigObjectInstance(configInstanceType);
 
 		configObject.DataEndpoint = dataEndpoint;
 		configObject.Save();
 	}
 
-	public void Save<T>(IDataEndpointObject dataEndpoint = null) where T : ValidatedObject
+	public void Save<T>(IEndpoint dataEndpoint = null) where T : VObject
 	{
 		SaveConfigObjectInstance(typeof(T), dataEndpoint);
 	}

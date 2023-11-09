@@ -1,21 +1,24 @@
-namespace Godot.EGP;
+namespace GodotEGP.Service;
 
 using Godot;
 using System;
 using System.Collections.Generic;
 
+using GodotEGP.Random;
+using GodotEGP.Logging;
+
 public partial class RandomService : Service
 {
-	private Dictionary<string, RandomNumberGeneratorExtended> _randomInstances = new Dictionary<string, RandomNumberGeneratorExtended>();
+	private Dictionary<string, NumberGenerator> _randomInstances = new Dictionary<string, NumberGenerator>();
 
 	public override void _Ready()
 	{
 		_SetServiceReady(true);
 	}
 
-	public RandomNumberGeneratorExtended Get(string instanceName = "default")
+	public NumberGenerator Get(string instanceName = "default")
 	{
-		if (!_randomInstances.TryGetValue(instanceName, out RandomNumberGeneratorExtended randomInstance))
+		if (!_randomInstances.TryGetValue(instanceName, out NumberGenerator randomInstance))
 		{
 			// instead of throwing an error, we just create a basic instance
 			randomInstance = _CreateRandomInstance();
@@ -26,12 +29,12 @@ public partial class RandomService : Service
 		return randomInstance;
 	}
 
-	private RandomNumberGeneratorExtended _CreateRandomInstance(ulong seed = 0, ulong state = 0)
+	private NumberGenerator _CreateRandomInstance(ulong seed = 0, ulong state = 0)
 	{
-		return new RandomNumberGeneratorExtended(seed, state);
+		return new NumberGenerator(seed, state);
 	}
 
-	public RandomNumberGeneratorExtended RegisterInstance(RandomNumberGeneratorExtended randomInstance, string instanceName)
+	public NumberGenerator RegisterInstance(NumberGenerator randomInstance, string instanceName)
 	{
 		if (!_randomInstances.TryAdd(instanceName, randomInstance))
 		{

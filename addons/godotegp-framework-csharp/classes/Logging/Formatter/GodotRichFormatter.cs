@@ -1,11 +1,11 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging.Formatter;
 
 using Godot;
 using System;
 
-public class LoggerFormatterGodotRich : LoggerFormatterText
+public class GodotRichFormatter : TextFormatter
 {
-	public LoggerFormatterGodotRich()
+	public GodotRichFormatter()
 	{
 		_separator = "[bgcolor=black][color=white] | [/color][/bgcolor]";
 
@@ -19,27 +19,27 @@ public class LoggerFormatterGodotRich : LoggerFormatterText
 			string color = "white";
 			switch (lm.Level)
 			{
-				case LoggerMessage.LogLevel.Trace:
+				case Logging.Message.LogLevel.Trace:
 					color = "purple";
 					s = $"[b]{s}[/b]";
 				break;
-				case LoggerMessage.LogLevel.Debug:
+				case Logging.Message.LogLevel.Debug:
 					color = "green";
 					s = $"[b]{s}[/b]";
 				break;
-				case LoggerMessage.LogLevel.Info:
+				case Logging.Message.LogLevel.Info:
 					color = "cyan";
 					s = $"[b]{s}[/b]";
 				break;
-				case LoggerMessage.LogLevel.Warning:
+				case Logging.Message.LogLevel.Warning:
 					color = "orange";
 					s = $"[b]{s}[/b]";
 				break;
-				case LoggerMessage.LogLevel.Error:
+				case Logging.Message.LogLevel.Error:
 					color = "red";
 					s = $"[b]{s}[/b]";
 				break;
-				case LoggerMessage.LogLevel.Critical:
+				case Logging.Message.LogLevel.Critical:
 					color = "white";
 					s = $"[b][bgcolor=red]{s}[/bgcolor][/b]";
 				break;
@@ -48,14 +48,14 @@ public class LoggerFormatterGodotRich : LoggerFormatterText
 			return $"[bgcolor=black][color={color}]{s}[/color][/bgcolor]";
 		});
 
-		RegisterPropertyFormatter("Message", (s, lm) => {
+		RegisterPropertyFormatter("Text", (s, lm) => {
 			string color = "white";
 			switch (lm.Level)
 			{
-				case LoggerMessage.LogLevel.Error:
+				case Logging.Message.LogLevel.Error:
 					color = "red";
 				break;
-				case LoggerMessage.LogLevel.Critical:
+				case Logging.Message.LogLevel.Critical:
 					color = "red";
 				break;
 			}
@@ -81,7 +81,7 @@ public class LoggerFormatterGodotRich : LoggerFormatterText
 			}
 			});
 	}
-	public override object Format(LoggerMessage loggerMessage)
+	public override object Format(Logging.Message loggerMessage)
 	{
 		return base.Format(loggerMessage);
 	}
@@ -91,7 +91,7 @@ public class LoggerFormatterGodotRich : LoggerFormatterText
         return $"[bgcolor=black][color=cyan]{dataName}[/color][/bgcolor][bgcolor=black][color=white]=[/color][/bgcolor][bgcolor=black][color=pink]{dataJson}[/color][/bgcolor]".Replace("\n", "");
 	}
 
-	public override string FormatDataTraceString(string dataString, LoggerMessage loggerMessage)
+	public override string FormatDataTraceString(string dataString, Logging.Message loggerMessage)
 	{
 		return $"[bgcolor=black][color=white]TRACE: {loggerMessage.SourceFilename}:[color=white]{loggerMessage.SourceLineNumber}[/color][color=cyan] [{loggerMessage.SourceName}.{loggerMessage.SourceMethodName}()][/color][/color][/bgcolor]";
 	}

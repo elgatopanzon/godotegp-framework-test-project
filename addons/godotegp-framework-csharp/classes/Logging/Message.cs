@@ -1,15 +1,15 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging;
 
 using Godot;
 using System;
 using System.Collections.Generic;
 
-public class LoggerMessage
+public class Message
 {
 	public DateTime Created { get; set; }
 	public ulong TicksMsec { get; set; }
 	public LogLevel Level { get; set; }
-	public string Message { get; set; }
+	public string Text { get; set; }
 	public string Custom { get; set; }
 	public string DataName { get; set; }
 	public object Data { get; set; }
@@ -44,12 +44,12 @@ public class LoggerMessage
 		}
 	}
 
-	public LoggerMessage(LogLevel level, string message, string custom = "", string dataName = "", object data = null, string sourceName = "", string sourceMethodName = "", string sourceFilename = "", int sourceLineNumber = 0)
+	public Message(LogLevel level, string text, string custom = "", string dataName = "", object data = null, string sourceName = "", string sourceMethodName = "", string sourceFilename = "", int sourceLineNumber = 0)
 	{
 		Created = DateTime.Now;
 		TicksMsec = Time.GetTicksMsec();
 		Level = level;
-		Message = message;
+		Text = text;
 		Custom = custom;
 		DataName = dataName;
 		Data = data;

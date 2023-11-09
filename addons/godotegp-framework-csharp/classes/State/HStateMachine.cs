@@ -1,9 +1,10 @@
-namespace Godot.EGP.State;
+namespace GodotEGP.State;
 
 using Godot;
 using System;
 
 using System.Collections.Generic;
+using GodotEGP.Logging;
 
 public class HStateMachine
 {

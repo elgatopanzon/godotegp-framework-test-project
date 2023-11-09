@@ -1,10 +1,10 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging.Destination;
 
 using Godot;
 using System;
 
-public interface ILoggerDestination
+public interface IDestination
 {
 	bool Enabled { get; set; }
-	public bool Process(LoggerMessage loggerMessage);
+	public bool Process(Logging.Message loggerMessage);
 }

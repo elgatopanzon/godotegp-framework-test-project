@@ -1,7 +1,9 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Endpoint;
+
+using GodotEGP.Logging;
 
 // File object holding information about the provided filename and path
-public class DataEndpointFile : IDataEndpointObject
+public class FileEndpoint : IEndpoint
 {
 	private string _path;
 	private string _extension;
@@ -25,7 +27,7 @@ public class DataEndpointFile : IDataEndpointObject
 		set { _mimetype = value; }
 	}
 
-	public DataEndpointFile(string filePath)
+	public FileEndpoint(string filePath)
 	{
         // get platform safe path from a provided unix path (because we use
         // that, because godot uses that even for windows)

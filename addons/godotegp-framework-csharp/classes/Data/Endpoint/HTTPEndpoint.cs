@@ -1,10 +1,12 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Endpoint;
 
 using System.Collections.Generic;
 using System.Net.Http;
 
+using GodotEGP.Logging;
+
 // File object holding information about the provided filename and path
-public class DataEndpointHTTP : IDataEndpointObject
+public class HTTPEndpoint : IEndpoint
 {
 	private string _hostname;
 	public string Hostname
@@ -69,7 +71,7 @@ public class DataEndpointHTTP : IDataEndpointObject
 		set { _params = value; }
 	}
 
-	public DataEndpointHTTP(string hostname, int port = 443, string path = "/", Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
+	public HTTPEndpoint(string hostname, int port = 443, string path = "/", Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
 	{
 		_hostname = hostname;
 		_port = port;

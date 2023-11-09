@@ -1,13 +1,13 @@
-namespace Godot.EGP;
+namespace GodotEGP.Random;
 
 using Godot;
 
-public partial class RandomNumberGeneratorExtended : RandomNumberGenerator
+public partial class NumberGenerator : RandomNumberGenerator
 {
 	private ulong _initialSeed { get; set; }
 	private ulong _initialState { get; set; }
 
-	public RandomNumberGeneratorExtended(ulong seed = 0, ulong state = 0)
+	public NumberGenerator(ulong seed = 0, ulong state = 0)
 	{
 		_initialSeed = seed;
 		_initialState = state;

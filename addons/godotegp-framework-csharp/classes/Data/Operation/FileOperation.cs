@@ -1,13 +1,18 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Operation;
+
+using GodotEGP.Data.Operator;
+using GodotEGP.Data.Endpoint;
+
+using GodotEGP.Logging;
 
 // operation class for File operators
-class DataOperationFile<T> : DataOperation<T>
+class FileOperation<T> : Operation<T>
 {
-	DataOperatorFile _dataOperator;
+	FileOperator _dataOperator;
 
-	public override IDataOperator CreateOperator()
+	public override IOperator CreateOperator()
 	{
-		var dataOperator = new DataOperatorFile();
+		var dataOperator = new FileOperator();
 
 		dataOperator.OnComplete = __On_OperatorComplete;
 		dataOperator.OnError = __On_OperatorError;
@@ -15,12 +20,12 @@ class DataOperationFile<T> : DataOperation<T>
 		return dataOperator;
 	}
 
-	public override DataOperator GetOperator()
+	public override Operator GetOperator()
 	{
 		return _dataOperator;
 	}
 
-	public DataOperationFile(DataEndpointFile fileEndpoint, object dataObject = null)
+	public FileOperation(FileEndpoint fileEndpoint, object dataObject = null)
 	{
 		LoggerManager.LogDebug($"Creating instance");
 		LoggerManager.LogDebug($"fileEndpoint {fileEndpoint}");
@@ -28,7 +33,7 @@ class DataOperationFile<T> : DataOperation<T>
 		_dataObject = dataObject;
 
 		// create instance of the operator
-		_dataOperator = (DataOperatorFile) CreateOperator();
+		_dataOperator = (FileOperator) CreateOperator();
 
 		// set the data endpoint object
 		_dataOperator.SetDataEndpoint(fileEndpoint);

@@ -1,27 +1,29 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging.Destination;
 
 using Godot;
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-public class LoggerDestinationGodotConsole : ILoggerDestination
+using GodotEGP.Logging.Formatter;
+
+public class GodotConsole : IDestination
 {
 	public bool Enabled { get; set; }
 
-	private ILoggerFormatter _loggerFormatter;
+	private IFormatter _loggerFormatter;
 
-	public LoggerDestinationGodotConsole(ILoggerFormatter loggerFormatter = null)
+	public GodotConsole(IFormatter loggerFormatter = null)
 	{
 		if (loggerFormatter == null)
 		{
-			loggerFormatter = new LoggerFormatterGodotRich();
+			loggerFormatter = new GodotRichFormatter();
 		}
 		_loggerFormatter = loggerFormatter;
 		Enabled = true; // enabled by default
 	}
 
-	public bool Process(LoggerMessage loggerMessage)
+	public bool Process(Logging.Message loggerMessage)
 	{
 		if (Enabled)
 		{

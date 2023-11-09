@@ -1,8 +1,13 @@
-namespace Godot.EGP.Extensions;
+namespace GodotEGP.Objects.Extensions;
 
 using Godot;
 using System;
 using System.Collections.Generic;
+
+using GodotEGP.Event;
+using GodotEGP.Event.Events;
+using GodotEGP.Event.Filter;
+using GodotEGP.Service;
 
 public static class ObjectExtensions
 {
@@ -55,5 +60,56 @@ public static class ObjectExtensions
 	public static bool HasProperty(this object obj, string propertyName)
 	{
     	return obj.GetType().GetProperty(propertyName) != null;
+	}
+}
+
+public static class EventManagerObjectExtensions
+{
+	public static EventSubscription<T> Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null) where T : Event
+	{
+		EventSubscription<T> subscription = new EventSubscription<T>(obj, callbackMethod, isHighPriority, oneshot, eventFilters);
+		ServiceRegistry.Get<EventManager>().Subscribe(subscription);
+
+		return subscription;
+	}
+
+	public static EventSubscription<T> SubscribeOwner<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null) where T : Event
+	{
+		EventSubscription<T> subscription = obj.Subscribe<T>(callbackMethod, isHighPriority, oneshot, eventFilters);
+		subscription.Owner(obj);
+
+		return subscription;
+	}
+
+	public static IEventSubscription<Event> Subscribe(this object obj, IEventSubscription<Event> eventSubscription)
+	{
+		ServiceRegistry.Get<EventManager>().Subscribe(eventSubscription);
+
+		return eventSubscription;
+	}
+
+
+	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
+	{
+		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, new EventSubscription<GodotSignal>(obj, callbackMethod, isHighPriority, oneshot, eventFilters));
+	}
+
+	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, IEventSubscription<Event> eventSubscription)
+	{
+		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, eventSubscription);
+	}
+
+	public static T Emit<T>(this object obj, Action<T> preinvokeHook = null) where T : Event, new()
+	{
+		T e = new T().SetOwner(obj);
+
+		if (preinvokeHook != null)
+		{
+			preinvokeHook(e);
+		}
+
+		e.Invoke();
+
+		return e;
 	}
 }

@@ -1,8 +1,12 @@
-namespace Godot.EGP;
+namespace GodotEGP.Event;
 
 using Godot;
 using System;
 using System.Collections.Generic;
+
+using GodotEGP.Logging;
+using GodotEGP.Event.Events;
+using GodotEGP.Event.Filter;
 
 public class EventQueue
 {
@@ -15,7 +19,7 @@ public class EventQueue
 		_eventQueue.Enqueue(eventObj);
 	}
 
-	public Queue<IEvent> Fetch(List<IEventFilter> eventFilters = null, int fetchCount = 1)
+	public Queue<IEvent> Fetch(List<IFilter> eventFilters = null, int fetchCount = 1)
 	{
 		Queue<IEvent> matchingQueue = new Queue<IEvent>();
 		Queue<IEvent> nonMatchingQueue = new Queue<IEvent>();
@@ -29,7 +33,7 @@ public class EventQueue
 
 			if (eventFilters != null) 
 			{
-				foreach (EventFilter eventFilter in eventFilters)
+				foreach (Filter.Filter eventFilter in eventFilters)
 				{
 					filtersMatch = eventFilter.Match(eventItem);
 

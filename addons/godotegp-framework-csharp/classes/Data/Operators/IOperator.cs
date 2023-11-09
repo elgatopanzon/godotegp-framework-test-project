@@ -1,10 +1,12 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Operator;
+
+using GodotEGP.Data.Endpoint;
 
 // interface for classes which perform direct data operations using
 // IDataEndpointObject instances
-public interface IDataOperator
+public interface IOperator
 {
-	void SetDataEndpoint(IDataEndpointObject dataEndpoint);
+	void SetDataEndpoint(IEndpoint dataEndpoint);
 	void Load();
 	void Save(object dataObj);
 }

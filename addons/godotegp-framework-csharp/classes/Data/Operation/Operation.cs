@@ -1,18 +1,24 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Operation;
 
 using System.ComponentModel;
 
-public abstract class DataOperation : BackgroundJob, IDataOperation
+using GodotEGP.Threading;
+using GodotEGP.Logging;
+using GodotEGP.Event.Events;
+using GodotEGP.Data.Operator;
+using GodotEGP.Objects.Extensions;
+
+public abstract class Operation : BackgroundJob, IOperation
 {
 	public abstract void Load();
 	public abstract void Save();
 }
 
 // base class for operation classes interfacing with operator classes
-public abstract class DataOperation<T> : DataOperation, IDataOperation
+public abstract class Operation<T> : Operation, IOperation
 {
-	public abstract IDataOperator CreateOperator();
-	public abstract DataOperator GetOperator();
+	public abstract IOperator CreateOperator();
+	public abstract Operator GetOperator();
 
 	protected RunWorkerCompletedEventArgs _completedArgs;
 
@@ -39,7 +45,7 @@ public abstract class DataOperation<T> : DataOperation, IDataOperation
 		// load request, therefore we proceed to create the loaded instance
 		try
 		{
-			DataOperationResult<T> resultObj = new DataOperationResult<T>(_completedArgs.Result);
+			OperationResult<T> resultObj = new OperationResult<T>(_completedArgs.Result);
 			LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
 
 			e.Result = resultObj;
@@ -71,21 +77,21 @@ public abstract class DataOperation<T> : DataOperation, IDataOperation
 	// override event methods to send different events
 	public override void EmitEventDoWork(object sender, DoWorkEventArgs e)
 	{
-		this.Emit<EventDataOperationWorking>((ev) => ev.SetDoWorkEventArgs(e));
+		this.Emit<DataOperationWorking>((ev) => ev.SetDoWorkEventArgs(e));
 	}
 
 	public override void EmitEventProgressChanged(object sender, ProgressChangedEventArgs e)
 	{
-		this.Emit<EventDataOperationProgress>((ev) => ev.SetProgressChangesEventArgs(e));
+		this.Emit<DataOperationProgress>((ev) => ev.SetProgressChangesEventArgs(e));
 	}
 
 	public override void EmitEventRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
-		this.Emit<EventDataOperationComplete>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
+		this.Emit<DataOperationComplete>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
 	}
 
 	public override void EmitEventRunWorkerError(object sender, RunWorkerCompletedEventArgs e)
 	{
-		this.Emit<EventDataOperationError>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
+		this.Emit<DataOperationError>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
 	}
 }

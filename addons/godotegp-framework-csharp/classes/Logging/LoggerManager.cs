@@ -1,11 +1,16 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging;
 
 using Godot;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
-using Godot.EGP.Extensions;
-using Godot.EGP.Config;
+
+using GodotEGP.Objects.Extensions;
+using GodotEGP.Config;
+using GodotEGP.Service;
+using GodotEGP.Logging;
+using GodotEGP.Logging.Destination;
+using GodotEGP.Event.Events;
 
 /// <summary>
 /// Manage instances of <c>Logger</c> objects based on class type.
@@ -37,17 +42,17 @@ public partial class LoggerManager : Service
 
 	// Default LoggerDestinationCollection instance used for new Logger
 	// instances
-	private LoggerDestinationCollection _loggerDestinationCollectionDefault;
+	private DestinationCollection _loggerDestinationCollectionDefault;
 
-	public LoggerDestinationCollection LoggerDestinationCollectionDefault
+	public DestinationCollection LoggerDestinationCollectionDefault
 	{
 		get { 
 			if (_loggerDestinationCollectionDefault == null)
 			{
-				_loggerDestinationCollectionDefault = new LoggerDestinationCollection();
+				_loggerDestinationCollectionDefault = new DestinationCollection();
 
 				// Add Godot console as default destination
-				_loggerDestinationCollectionDefault.AddDestination(new LoggerDestinationGodotConsole());
+				_loggerDestinationCollectionDefault.AddDestination(new GodotConsole());
 			}
 
 			return _loggerDestinationCollectionDefault;
@@ -76,7 +81,7 @@ public partial class LoggerManager : Service
 	/// Log a message with the given <c>LogLevel</c>.
 	/// Automatically creates or forwards Log request to <c>Logger</c> instance.
 	/// </summary>
-	private static void _Log(LoggerMessage.LogLevel logLevel = LoggerMessage.LogLevel.Debug, 
+	private static void _Log(Message.LogLevel logLevel = Message.LogLevel.Debug, 
 			string logMessage = "", 
 			string logCustom = "", 
 			string logDataName = "", 
@@ -94,7 +99,7 @@ public partial class LoggerManager : Service
 
 		// Queue the LoggerMessage object for logging if the message is within
 		// the allowed current log level value
-		var currentLogLevel = LoggerMessage.DefaultLogLevel;
+		var currentLogLevel = Message.DefaultLogLevel;
 		if (Instance.Config != null)
 		{
 			currentLogLevel = Instance.Config.GetMatchingLogLevelOverride(sourceType.Name);
@@ -102,7 +107,7 @@ public partial class LoggerManager : Service
 
 		if (logLevel >= currentLogLevel)
 		{
-			GetLoggerInstance(sourceType).ProcessLoggerMessage(new LoggerMessage(logLevel, logMessage, logCustom, logDataName, logData, sourceName, sourceMethodName, sourceFilename, sourceLineNumber));
+			GetLoggerInstance(sourceType).ProcessLoggerMessage(new Message(logLevel, logMessage, logCustom, logDataName, logData, sourceName, sourceMethodName, sourceFilename, sourceLineNumber));
 		}
 	}
 
@@ -119,7 +124,7 @@ public partial class LoggerManager : Service
         return logger;
 	}
 
-	public static void SetLoggerDestinationCollection<T>(LoggerDestinationCollection ldc)
+	public static void SetLoggerDestinationCollection<T>(DestinationCollection ldc)
 	{
 		GetLoggerInstance(typeof(T)).LoggerDestinationCollection = ldc;
 	}
@@ -142,7 +147,7 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Trace, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(Message.LogLevel.Trace, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogDebug( 
 			object logMessage, 
@@ -153,7 +158,7 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Debug, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(Message.LogLevel.Debug, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogInfo( 
 			object logMessage, 
@@ -164,7 +169,7 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Info, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(Message.LogLevel.Info, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogWarning( 
 			object logMessage, 
@@ -175,7 +180,7 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Warning, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(Message.LogLevel.Warning, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogError( 
 			object logMessage, 
@@ -186,7 +191,7 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Error, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(Message.LogLevel.Error, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 	public static void LogCritical( 
 			object logMessage, 
@@ -197,7 +202,7 @@ public partial class LoggerManager : Service
         	[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
 		)
 	{
-		_Log(LoggerMessage.LogLevel.Critical, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
+		_Log(Message.LogLevel.Critical, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 }
 
@@ -205,15 +210,15 @@ public class LoggerManagerConfigHandler
 {
 	public LoggerManagerConfigHandler()
 	{
-		ServiceRegistry.Get<ConfigManager>().Get<CoreEngineConfig>().SubscribeOwner<EventValidatedValueChanged>(_On_ConfigManager_ValueChanged);
+		ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().SubscribeOwner<ValidatedValueChanged>(_On_ConfigManager_ValueChanged);
 
 	}
 
 	private void _On_ConfigManager_ValueChanged(IEvent e)
 	{
-		if (e is EventValidatedValueChanged ev)
+		if (e is ValidatedValueChanged ev)
 		{
-			if (ev.Owner is CoreEngineConfig cec)
+			if (ev.Owner is EngineConfig cec)
 			{
 				LoggerManager.Instance.Config = cec.LoggerConfig;
 			}

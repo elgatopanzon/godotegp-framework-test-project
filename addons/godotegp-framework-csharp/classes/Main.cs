@@ -1,20 +1,27 @@
-namespace Godot.EGP;
+namespace GodotEGP;
 
 using Godot;
-using Godot.EGP.Extensions;
-using Godot.EGP.State;
+using GodotEGP.Objects.Extensions;
+using GodotEGP.State;
 using System;
 using System.Collections.Generic;
-using Godot.EGP.ValidatedObjects;
+using GodotEGP.Objects.Validated;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
 using System.IO;
 using System.Threading;
 using System.ComponentModel;
-using Godot.EGP.Config;
 
-public partial class GodotEGP : Node
+using GodotEGP.Service;
+using GodotEGP.Logging;
+using GodotEGP.Event;
+using GodotEGP.Event.Events;
+using GodotEGP.Event.Filter;
+using GodotEGP.Config;
+using GodotEGP.Data.Operation;
+
+public partial class Main : Node
 {
 	enum States
 	{
@@ -27,6 +34,7 @@ public partial class GodotEGP : Node
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		AddChild(new ServiceRegistry());
 		ServiceRegistry.Get<ConfigManager>();
 		ServiceRegistry.Get<DataService>();
 
@@ -64,8 +72,8 @@ public partial class GodotEGP : Node
 		// var sub = new EventSubscription<EventServiceRegistered>(this, false);
 		// ServiceRegistry.Get<EventManager>().Subscribe(sub);
 
-		var sub = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered, false, false, new List<IEventFilter> {new EventFilterSignal("test")});
-		var sub2 = new EventSubscription<EventServiceRegistered>(this, __On_EventServiceRegistered_highpriority, true);
+		var sub = new EventSubscription<ServiceRegistered>(this, __On_EventServiceRegistered, false, false, new List<IFilter> {new SignalType("test")});
+		var sub2 = new EventSubscription<ServiceRegistered>(this, __On_EventServiceRegistered_highpriority, true);
 
 		ServiceRegistry.Get<EventManager>().Subscribe(sub);
 		ServiceRegistry.Get<EventManager>().Subscribe(sub2);
@@ -106,23 +114,23 @@ public partial class GodotEGP : Node
 		// 	AddChild(timer2);
 		// 	}, true, new List<IEventFilter>() {new EventFilterOwner(ServiceRegistry.Get<NodeManager>())}));
 
-		this.Subscribe<EventServiceReady>((e) => {
-			this.Subscribe<EventNodeAdded>((e) => {
+		this.Subscribe<ServiceReady>((e) => {
+			this.Subscribe<NodeAdded>((e) => {
 					if (ServiceRegistry.Get<NodeManager>().TryGetNode("timer2", out Node n))
 					{
 						LoggerManager.LogDebug("Timer node exists", "", "timer", n.ToString());
 					}
-				}, true, false, new List<IEventFilter>() {new EventFilterOwner(timer2)});
+				}, true, false, new List<IFilter>() {new OwnerObject(timer2)});
 
 			AddChild(timer2);
-			}, true, false, new List<IEventFilter>() {new EventFilterOwner(ServiceRegistry.Get<NodeManager>())});
+			}, true, false, new List<IFilter>() {new OwnerObject(ServiceRegistry.Get<NodeManager>())});
 
 		// validated objects testing
-		ValidatedObjectTest vObj = new ValidatedObjectTest();
+		ObjectTest vObj = new ObjectTest();
 		// LoggerManager.LogDebug(vObj);
         //
         //
-        vObj.ObjectTest.StringTest = "string200";
+        vObj.ObjectTestt.StringTest = "string200";
 		string vObjJson = Newtonsoft.Json.JsonConvert.SerializeObject(vObj);
 		LoggerManager.LogDebug(vObjJson);
 
@@ -133,7 +141,7 @@ public partial class GodotEGP : Node
 
 		List<string> errors = new List<string>();
 
-		ValidatedObjectTest vObj2 = Newtonsoft.Json.JsonConvert.DeserializeObject<ValidatedObjectTest>(vObjJson,
+		ObjectTest vObj2 = Newtonsoft.Json.JsonConvert.DeserializeObject<ObjectTest>(vObjJson,
 		// Newtonsoft.Json.JsonConvert.PopulateObject(vObjJson, vObj,
 				new JsonSerializerSettings
     				{
@@ -152,7 +160,7 @@ public partial class GodotEGP : Node
 		vObjJson = Newtonsoft.Json.JsonConvert.SerializeObject(vObj);
 		LoggerManager.LogDebug($"Before merge: {vObjJson}");
 
-		LoggerManager.LogDebug("vObj2.ObjectTest", "", "ObjectTest", vObj2.ObjectTest);
+		LoggerManager.LogDebug("vObj2.ObjectTest", "", "ObjectTest", vObj2.ObjectTestt);
 		LoggerManager.LogDebug("vObj2.GetProperties()[9]", "", "ObjectTest", vObj2.GetProperties()[9]);
 		vObj.MergeFrom(vObj2);
 
@@ -189,7 +197,7 @@ public partial class GodotEGP : Node
 		// LoggerManager.LogDebug(ServiceRegistry.Get<Service>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Get<TestService>().GetReady());
 		// LoggerManager.LogDebug(ServiceRegistry.Instance["Test"].GetReady());
-		
+
 		// ServiceRegistry.Get<ObjectPoolService>().SetPoolConfig<Node>(10, 100);
         //
 		// Node obj = ServiceRegistry.Get<ObjectPoolService>().Get<Node>();
@@ -268,7 +276,7 @@ public partial class GodotEGP : Node
         //
 		// sm.Pop();
 		// LoggerManager.LogDebug("Current state", "", "state", sm.State);
-		
+
 		// MoveState moveState = new MoveState();
 		// RunState runState = new RunState();
 		// JumpState jumpState = new JumpState();
@@ -324,7 +332,7 @@ public partial class GodotEGP : Node
         //
 		// // moveState.Change(otherState);
 		// // moveState.ChangeTo(other2State);
-		
+
 		// var random1 = ServiceRegistry.Get<RandomService>().Get();
 		// LoggerManager.LogDebug($"Random test: randf", "", "value", random1.Randf());
 		// LoggerManager.LogDebug($"Random test: randf", "", "value", random1.Randf());
@@ -351,8 +359,8 @@ public partial class GodotEGP : Node
         //
 		// LoggerManager.LogDebug($"Random seed/state test: randfn", "", "value", random2.Randfn());
 
-		this.Subscribe<EventBackgroundJobComplete>(__On_Event);
-		this.Subscribe<EventValidatedValueChanged>(__On_Event);
+		this.Subscribe<BackgroundJobComplete>(__On_Event);
+		this.Subscribe<ValidatedValueChanged>(__On_Event);
 
 		// config object test
 		// LoggerManager.LogDebug("Creating CoreEngineConfig instance");
@@ -411,14 +419,14 @@ public partial class GodotEGP : Node
 	{
 		LoggerManager.LogDebug("DataLoadTest: requesting load object");
 
-		ServiceRegistry.Get<DataService>().LoadFromFile<CoreEngineConfig>("config/CoreEngineConfig.json", onCompleteCb: (e) => {
-				if (e is EventDataOperationComplete ee)
+		ServiceRegistry.Get<DataService>().LoadFromFile<EngineConfig>("config/CoreEngineConfig.json", onCompleteCb: (e) => {
+				if (e is DataOperationComplete ee)
 				{
 					LoggerManager.LogDebug("DataLoadTest: My loaded object!", "", "object", ee.RunWorkerCompletedEventArgs.Result);
 
-					if (ee.RunWorkerCompletedEventArgs.Result is DataOperationResult<CoreEngineConfig> cecr)
+					if (ee.RunWorkerCompletedEventArgs.Result is OperationResult<EngineConfig> cecr)
 					{
-						cecr.ResultObject.LoggerConfig.LogLevel = LoggerMessage.LogLevel.Info;
+						cecr.ResultObject.LoggerConfig.LogLevel = Logging.Message.LogLevel.Info;
 
 						// data save operation
 						// DataOperation dataOperation = ServiceRegistry.Get<DataService>()
@@ -431,7 +439,7 @@ public partial class GodotEGP : Node
 						ServiceRegistry.Get<DataService>().HTTPRequest<HTTPEchoResult>("echo.free.beeceptor.com", 443, path: "/fact", requestMethod: HttpMethod.Get, dataObject: cecr.ResultObject);
 						// ServiceRegistry.Get<DataService>().HTTPRequest<ValidatedObject>("echo.free.beeceptor.com", 443, path: "/fact", requestMethod: HttpMethod.Get, urlParams: new Dictionary<string, object> { {"someParam", "someValue"},{"someParam2", "someValue2"} });
 
-						ValidatedValue vv = CreateValidatedValue("System.String");
+						VValue vv = CreateValidatedValue("System.String");
 
 						vv.RawValue = "asd";
 
@@ -441,20 +449,20 @@ public partial class GodotEGP : Node
 			});
 	}
 
-	public ValidatedValue CreateValidatedValue(string parameterTypeName)
+	public VValue CreateValidatedValue(string parameterTypeName)
     {
         Type parameterType = Type.GetType(parameterTypeName);
-        Type genericType = typeof(ValidatedValue<>).MakeGenericType(parameterType);
-        return (ValidatedValue) Activator.CreateInstance(genericType);
+        Type genericType = typeof(VValue<>).MakeGenericType(parameterType);
+        return (VValue) Activator.CreateInstance(genericType);
     }
 
 	public void __On_Event(IEvent e)
 	{
-		if (e is EventBackgroundJobComplete ev)
+		if (e is BackgroundJobComplete ev)
 		{
 			LoggerManager.LogDebug($"Event data: {ev.RunWorkerCompletedEventArgs.Result}");
 		}
-		if (e is EventValidatedValueChanged evv)
+		if (e is ValidatedValueChanged evv)
 		{
 			LoggerManager.LogDebug($"Event data: {evv.Owner}", "", "data", evv.Owner.GetType());
 			LoggerManager.LogDebug($"Event data: {evv.Value}", "", "data", evv);
@@ -463,9 +471,9 @@ public partial class GodotEGP : Node
 	}
 }
 
-public class HTTPEchoResult : ValidatedObject
+public class HTTPEchoResult : VObject
 {
-	private readonly ValidatedValue<string> _method;
+	private readonly VValue<string> _method;
 
 	public string Method
 	{
@@ -473,21 +481,21 @@ public class HTTPEchoResult : ValidatedObject
 		set { _method.Value = value; }
 	}
 
-	private readonly ValidatedValue<string> _protocol;
+	private readonly VValue<string> _protocol;
 	public string Protocol
 	{
 		get { return _protocol.Value; }
 		set { _protocol.Value = value; }
 	}
 
-	private readonly ValidatedValue<string> _host;
+	private readonly VValue<string> _host;
 	public string Host
 	{
 		get { return _host.Value; }
 		set { _host.Value = value; }
 	}
 
-	private readonly ValidatedValue<string> _ip;
+	private readonly VValue<string> _ip;
 	public string IP
 	{
 		get { return _ip.Value; }

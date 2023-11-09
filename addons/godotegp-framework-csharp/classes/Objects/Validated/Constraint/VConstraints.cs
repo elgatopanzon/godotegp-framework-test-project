@@ -1,12 +1,12 @@
-namespace Godot.EGP.ValidatedObjects;
+namespace GodotEGP.Objects.Validated.Constraint;
 
 using Godot;
 using System;
 using System.Collections.Generic;
 using System.Collections;
-using Godot.EGP.Extensions;
+using GodotEGP.Objects.Extensions;
 
-public class ValidatedValueConstraint<T>
+public class VConstraint<T>
 {
 	public virtual bool Validate(T value)
 	{
@@ -14,7 +14,7 @@ public class ValidatedValueConstraint<T>
 	}
 }
 
-public class ValidationConstraintUniqueItems<T> : ValidatedValueConstraint<T>
+public class UniqueItems<T> : VConstraint<T>
 {
 	public override bool Validate(T value)
 	{
@@ -50,12 +50,12 @@ public class ValidationConstraintUniqueItems<T> : ValidatedValueConstraint<T>
 	}
 }
 
-public class ValidationConstraintMinMaxLength<T> : ValidatedValueConstraint<T>
+public class MinMaxLength<T> : VConstraint<T>
 {
 	private int _minLength;
 	private int _maxLength;
 
-	public ValidationConstraintMinMaxLength(int minLength, int maxLength)
+	public MinMaxLength(int minLength, int maxLength)
 	{
 		_minLength = minLength;
 		_maxLength = maxLength;
@@ -91,12 +91,12 @@ public class ValidationConstraintMinMaxLength<T> : ValidatedValueConstraint<T>
 	}
 }
 
-public class ValidationConstraintMinMaxItems<T> : ValidatedValueConstraint<T>
+public class MinMaxItems<T> : VConstraint<T>
 {
 	private int _minItems;
 	private int _maxItems;
 
-	public ValidationConstraintMinMaxItems(int minItems, int maxItems)
+	public MinMaxItems(int minItems, int maxItems)
 	{
 		_minItems = minItems;
 		_maxItems = maxItems;
@@ -147,12 +147,12 @@ public class ValidationConstraintMinMaxItems<T> : ValidatedValueConstraint<T>
 	}
 }
 
-public class ValidationConstraintMinMaxValue<T> : ValidatedValueConstraint<T>
+public class MinMaxValue<T> : VConstraint<T>
 {
 	private T _minValue;
 	private T _maxValue;
 
-	public ValidationConstraintMinMaxValue(T minValue, T maxValue)
+	public MinMaxValue(T minValue, T maxValue)
 	{
 		_minValue = minValue;
 		_maxValue = maxValue;
@@ -185,15 +185,15 @@ public class ValidationConstraintMinMaxValue<T> : ValidatedValueConstraint<T>
 	}
 }
 
-public class ValidationConstraintVector2MinMaxValue<T> : ValidatedValueConstraint<T>
+public class Vector2MinMaxValue<T> : VConstraint<T>
 {
-	private ValidationConstraintMinMaxValue<double> _xConstraint;
-	private ValidationConstraintMinMaxValue<double> _yConstraint;
+	private MinMaxValue<double> _xConstraint;
+	private MinMaxValue<double> _yConstraint;
 
-	public ValidationConstraintVector2MinMaxValue(double minXValue, double maxXValue, double minYValue, double maxYValue)
+	public Vector2MinMaxValue(double minXValue, double maxXValue, double minYValue, double maxYValue)
 	{
-		_xConstraint = new ValidationConstraintMinMaxValue<double>(minXValue, maxXValue);
-		_yConstraint = new ValidationConstraintMinMaxValue<double>(minYValue, maxYValue);
+		_xConstraint = new MinMaxValue<double>(minXValue, maxXValue);
+		_yConstraint = new MinMaxValue<double>(minYValue, maxYValue);
 	}
 
 	// validate method
@@ -236,11 +236,11 @@ public class ValidationConstraintVector2MinMaxValue<T> : ValidatedValueConstrain
 	}
 }
 
-public class ValidationConstraintAllowedValues<T> : ValidatedValueConstraint<T>
+public class AllowedValues<T> : VConstraint<T>
 {
 	private IList _allowedValues;
 
-	public ValidationConstraintAllowedValues(IList allowedValues)
+	public AllowedValues(IList allowedValues)
 	{
 		_allowedValues = allowedValues;
 	}

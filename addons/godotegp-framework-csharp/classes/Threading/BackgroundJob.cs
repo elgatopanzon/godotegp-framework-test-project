@@ -1,7 +1,11 @@
-namespace Godot.EGP;
+namespace GodotEGP.Threading;
 
 using System.ComponentModel;
 using System;
+
+using GodotEGP.Logging;
+using GodotEGP.Event.Events;
+using GodotEGP.Objects.Extensions;
 
 public class BackgroundJob
 {
@@ -104,22 +108,22 @@ public class BackgroundJob
 
 	public virtual void EmitEventDoWork(object sender, DoWorkEventArgs e)
 	{
-		this.Emit<EventBackgroundJobWorking>((ev) => ev.SetDoWorkEventArgs(e));
+		this.Emit<BackgroundJobWorking>((ev) => ev.SetDoWorkEventArgs(e));
 	}
 
 	public virtual void EmitEventProgressChanged(object sender, ProgressChangedEventArgs e)
 	{
-		this.Emit<EventBackgroundJobProgress>((ev) => ev.SetProgressChangesEventArgs(e));
+		this.Emit<BackgroundJobProgress>((ev) => ev.SetProgressChangesEventArgs(e));
 	}
 
 	public virtual void EmitEventRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
-		this.Emit<EventBackgroundJobComplete>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
+		this.Emit<BackgroundJobComplete>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
 	}
 
 	public virtual void EmitEventRunWorkerError(object sender, RunWorkerCompletedEventArgs e)
 	{
-		this.Emit<EventBackgroundJobError>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
+		this.Emit<BackgroundJobError>((ev) => ev.SetRunWorkerCompletedEventArgs(e));
 	}
 
 	// override these to do the work

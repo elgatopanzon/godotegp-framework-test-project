@@ -1,30 +1,32 @@
-namespace Godot.EGP;
+namespace GodotEGP.Config;
 
 using System;
-using Godot.EGP.ValidatedObjects;
 
-public interface IConfigFileObject
-{
-}
+using GodotEGP.Objects.Validated;
+using GodotEGP.Logging;
+using GodotEGP.Data.Endpoint;
+using GodotEGP.Data.Operation;
+using GodotEGP.Service;
+using GodotEGP.Event.Events;
 
-public abstract class ConfigObject : IConfigFileObject
+public abstract class Object : IObject
 {
 	internal abstract object RawValue { get; set; }
-	internal abstract IDataEndpointObject DataEndpoint { get; set; }
+	internal abstract IEndpoint DataEndpoint { get; set; }
 	internal abstract bool Loading { get; set; }
 
 	public abstract void Load();
 	public abstract void Save();
 
-	public static ConfigObject Create(string parameterTypeName)
+	public static Object Create(string parameterTypeName)
     {
         Type parameterType = Type.GetType(parameterTypeName);
-        Type genericType = typeof(ConfigObject<>).MakeGenericType(parameterType);
-        return (ConfigObject) Activator.CreateInstance(genericType);
+        Type genericType = typeof(Object<>).MakeGenericType(parameterType);
+        return (Object) Activator.CreateInstance(genericType);
     }
 }
 
-public class ConfigObject<T> : ConfigObject where T : ValidatedObject, new()
+public class Object<T> : Object where T : VObject, new()
 {
 	private bool _loading;
 	internal override bool Loading
@@ -33,7 +35,7 @@ public class ConfigObject<T> : ConfigObject where T : ValidatedObject, new()
 		set { _loading = value; }
 	}
 
-	private ValidatedNative<T> _validatedObject;
+	private VNative<T> _validatedObject;
 	public T Value
 	{
 		get { return _validatedObject.Value; }
@@ -49,16 +51,16 @@ public class ConfigObject<T> : ConfigObject where T : ValidatedObject, new()
 		}
 	}
 
-	private IDataEndpointObject _dataEndpoint;
-	internal override IDataEndpointObject DataEndpoint
+	private IEndpoint _dataEndpoint;
+	internal override IEndpoint DataEndpoint
 	{
 		get { return _dataEndpoint; }
 		set { _dataEndpoint = value; }
 	}
 
-	public ConfigObject()
+	public Object()
 	{
-		_validatedObject = new ValidatedNative<T>();
+		_validatedObject = new VNative<T>();
 		_validatedObject.Value = new T();
 	}
 
@@ -76,9 +78,9 @@ public class ConfigObject<T> : ConfigObject where T : ValidatedObject, new()
 
 	public void _OnCompleteCb(IEvent e)
 	{
-		if (e is EventDataOperationComplete ee)
+		if (e is DataOperationComplete ee)
 		{
-			if (ee.RunWorkerCompletedEventArgs.Result is DataOperationResult<T> resultObj)
+			if (ee.RunWorkerCompletedEventArgs.Result is OperationResult<T> resultObj)
 			{
 				// if (RawValue is T co)
 				// {

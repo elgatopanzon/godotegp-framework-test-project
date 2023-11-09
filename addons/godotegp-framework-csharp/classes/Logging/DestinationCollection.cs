@@ -1,24 +1,26 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging;
 
 using Godot;
 using System;
 using System.Collections.Generic;
 
-public class LoggerDestinationCollection
-{
-	private List<ILoggerDestination> _loggerDestinations = new List<ILoggerDestination>();
+using GodotEGP.Logging.Destination;
 
-	public void AddDestination(ILoggerDestination destination)
+public class DestinationCollection
+{
+	private List<IDestination> _loggerDestinations = new List<IDestination>();
+
+	public void AddDestination(IDestination destination)
 	{
 		_loggerDestinations.Add(destination);
 	}
 
-	public bool RemoveDestination(ILoggerDestination destination)
+	public bool RemoveDestination(IDestination destination)
 	{
 		return _loggerDestinations.Remove(destination);
 	}
 
-	public List<ILoggerDestination> GetDestinations()
+	public List<IDestination> GetDestinations()
 	{
 		return _loggerDestinations;
 	}

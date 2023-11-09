@@ -1,4 +1,4 @@
-namespace Godot.EGP.ValidatedObjects;
+namespace GodotEGP.Objects.Validated;
 
 using Godot;
 using System;
@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Reflection;
 
-public abstract class ValidatedValue : IValidatedValue
+using GodotEGP.Logging;
+using GodotEGP.Objects.Validated.Constraint;
+
+public abstract class VValue : Validated.IVValue
 {
 	public abstract bool Validate();
 	public abstract bool IsDefault();
@@ -16,7 +19,7 @@ public abstract class ValidatedValue : IValidatedValue
 	internal abstract object Parent {set; get;}
 }
 
-public class ValidatedValue<T> : ValidatedValue
+public class VValue<T> : VValue
 {
 	protected T _value;
 	protected T _default;
@@ -62,7 +65,7 @@ public class ValidatedValue<T> : ValidatedValue
 		if (ChangeEventsState)
 		{
 			Type root = this.Parent.GetType().BaseType;
-			if (this.Parent is ValidatedObject vo)
+			if (this.Parent is VObject vo)
 			{
 				vo._onValueChange(this, _value, newValue);
 			}
@@ -71,9 +74,9 @@ public class ValidatedValue<T> : ValidatedValue
 		_value = newValue;
 	}
 
-	protected List<ValidatedValueConstraint<T>> _constraints = new List<ValidatedValueConstraint<T>>();
+	protected List<VConstraint<T>> _constraints = new List<VConstraint<T>>();
 
-	public ValidatedValue()
+	public VValue()
 	{
 	}
 	
@@ -91,7 +94,7 @@ public class ValidatedValue<T> : ValidatedValue
 		return _default;
 	}
 
-	public virtual ValidatedValue<T> Default(T defaultValue)
+	public virtual VValue<T> Default(T defaultValue)
 	{
 		_default = ValidateValue(defaultValue);
 		_value = defaultValue;
@@ -101,7 +104,7 @@ public class ValidatedValue<T> : ValidatedValue
 		return this;
 	}
 
-	public virtual ValidatedValue<T> Reset()
+	public virtual VValue<T> Reset()
 	{
 		LoggerManager.LogDebug("Resetting value");
 
@@ -110,36 +113,36 @@ public class ValidatedValue<T> : ValidatedValue
 	
 
 	// constraint classes to activate constraints on an object
-	public virtual ValidatedValue<T> AllowedLength(int minLength = 0, int maxLength = 0)
+	public virtual VValue<T> AllowedLength(int minLength = 0, int maxLength = 0)
 	{
-		return AddConstraint(new ValidationConstraintMinMaxLength<T>(minLength, maxLength));
+		return AddConstraint(new MinMaxLength<T>(minLength, maxLength));
 	}
 
-	public virtual ValidatedValue<T> AllowedRange(T min, T max)
+	public virtual VValue<T> AllowedRange(T min, T max)
 	{
-		return AddConstraint(new ValidationConstraintMinMaxValue<T>(min, max));
+		return AddConstraint(new MinMaxValue<T>(min, max));
 	}
 
-	public virtual ValidatedValue<T> AllowedSize(int min, int max)
+	public virtual VValue<T> AllowedSize(int min, int max)
 	{
-		return AddConstraint(new ValidationConstraintMinMaxItems<T>(min, max));
+		return AddConstraint(new MinMaxItems<T>(min, max));
 	}
 
-	public virtual ValidatedValue<T> AllowedValues(IList allowedValues)
+	public virtual VValue<T> AllowedValues(IList allowedValues)
 	{
-		return AddConstraint(new ValidationConstraintAllowedValues<T>(allowedValues));
+		return AddConstraint(new AllowedValues<T>(allowedValues));
 	}
 
-	public virtual ValidatedValue<T> UniqueItems()
+	public virtual VValue<T> UniqueItems()
 	{
-		return AddConstraint(new ValidationConstraintUniqueItems<T>());
+		return AddConstraint(new UniqueItems<T>());
 	}
 
-	public virtual ValidatedValue<T> Prototype(ValidatedValue<T> from)
+	public virtual VValue<T> Prototype(VValue<T> from)
 	{
 		_default = from._default;
 
-		foreach (ValidatedValueConstraint<T> constraint in from._constraints)
+		foreach (VConstraint<T> constraint in from._constraints)
 		{
 			_constraints.Add(constraint);
 		}
@@ -147,7 +150,7 @@ public class ValidatedValue<T> : ValidatedValue
 		return this;
 	}
 
-	public ValidatedValue<T> AddConstraint(ValidatedValueConstraint<T> constraint)
+	public VValue<T> AddConstraint(VConstraint<T> constraint)
 	{
 		_constraints.Add(constraint);
 
@@ -159,13 +162,13 @@ public class ValidatedValue<T> : ValidatedValue
 		return this;
 	}
 
-	public ValidatedValue<T> NotNull()
+	public VValue<T> NotNull()
 	{
 		NullAllowed = false;
 		return this;
 	}
 
-	public virtual ValidatedValue<T> ChangeEventsEnabled(bool changeEventsState = true)
+	public virtual VValue<T> ChangeEventsEnabled(bool changeEventsState = true)
 	{
 		ChangeEventsState = changeEventsState;
 		return this;
@@ -180,7 +183,7 @@ public class ValidatedValue<T> : ValidatedValue
 			throw new ValidationValueIsNullException($"The {typeof(T)} value is null and NullAllowed is false");
 		}
 
-		foreach (ValidatedValueConstraint<T> constraint in _constraints)
+		foreach (VConstraint<T> constraint in _constraints)
 		{
 			constraint.Validate(value);
 		}
@@ -205,28 +208,3 @@ public class ValidatedValue<T> : ValidatedValue
 	}
 }
 
-public class ValidatedNative<T> : ValidatedValue<T> where T : ValidatedObject
-{
-	public override ValidatedNative<T> Default(T defaultValue)
-	{
-		_default = ValidateValue(defaultValue);
-		_value = defaultValue;
-
-		LoggerManager.LogDebug("Setting default value", "", "default", defaultValue);
-		LoggerManager.LogDebug("", "", "current", Value);
-		return this;
-	}
-
-	public override ValidatedNative<T> Reset()
-	{
-		LoggerManager.LogDebug("Resetting value");
-
-		return Default(_default);
-	}
-
-	public override ValidatedNative<T> ChangeEventsEnabled(bool changeEventsState = true)
-	{
-		ChangeEventsState = changeEventsState;
-		return this;
-	}
-}

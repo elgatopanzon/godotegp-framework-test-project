@@ -1,18 +1,12 @@
-namespace Godot.EGP;
+namespace GodotEGP.Event;
 
 using System;
 using System.Collections.Generic;
 using Godot;
 
-public interface IEventSubscription<in T> where T : Event
-{
-	object Subscriber { get; }
-	Action<IEvent> CallbackMethod { get; }
-	Type EventType { get; }
-	bool IsHighPriority { get; }
-	bool Oneshot { get; }
-	List<IEventFilter> EventFilters { get; set; }
-}
+using GodotEGP.Event.Events;
+using GodotEGP.Event.Filter;
+
 
 public class EventSubscription<T> : IEventSubscription<Event>
 {
@@ -21,9 +15,9 @@ public class EventSubscription<T> : IEventSubscription<Event>
     public bool IsHighPriority { get; }
     public bool Oneshot { get; set; }
     public Type EventType { get; }
-    public List<IEventFilter> EventFilters { get; set; }
+    public List<IFilter> EventFilters { get; set; }
 
-    public EventSubscription(object subscriberObj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null)
+    public EventSubscription(object subscriberObj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
     {
         EventType = typeof(T);
         Subscriber = subscriberObj;
@@ -33,7 +27,7 @@ public class EventSubscription<T> : IEventSubscription<Event>
 
         if (eventFilters == null)
         {
-        	eventFilters = new List<IEventFilter>();
+        	eventFilters = new List<IFilter>();
         }
 
         EventFilters = eventFilters;
@@ -42,9 +36,9 @@ public class EventSubscription<T> : IEventSubscription<Event>
 
 public static class EventSubscriptionExtensionMethods
 {
-	public static IEventSubscription<Event> Filters(this IEventSubscription<Event> obj, params IEventFilter[] filters)
+	public static IEventSubscription<Event> Filters(this IEventSubscription<Event> obj, params IFilter[] filters)
 	{
-		foreach (IEventFilter filter in filters)
+		foreach (IFilter filter in filters)
 		{
 			obj.EventFilters.Add(filter);
 		}
@@ -53,7 +47,7 @@ public static class EventSubscriptionExtensionMethods
 
 	public static IEventSubscription<Event> Owner(this IEventSubscription<Event> obj, object ownerObject)
 	{
-		obj.Filters(new EventFilterOwner(ownerObject));
+		obj.Filters(new OwnerObject(ownerObject));
 
 		return obj;
 	}

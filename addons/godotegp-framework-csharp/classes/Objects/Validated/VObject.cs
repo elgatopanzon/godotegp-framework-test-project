@@ -1,36 +1,39 @@
-namespace Godot.EGP.ValidatedObjects;
+namespace GodotEGP.Objects.Validated;
 
 using Godot;
 using System;
 using System.Collections.Generic;
-using Godot.EGP.Extensions;
+using GodotEGP.Objects.Extensions;
 using System.Reflection;
 using System.Linq;
 
-public class ValidatedObject
+using GodotEGP.Logging;
+using GodotEGP.Event.Events;
+
+public class VObject
 {
-	protected ValidatedObject _parent;
+	protected VObject _parent;
 
-	protected List<ValidatedValue> Properties { get; } = new List<ValidatedValue>();
-    protected ValidatedValue<T> AddValidatedValue<T>(object parent = null)
+	protected List<VValue> Properties { get; } = new List<VValue>();
+    protected VValue<T> AddValidatedValue<T>(object parent = null)
         {
-            var val = new ValidatedValue<T>();
+            var val = new VValue<T>();
             val.Parent = parent;
 
             Properties.Add(val);
             return val;
         }
 
-    protected ValidatedNative<T> AddValidatedNative<T>(object parent = null) where T : ValidatedObject
+    protected VNative<T> AddValidatedNative<T>(object parent = null) where T : VObject
         {
-            var val = new ValidatedNative<T>();
+            var val = new VNative<T>();
             val.Parent = parent;
 
             Properties.Add(val);
             return val;
         }
 
-	public ValidatedObject(ValidatedObject parent = null)
+	public VObject(VObject parent = null)
 	{
 		_parent = parent;
 		ValidateFields();
@@ -48,7 +51,7 @@ public class ValidatedObject
 
 			if (field.GetType().GetMethod("Validate") != null)
 			{
-				if (field.GetValue(this) is IValidatedValue vv)
+				if (field.GetValue(this) is IVValue vv)
 				{
 					vv.Validate();
 				}
@@ -56,13 +59,13 @@ public class ValidatedObject
 		}
 	}
 
-	public virtual void MergeFrom(ValidatedObject sourceObj)
+	public virtual void MergeFrom(VObject sourceObj)
 	{
 		LoggerManager.LogDebug($"Merging {sourceObj.GetType().Name}");
 
 		for (int i = 0; i < sourceObj.Properties.Count; i++)
 		{
-			ValidatedValue sourceProperty = sourceObj.Properties[i];
+			VValue sourceProperty = sourceObj.Properties[i];
 
 			// LoggerManager.LogDebug("Evaluating property from source object", "", "sourcePropType", sourceProperty.GetType());
 			// LoggerManager.LogDebug("", "", "sourceProp", sourceProperty);
@@ -72,9 +75,9 @@ public class ValidatedObject
 
 			if (!sourceProperty.IsNull())
 			{
-				if (sourceProperty.RawValue is ValidatedObject validatedObjectSource)
+				if (sourceProperty.RawValue is VObject validatedObjectSource)
 				{
-					if (Properties[i].RawValue is ValidatedObject validatedObjectThis)
+					if (Properties[i].RawValue is VObject validatedObjectThis)
 					{
 						// LoggerManager.LogDebug($"Property is type {sourceObj.GetType().Name}, recursive merging");
 
@@ -97,7 +100,7 @@ public class ValidatedObject
 		LoggerManager.LogDebug($"Merging {sourceObj.GetType().Name} finished", "", "obj", this);
 	}
 
-	public List<ValidatedValue> GetProperties()
+	public List<VValue> GetProperties()
 	{
 		return Properties;
 	}
@@ -109,7 +112,7 @@ public class ValidatedObject
 		LoggerManager.LogDebug("", "", "value", v);
 		LoggerManager.LogDebug("", "", "newValue", nv);
 
-		this.Emit<EventValidatedValueChanged>((e) => {
+		this.Emit<ValidatedValueChanged>((e) => {
 			e.SetValue(nv);
 			e.SetPrevValue(v);
 		});
@@ -126,12 +129,12 @@ public interface IMergeFrom<in T>
     void MergeFrom(T sourceObj);
 }
 
-public class ValidatedObjectTest : ValidatedObject
+public class ObjectTest : VObject
 {
-	private readonly ValidatedValue<List<string>> _stringListTest;
-	private readonly ValidatedValue<Dictionary<string, int>> _dictionarySizeTest;
+	private readonly VValue<List<string>> _stringListTest;
+	private readonly VValue<Dictionary<string, int>> _dictionarySizeTest;
 
-	// private ValidatedValue<List<string>> _stringListTest = new ValidatedValue<List<string>>()
+	// private Value<List<string>> _stringListTest = new Value<List<string>>()
 	// 	.Default(new List<string> {"a", "b", "c"})
 	// 	.AllowedSize(3, 8)
 	// 	.NotNull()
@@ -143,7 +146,7 @@ public class ValidatedObjectTest : ValidatedObject
 		set { _stringListTest.Value = value; }
 	}
 
-	// private ValidatedValue<Dictionary<string, int>> _dictionarySizeTest = new ValidatedValue<Dictionary<string, int>>()
+	// private Value<Dictionary<string, int>> _dictionarySizeTest = new Value<Dictionary<string, int>>()
 	// 	.Default(new Dictionary<string, int> {{"a", 1}, {"b", 1}, {"c", 1}})
 	// 	.AllowedSize(3, 8)
 	// 	;
@@ -154,8 +157,8 @@ public class ValidatedObjectTest : ValidatedObject
 		set { _dictionarySizeTest.Value = value; }
 	}
 
-	private readonly ValidatedValue<string> _stringTest;
-	// private ValidatedValue<string> _stringTest = new ValidatedValue<string>()
+	private readonly VValue<string> _stringTest;
+	// private Value<string> _stringTest = new Value<string>()
 	// 	.Default("string")
 	// 	.AllowedLength(5, 15)
 	// 	.AllowedValues(new string[] {"string"})
@@ -167,8 +170,8 @@ public class ValidatedObjectTest : ValidatedObject
 		set { _stringTest.Value = value; }
 	}
 
-	private readonly ValidatedValue<int> _intTest;
-	// private ValidatedValue<int> _intTest = new ValidatedValue<int>()
+	private readonly VValue<int> _intTest;
+	// private Value<int> _intTest = new Value<int>()
 	// 	.Default(5)
 	// 	.AllowedRange(2, 8)
 	// 	;
@@ -179,8 +182,8 @@ public class ValidatedObjectTest : ValidatedObject
 		set { _intTest.Value = value; }
 	}
 
-	private readonly ValidatedValue<double> _doubleTest;
-	// private ValidatedValue<double> _doubleTest = new ValidatedValue<double>()
+	private readonly VValue<double> _doubleTest;
+	// private Value<double> _doubleTest = new Value<double>()
 	// 	.Default(5)
 	// 	.AllowedRange(2.5, 8.8)
 	// 	;
@@ -191,8 +194,8 @@ public class ValidatedObjectTest : ValidatedObject
 		set { _doubleTest.Value = value; }
 	}
 
-	private readonly ValidatedValue<ulong> _ulongTest;
-	// private ValidatedValue<ulong> _ulongTest = new ValidatedValue<ulong>()
+	private readonly VValue<ulong> _ulongTest;
+	// private Value<ulong> _ulongTest = new Value<ulong>()
 	// 	.Default(5)
 	// 	.AllowedRange(2, 8)
 	// 	;
@@ -203,8 +206,8 @@ public class ValidatedObjectTest : ValidatedObject
 		set { _ulongTest.Value = value; }
 	}
 
-	private ValidatedValue<int[]> _intArrayTest;
-	// private ValidatedValue<int[]> _intArrayTest = new ValidatedValue<int[]>()
+	private VValue<int[]> _intArrayTest;
+	// private Value<int[]> _intArrayTest = new Value<int[]>()
 	// 	.Default(new int[] {1,2,3})
 	// 	.AllowedSize(3, 8)
 	// 	.AllowedValues(new List<int> {1,2,3})
@@ -217,13 +220,13 @@ public class ValidatedObjectTest : ValidatedObject
 		set { _intArrayTest.Value = value; }
 	}
 
-	// public ValidatedValue<int[]> IntPrototypeTest = new ValidatedValue<int[]>()
+	// public Value<int[]> IntPrototypeTest = new Value<int[]>()
 	// 	.Prototype(IntArrayTest)
 	// 	.Default(new int[] {1,2,3,4})
 	// 	;
 
-	private readonly  ValidatedValue<Vector2> _vector2Test;
-	// private ValidatedValue<Vector2> _vector2Test = new ValidatedValue<Vector2>()
+	private readonly  VValue<Vector2> _vector2Test;
+	// private Value<Vector2> _vector2Test = new Value<Vector2>()
 	// 	.Default(new Vector2(1, 1))
 	// 	.AddConstraint(new ValidationConstraintVector2MinMaxValue<Vector2>(1, 1, 1, 1))
 	// 	;
@@ -234,41 +237,41 @@ public class ValidatedObjectTest : ValidatedObject
 		set { _vector2Test.Value = value; }
 	}
 
-	private readonly ValidatedValue<List<ValidatedValue<Vector2>>> _recursiveTest;
-	// private ValidatedValue<List<ValidatedValue<Vector2>>> _recursiveTest = new ValidatedValue<List<ValidatedValue<Vector2>>>()
-	// 	.Default(new List<ValidatedValue<Vector2>>()
+	private readonly VValue<List<VValue<Vector2>>> _recursiveTest;
+	// private Value<List<Value<Vector2>>> _recursiveTest = new Value<List<Value<Vector2>>>()
+	// 	.Default(new List<Value<Vector2>>()
 	// 			{
-	// 				new ValidatedValue<Vector2>().Default(new Vector2(1, 1)),
-	// 				new ValidatedValue<Vector2>().Default(new Vector2(2, 2)),
-	// 				new ValidatedValue<Vector2>().Default(new Vector2(3, 3)),
+	// 				new Value<Vector2>().Default(new Vector2(1, 1)),
+	// 				new Value<Vector2>().Default(new Vector2(2, 2)),
+	// 				new Value<Vector2>().Default(new Vector2(3, 3)),
 	// 			}
 	// 			)
 	// 	// .AddConstraint(new ValidationConstraintVector2MinMaxValue<Vector2>(1, 1, 1, 1))
 	// 	;
 
-	public List<ValidatedValue<Vector2>> RecursiveTest
+	public List<VValue<Vector2>> RecursiveTest
 	{
 		get { return _recursiveTest.Value; }
 		set { _recursiveTest.Value = value; }
 	}
 
-	// public ValidatedObjectTest(List<string> stringListTest)
+	// public ObjectTest(List<string> stringListTest)
 	// {
 	// 	StringListTest = stringListTest;
 	// }
 	//
-	private ValidatedNative<ValidatedObjectTest2> _objectTest;
+	private VNative<ObjectTest2> _objectTest;
 		// .Default(new Vector2(1, 1))
 		// .AddConstraint(new ValidationConstraintVector2MinMaxValue<Vector2>(1, 1, 1, 1))
 		// ;
 
-	public ValidatedObjectTest2 ObjectTest
+	public ObjectTest2 ObjectTestt
 	{
 		get { return _objectTest.Value; }
 		set { _objectTest.Value = value; }
 	}
 
-	public ValidatedObjectTest()
+	public ObjectTest()
 	{
 		
 		_stringListTest = AddValidatedValue<List<string>>()
@@ -305,28 +308,28 @@ public class ValidatedObjectTest : ValidatedObject
             ;
         _vector2Test = AddValidatedValue<Vector2>()
             .Default(new Vector2(1, 1))
-            .AddConstraint(new ValidationConstraintVector2MinMaxValue<Vector2>(1, 1, 1, 1))
+            .AddConstraint(new Constraint.Vector2MinMaxValue<Vector2>(1, 1, 1, 1))
             ;
-        _recursiveTest = AddValidatedValue<List < ValidatedValue<Vector2>>>()
-            .Default(new List<ValidatedValue<Vector2>>()
+        _recursiveTest = AddValidatedValue<List < VValue<Vector2>>>()
+            .Default(new List<VValue<Vector2>>()
                     {
-                    new ValidatedValue<Vector2>().Default(new Vector2(1, 1)),
-                    new ValidatedValue<Vector2>().Default(new Vector2(2, 2)),
-                    new ValidatedValue<Vector2>().Default(new Vector2(3, 3)),
+                    new VValue<Vector2>().Default(new Vector2(1, 1)),
+                    new VValue<Vector2>().Default(new Vector2(2, 2)),
+                    new VValue<Vector2>().Default(new Vector2(3, 3)),
                     }
                     )
             // .AddConstraint(new ValidationConstraintVector2MinMaxValue<Vector2>(1, 1, 1, 1))
             ;
 
-        _objectTest = AddValidatedNative<ValidatedObjectTest2>()
-        	.Default(new ValidatedObjectTest2());
+        _objectTest = AddValidatedNative<ObjectTest2>()
+        	.Default(new ObjectTest2());
 	}
 
 }
 
-public class ValidatedObjectTest2 : ValidatedObject
+public class ObjectTest2 : VObject
 {
-	private readonly ValidatedValue<string> _stringTest;
+	private readonly VValue<string> _stringTest;
 
 	public string StringTest
 	{
@@ -334,7 +337,7 @@ public class ValidatedObjectTest2 : ValidatedObject
 		set { _stringTest.Value = value; }
 	}
 
-	private ValidatedValue<int> _intTest;
+	private VValue<int> _intTest;
 
 	public int IntTest
 	{
@@ -342,10 +345,10 @@ public class ValidatedObjectTest2 : ValidatedObject
 		set { _intTest.Value = value; }
 	}
 
-	private ValidatedValue<double> _doubleTest;
+	private VValue<double> _doubleTest;
 
 
-	public ValidatedObjectTest2()
+	public ObjectTest2()
 	{
         _stringTest = AddValidatedValue<string>()
             .Default("string100")

@@ -1,4 +1,4 @@
-namespace Godot.EGP;
+namespace GodotEGP.Logging.Formatter;
 
 using Godot;
 using System;
@@ -6,14 +6,16 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-public class LoggerFormatterText : ILoggerFormatter
+using GodotEGP.Logging.Formatter;
+
+public class TextFormatter : IFormatter
 {
 	protected string _createdTimeFormat = "dd MMM yyyy HH:mm:ss";
 	protected string _separator = " | ";
 
-	protected Dictionary<string, List<Func<string, LoggerMessage, string>>> _propertyFormatterFuncs = new Dictionary<string, List<Func<string, LoggerMessage, string>>>();
+	protected Dictionary<string, List<Func<string, Logging.Message, string>>> _propertyFormatterFuncs = new Dictionary<string, List<Func<string, Logging.Message, string>>>();
 
-	public LoggerFormatterText()
+	public TextFormatter()
 	{
 		SetupDefaultPropertyFormatters();
 	}
@@ -32,7 +34,7 @@ public class LoggerFormatterText : ILoggerFormatter
 
 		// // Add Trace info to SourceName
 		// RegisterPropertyFormatter("SourceName", (s, lm) => {
-		// 		if (lm.Level == LoggerMessage.LogLevel.Trace)
+		// 		if (lm.Level == Logging.Message.LogLevel.Trace)
 		// 		{
 		// 			s = $"{s}.{lm.SourceMethodName}:L{lm.SourceLineNumber}";
 		// 		}
@@ -54,10 +56,10 @@ public class LoggerFormatterText : ILoggerFormatter
 		// Padding for values
 		RegisterPropertyFormatter("Level", (s, lm) => s.PadRight(8, ' '));
 		RegisterPropertyFormatter("SourceName", (s, lm) => s.PadRight(25, ' '));
-		RegisterPropertyFormatter("Message", (s, lm) => s.PadRight(40, ' '));
+		RegisterPropertyFormatter("Text", (s, lm) => s.PadRight(40, ' '));
 	}
 
-	public virtual object Format(LoggerMessage loggerMessage)
+	public virtual object Format(Logging.Message loggerMessage)
 	{
 		var preProcessedMessage = PreProcess(loggerMessage);
 		var postProcessedMessage = PostProcess(preProcessedMessage);
@@ -65,7 +67,7 @@ public class LoggerFormatterText : ILoggerFormatter
 		return BuildString(postProcessedMessage);
 	}
 
-	public string BuildString(LoggerMessage loggerMessage)
+	public string BuildString(Logging.Message loggerMessage)
 	{
 		var ticksMsec = GetFormattedProperty(loggerMessage, "TicksMsec");
 		var created = GetFormattedProperty(loggerMessage, "Created");
@@ -73,7 +75,7 @@ public class LoggerFormatterText : ILoggerFormatter
 		var sourceMethodName = GetFormattedProperty(loggerMessage, "SourceMethodName");
 		var custom = GetFormattedProperty(loggerMessage, "Custom");
 		var level = GetFormattedProperty(loggerMessage, "Level");
-		var message = GetFormattedProperty(loggerMessage, "Message");
+		var message = GetFormattedProperty(loggerMessage, "Text");
 		var dataName = GetFormattedProperty(loggerMessage, "DataName");
 		var data = GetFormattedProperty(loggerMessage, "Data");
 
@@ -88,19 +90,19 @@ public class LoggerFormatterText : ILoggerFormatter
 			});
 	}
 
-	public LoggerMessage PreProcess(LoggerMessage loggerMessage)
+	public Logging.Message PreProcess(Logging.Message loggerMessage)
 	{
 		loggerMessage.Formatted.Add("TicksMsec", FormatTicksMsec(loggerMessage.TicksMsec));
 		loggerMessage.Formatted.Add("Created", FormatCreatedTimestamp(loggerMessage.Created));
 		return loggerMessage;
 	}
 
-	public LoggerMessage PostProcess(LoggerMessage loggerMessage)
+	public Logging.Message PostProcess(Logging.Message loggerMessage)
 	{
 		return loggerMessage;
 	}
 
-	public string GetFormattedProperty(LoggerMessage loggerMessage, string propertyName)
+	public string GetFormattedProperty(Logging.Message loggerMessage, string propertyName)
 	{
         if (!loggerMessage.Formatted.TryGetValue(propertyName, out var obj) || obj is not object propertyValue)
         {
@@ -115,7 +117,7 @@ public class LoggerFormatterText : ILoggerFormatter
 		// Call custom format function for property if found
         if (_propertyFormatterFuncs.TryGetValue(propertyName, out var formatFuncs))
         {
-			foreach (Func<string, LoggerMessage, string> formatFunc in formatFuncs)
+			foreach (Func<string, Logging.Message, string> formatFunc in formatFuncs)
 			{
 				propertyValue = formatFunc(propertyValue.ToString(), loggerMessage);
 			}
@@ -124,11 +126,11 @@ public class LoggerFormatterText : ILoggerFormatter
         return propertyValue.ToString();
 	}
 
-	public void RegisterPropertyFormatter(string propertyName, Func<string, LoggerMessage, string> func)
+	public void RegisterPropertyFormatter(string propertyName, Func<string, Logging.Message, string> func)
 	{
-        if (!_propertyFormatterFuncs.TryGetValue(propertyName, out var obj) || obj is not List<Func<string, LoggerMessage, string>> formatFuncs)
+        if (!_propertyFormatterFuncs.TryGetValue(propertyName, out var obj) || obj is not List<Func<string, Logging.Message, string>> formatFuncs)
         {
-        	_propertyFormatterFuncs.Add(propertyName, new List<Func<string, LoggerMessage, string>>());
+        	_propertyFormatterFuncs.Add(propertyName, new List<Func<string, Logging.Message, string>>());
         }
 
 		_propertyFormatterFuncs[propertyName].Add(func);
@@ -149,7 +151,7 @@ public class LoggerFormatterText : ILoggerFormatter
 		return createdTime.ToString(_createdTimeFormat);
 	}
 
-	public string FormatData(string dataName, object data, LoggerMessage loggerMessage)
+	public string FormatData(string dataName, object data, Logging.Message loggerMessage)
 	{
 		string dataString = "";
 
@@ -162,7 +164,7 @@ public class LoggerFormatterText : ILoggerFormatter
 			dataString = FormatDataStrings(dataName, jsonString);
 		}
 
-		if (loggerMessage.Level == LoggerMessage.LogLevel.Trace)
+		if (loggerMessage.Level == Logging.Message.LogLevel.Trace)
 		{
 			dataString += "\n" + FormatDataTraceString(dataString, loggerMessage);
 		}
@@ -175,7 +177,7 @@ public class LoggerFormatterText : ILoggerFormatter
         return $"{dataName}={dataJson}".Replace("\n", "");
 	}
 
-	public virtual string FormatDataTraceString(string dataString, LoggerMessage loggerMessage)
+	public virtual string FormatDataTraceString(string dataString, Logging.Message loggerMessage)
 	{
 		return $"TRACE: {loggerMessage.SourceFilename}:{loggerMessage.SourceLineNumber}[{loggerMessage.SourceMethodName}]";
 	}

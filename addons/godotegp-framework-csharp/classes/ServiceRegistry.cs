@@ -1,10 +1,13 @@
-namespace Godot.EGP;
+namespace GodotEGP;
 
 using Godot;
-using Godot.EGP.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using GodotEGP.Objects.Extensions;
+using GodotEGP.Event.Events;
+using GodotEGP.Logging;
 
 public partial class ServiceRegistry : Node
 {
@@ -12,7 +15,7 @@ public partial class ServiceRegistry : Node
 	public static ServiceRegistry Instance { get; private set; }
 
 	// Dictionary of BaseService objects
-	private Dictionary<Type, Service> _serviceObjs = new Dictionary<Type, Service>();
+	private Dictionary<Type, Service.Service> _serviceObjs = new Dictionary<Type, Service.Service>();
 
 	/// <summary>
 	/// Access service objects using []
@@ -22,18 +25,18 @@ public partial class ServiceRegistry : Node
 	/// </code>
 	/// </example>
 	/// </summary>
-	public Service this[Type serviceType] {
+	public Service.Service this[Type serviceType] {
 		get {
 			return GetService(serviceType);
 		}
 	}
 
-	private ServiceRegistry() 
+	public ServiceRegistry() 
 	{
 		Instance = this;
 
 		// Get<EventManager>().Subscribe(new EventSubscription<EventServiceReady>(this, __On_EventServiceReady, true));
-		this.Subscribe<EventServiceReady>(__On_EventServiceReady, true);
+		this.Subscribe<ServiceReady>(__On_EventServiceReady, true);
 	}
 
 	// Called when the node enters the scene tree for the first time.
@@ -52,7 +55,7 @@ public partial class ServiceRegistry : Node
 	/// <param name="serviceObj">Instance of a BaseService object</param>
 	/// <param name="serviceName">Short-name for the service object</param>
 	/// </summary>
-	public void RegisterService(Service serviceObj)
+	public void RegisterService(Service.Service serviceObj)
 	{
 		_serviceObjs.Add(serviceObj.GetType(), serviceObj);
 
@@ -63,12 +66,12 @@ public partial class ServiceRegistry : Node
 		serviceObj._OnServiceRegistered();
 
 		// Get<EventManager>().Emit(new EventServiceRegistered().SetOwner(serviceObj));
-		serviceObj.Emit<EventServiceRegistered>();
+		serviceObj.Emit<ServiceRegistered>();
 	}
 
 	public void __On_EventServiceReady(IEvent eventObj)
 	{
-		if (eventObj.Owner.TryCast(out Service s))
+		if (eventObj.Owner.TryCast(out Service.Service s))
 		{
 			LoggerManager.LogDebug($"Service ready!", "", "service", s.GetType().Name);
 
@@ -80,7 +83,7 @@ public partial class ServiceRegistry : Node
 	/// Get a service object
 	/// <param name="serviceType">Short-name of the service object</param>
 	/// </summary>
-	public Service GetService(Type serviceType)
+	public Service.Service GetService(Type serviceType)
 	{
 		if (_serviceObjs.ContainsKey(serviceType))
 			return _serviceObjs[serviceType];
@@ -91,9 +94,9 @@ public partial class ServiceRegistry : Node
 	/// <summary>
 	/// Get a service object by the given type
 	/// </summary>
-	public static T Get<T>() where T : Service, new()
+	public static T Get<T>() where T : Service.Service, new()
 	{
-		if (!Instance._serviceObjs.TryGetValue(typeof(T), out Service obj))
+		if (!Instance._serviceObjs.TryGetValue(typeof(T), out Service.Service obj))
 		{
 			LoggerManager.LogDebug("Lazy-creating service instance", "", "service", typeof(T).Name);
 

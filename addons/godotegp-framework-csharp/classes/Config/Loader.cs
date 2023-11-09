@@ -1,23 +1,29 @@
-namespace Godot.EGP;
+namespace GodotEGP.Config;
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-public class ConfigLoader : BackgroundJob
+using GodotEGP.Logging;
+using GodotEGP.Threading;
+using GodotEGP.Data.Endpoint;
+using GodotEGP.Objects.Extensions;
+using GodotEGP.Event.Events;
+
+public class Loader : BackgroundJob
 {
 	private Queue<Dictionary<string, object>> _loadQueue = new Queue<Dictionary<string, object>>();
 
-	private ConfigObject _currentlyLoadingObj;
+	private Object _currentlyLoadingObj;
 	private double _queueSize = 0;
 
 	private double _queueSizeCurrent { get {
 		return _loadQueue.Count;
 	} }
 
-	private List<ConfigObject> _configObjects = new List<ConfigObject>();
+	private List<Object> _configObjects = new List<Object>();
 
-	public ConfigLoader(Queue<Dictionary<string, object>> loadQueue)
+	public Loader(Queue<Dictionary<string, object>> loadQueue)
 	{
 		_loadQueue = loadQueue;
 
@@ -42,11 +48,11 @@ public class ConfigLoader : BackgroundJob
 					LoggerManager.LogDebug("Loading config item", "", "config", queuedItem);
 
 					// create config object instance to load into
-					var obj = ConfigObject.Create(queuedItem["configType"].ToString());
+					var obj = Object.Create(queuedItem["configType"].ToString());
 
 
 					// set data endpoint to current instance's file path
-					obj.DataEndpoint = new DataEndpointFile(queuedItem["path"].ToString());
+					obj.DataEndpoint = new FileEndpoint(queuedItem["path"].ToString());
 					obj.Load();
 
 					_currentlyLoadingObj = obj;
@@ -90,20 +96,20 @@ public class ConfigLoader : BackgroundJob
 	{
 		LoggerManager.LogDebug("Loading configs progress", "", "progress", e.ProgressPercentage);
 
-		this.Emit<EventConfigManagerLoaderProgress>((ee) => ee.SetProgressChangesEventArgs(e).SetProgressChangesEventArgs(e));
+		this.Emit<ConfigManagerLoaderProgress>((ee) => ee.SetProgressChangesEventArgs(e).SetProgressChangesEventArgs(e));
 	}
 
 	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
 		LoggerManager.LogDebug("Loading configs completed", "", "result", e.Result);
 
-		this.Emit<EventConfigManagerLoaderCompleted>((ee) => ee.SetConfigObjects(_configObjects).SetRunWorkerCompletedEventArgs(e));
+		this.Emit<ConfigManagerLoaderCompleted>((ee) => ee.SetConfigObjects(_configObjects).SetRunWorkerCompletedEventArgs(e));
 	}
 
 	public override void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
 	{
 		LoggerManager.LogDebug("Loading configs error");
 
-		this.Emit<EventConfigManagerLoaderError>((ee) => ee.SetConfigObjects(_configObjects).SetRunWorkerCompletedEventArgs(e));
+		this.Emit<ConfigManagerLoaderError>((ee) => ee.SetConfigObjects(_configObjects).SetRunWorkerCompletedEventArgs(e));
 	}
 }

@@ -1,13 +1,16 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Operator;
 
 using System.ComponentModel;
 using System.IO;
 using Newtonsoft.Json;
 
+using GodotEGP.Logging;
+using GodotEGP.Data.Endpoint;
+
 // operates on file based objects 
-public class DataOperatorFile : DataOperator, IDataOperator
+public class FileOperator : Operator, IOperator
 {
-	private DataEndpointFile _fileEndpoint;
+	private FileEndpoint _fileEndpoint;
 	private int _operationType;
 
 	private object _dataObject;
@@ -33,11 +36,11 @@ public class DataOperatorFile : DataOperator, IDataOperator
 		Run();
 	}
 
-	public void SetDataEndpoint(IDataEndpointObject dataEndpoint) {
-		_fileEndpoint = (DataEndpointFile) dataEndpoint;
+	public void SetDataEndpoint(IEndpoint dataEndpoint) {
+		_fileEndpoint = (FileEndpoint) dataEndpoint;
 	}
 
-	public DataEndpointFile GetDataEndpoint()
+	public FileEndpoint GetDataEndpoint()
 	{
 		return _fileEndpoint;
 	}

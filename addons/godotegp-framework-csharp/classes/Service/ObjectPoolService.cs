@@ -1,8 +1,11 @@
-namespace Godot.EGP;
+namespace GodotEGP.Service;
 
 using Godot;
 using System;
 using System.Collections.Generic;
+
+using GodotEGP.Logging;
+using GodotEGP.Objects;
 
 public partial class ObjectPoolService : Service
 {

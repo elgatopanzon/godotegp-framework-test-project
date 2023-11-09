@@ -1,4 +1,4 @@
-using Godot.EGP;
+namespace GodotEGP.Data;
 
 using System;
 

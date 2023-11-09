@@ -1,4 +1,4 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Operator;
 
 using System.ComponentModel;
 using System.IO;
@@ -6,10 +6,13 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
 
+using GodotEGP.Data.Endpoint;
+using GodotEGP.Logging;
+
 // operates on file based objects 
-public class DataOperatorHTTP : DataOperator, IDataOperator
+public class HTTPOperator : Operator, IOperator
 {
-	private DataEndpointHTTP _httpEndpoint;
+	private HTTPEndpoint _httpEndpoint;
 	private int _operationType;
 
 	private object _dataObject;
@@ -35,11 +38,11 @@ public class DataOperatorHTTP : DataOperator, IDataOperator
 		Run();
 	}
 
-	public void SetDataEndpoint(IDataEndpointObject dataEndpoint) {
-		_httpEndpoint = (DataEndpointHTTP) dataEndpoint;
+	public void SetDataEndpoint(IEndpoint dataEndpoint) {
+		_httpEndpoint = (HTTPEndpoint) dataEndpoint;
 	}
 
-	public DataEndpointHTTP GetDataEndpoint()
+	public HTTPEndpoint GetDataEndpoint()
 	{
 		return _httpEndpoint;
 	}

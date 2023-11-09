@@ -1,8 +1,14 @@
-namespace Godot.EGP;
+namespace GodotEGP.Service;
 
 using Godot;
 using System;
 using System.Collections.Generic;
+
+using GodotEGP.Logging;
+using GodotEGP.Event;
+using GodotEGP.Event.Events;
+using GodotEGP.Event.Filter;
+using GodotEGP.Objects.Extensions;
 
 public partial class EventManager : Service
 {
@@ -76,16 +82,16 @@ public partial class EventManager : Service
 		GetQueue<T>().Queue(eventObj);
 	}
 
-	public Queue<IEvent> Fetch<T>(Type eventType, List<IEventFilter> eventFilters = null, int fetchCount = 1) where T : EventQueue, new()
+	public Queue<IEvent> Fetch<T>(Type eventType, List<IFilter> eventFilters = null, int fetchCount = 1) where T : EventQueue, new()
 	{
 		// init eventFilters list if it's null
-		if (Object.Equals(eventFilters, default(List<IEventFilter>)))
+		if (Object.Equals(eventFilters, default(List<IFilter>)))
 		{
-			eventFilters = new List<IEventFilter>();
+			eventFilters = new List<IFilter>();
 		}
 
 		// add the eventType filter
-		eventFilters.Add(new EventFilterType(eventType));
+		eventFilters.Add(new ObjectType(eventType));
 
 		return GetQueue<T>().Fetch(eventFilters, fetchCount);
 	}
@@ -130,7 +136,7 @@ public partial class EventManager : Service
 
 					if (eventSubscription.EventFilters != null) 
 					{
-						foreach (IEventFilter eventFilter in eventSubscription.EventFilters)
+						foreach (IFilter eventFilter in eventSubscription.EventFilters)
 						{
 							filtersMatch = eventFilter.Match(eventObj);
 
@@ -190,15 +196,15 @@ public partial class EventManager : Service
 		}
 
 
-		eventSubscription.EventFilters.Add(new EventFilterOwner(connectObject));
-		eventSubscription.EventFilters.Add(new EventFilterSignal(signalName));
+		eventSubscription.EventFilters.Add(new OwnerObject(connectObject));
+		eventSubscription.EventFilters.Add(new SignalType(signalName));
 
 		Subscribe(eventSubscription);
 	}
 
 	public void __On_Signal(GodotObject connectObject, string signalName, Variant[] signalParams = null)
 	{
-		connectObject.Emit<EventSignal>((e) => e.SetSignalName(signalName).SetSignalParams(signalParams));
+		connectObject.Emit<GodotSignal>((e) => e.SetSignalName(signalName).SetSignalParams(signalParams));
 	}
 }
 
@@ -207,53 +213,3 @@ public class EventQueueDeferred : EventQueue
 	
 }
 
-public static class EventManagerObjectExtensions
-{
-	public static EventSubscription<T> Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null) where T : Event
-	{
-		EventSubscription<T> subscription = new EventSubscription<T>(obj, callbackMethod, isHighPriority, oneshot, eventFilters);
-		ServiceRegistry.Get<EventManager>().Subscribe(subscription);
-
-		return subscription;
-	}
-
-	public static EventSubscription<T> SubscribeOwner<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null) where T : Event
-	{
-		EventSubscription<T> subscription = obj.Subscribe<T>(callbackMethod, isHighPriority, oneshot, eventFilters);
-		subscription.Owner(obj);
-
-		return subscription;
-	}
-
-	public static IEventSubscription<Event> Subscribe(this object obj, IEventSubscription<Event> eventSubscription)
-	{
-		ServiceRegistry.Get<EventManager>().Subscribe(eventSubscription);
-
-		return eventSubscription;
-	}
-
-
-	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null)
-	{
-		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, new EventSubscription<EventSignal>(obj, callbackMethod, isHighPriority, oneshot, eventFilters));
-	}
-
-	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, IEventSubscription<Event> eventSubscription)
-	{
-		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, eventSubscription);
-	}
-
-	public static T Emit<T>(this object obj, Action<T> preinvokeHook = null) where T : Event, new()
-	{
-		T e = new T().SetOwner(obj);
-
-		if (preinvokeHook != null)
-		{
-			preinvokeHook(e);
-		}
-
-		e.Invoke();
-
-		return e;
-	}
-}

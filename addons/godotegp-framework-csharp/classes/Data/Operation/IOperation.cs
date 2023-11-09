@@ -1,6 +1,6 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Operation;
 
-public interface IDataOperation
+public interface IOperation
 {
 	public void Load();
 	public void Save();

@@ -1,7 +1,9 @@
-namespace Godot.EGP;
+namespace GodotEGP.Service;
 
 using Godot;
 using System;
+
+using GodotEGP.Logging;
 
 public partial class SystemService : Service
 {

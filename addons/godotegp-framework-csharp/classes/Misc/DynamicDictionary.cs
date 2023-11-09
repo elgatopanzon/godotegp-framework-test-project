@@ -1,4 +1,4 @@
-namespace Godot.EGP;
+namespace GodotEGP.Misc;
 
 using Godot;
 using System;

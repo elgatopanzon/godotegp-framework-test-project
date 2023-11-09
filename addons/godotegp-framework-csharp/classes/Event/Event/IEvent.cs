@@ -1,4 +1,4 @@
-namespace Godot.EGP;
+namespace GodotEGP.Event.Events;
 
 using System;
 

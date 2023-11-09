@@ -1,9 +1,13 @@
-namespace Godot.EGP;
+namespace GodotEGP.Service;
 
 using Godot;
-using Godot.EGP.Extensions;
 using System;
 using System.Collections.Generic;
+
+using GodotEGP.Objects.Extensions;
+using GodotEGP.Logging;
+using GodotEGP.Event.Events;
+using GodotEGP.Event.Filter;
 
 public partial class NodeManager : Service
 {
@@ -19,8 +23,8 @@ public partial class NodeManager : Service
 
 			// subscribe to Events related to nodes being added and removed with
 			// high priority
-			this.Subscribe<EventNodeAdded>(__On_EventNodeAdded, true);
-			this.Subscribe<EventNodeRemoved>(__On_EventNodeRemoved, true);
+			this.Subscribe<NodeAdded>(__On_EventNodeAdded, true);
+			this.Subscribe<NodeRemoved>(__On_EventNodeRemoved, true);
 
 			// connect to SceneTree node_added and node_removed signals
 			GetTree().Connect("node_added", new Callable(this, "__On_Signal_node_added"));
@@ -36,25 +40,25 @@ public partial class NodeManager : Service
 	// signal callbacks for node_* events, used as rebroadcasters
 	public void __On_Signal_node_added(Node nodeObj)
 	{
-		nodeObj.Emit<EventNodeAdded>((e) => e.SetNode(nodeObj));
+		nodeObj.Emit<NodeAdded>((e) => e.SetNode(nodeObj));
 	}
 	public void __On_Signal_node_removed(Node nodeObj)
 	{
-		nodeObj.Emit<EventNodeRemoved>((e) => e.SetNode(nodeObj));
+		nodeObj.Emit<NodeRemoved>((e) => e.SetNode(nodeObj));
 	}
 
 	// process node added and removed Event objects
 	public void __On_EventNodeAdded(IEvent eventObj)
 	{
-		EventNodeAdded e = (EventNodeAdded) eventObj;
+		NodeAdded e = (NodeAdded) eventObj;
 
-		RegisterNode(e.Node, GetNodeID(e.Node));
+		RegisterNode(e.NodeObj, GetNodeID(e.NodeObj));
 	}
 	public void __On_EventNodeRemoved(IEvent eventObj)
 	{
-		EventNodeAdded e = (EventNodeAdded) eventObj;
+		NodeAdded e = (NodeAdded) eventObj;
 		
-		DeregisterNode(e.Node);
+		DeregisterNode(e.NodeObj);
 	}
 
 	public void RegisterNode(Node node, string nodeId, bool registerGroups = true)
@@ -168,7 +172,7 @@ public partial class NodeManager : Service
 		return false;
 	}
 
-	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null)
+	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
 	{
 		// converts params to object
 		DeferredSignalSubscription deferredSignalSubscription = new DeferredSignalSubscription(nodeId, signalName, hasParams, callbackMethod, isHighPriority, oneshot, eventFilters);
@@ -221,10 +225,10 @@ public partial class NodeManager : Service
 		public Action<IEvent> CallbackMethod;
 		public bool IsHighPriority;
 		public bool Oneshot;
-		public List<IEventFilter> EventFilters;
+		public List<IFilter> EventFilters;
 		public List<Node> ConnectedTo;
 
-		public DeferredSignalSubscription(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority, bool oneshot, List<IEventFilter> eventFilters)
+		public DeferredSignalSubscription(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority, bool oneshot, List<IFilter> eventFilters)
 		{
 			this.NodeId = nodeId;
 			this.SignalName = signalName;

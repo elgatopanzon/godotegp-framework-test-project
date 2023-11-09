@@ -1,9 +1,12 @@
-namespace Godot.EGP;
+namespace GodotEGP.Service;
 
 using Godot;
 using System;
 
-public partial class Service : Node
+using GodotEGP.Event.Events;
+using GodotEGP.Objects.Extensions;
+
+public partial class Service : Godot.Node
 {
 	public bool ServiceReady { get; set; }
 
@@ -50,6 +53,6 @@ public partial class Service : Node
 		this.ServiceReady = readyState;
 
 		if (readyState)
-			this.Emit<EventServiceReady>();
+			this.Emit<ServiceReady>();
 	}
 }

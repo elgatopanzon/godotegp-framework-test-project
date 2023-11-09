@@ -17,8 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-GodotEgp="*res://addons/godotegp-framework-csharp/classes/GodotEGP.cs"
-ServiceRegistry="*res://addons/godotegp-framework-csharp/classes/Service/ServiceRegistry.cs"
+Main="*res://addons/godotegp-framework-csharp/classes/Main.cs"
 
 [dotnet]
 

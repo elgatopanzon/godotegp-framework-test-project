@@ -1,10 +1,11 @@
-namespace Godot.EGP;
+namespace GodotEGP.Event.Events;
 
 using System;
 using System.Collections.Generic;
 using Godot;
-using System.Threading;
 using System.ComponentModel;
+
+using GodotEGP.Service;
 
 public class Event : IEvent
 {
@@ -39,66 +40,62 @@ static class EventExtensionMethods
     }
 }
 
-public class EventServiceRegistered : Event
+public class ServiceRegistered : Event
 {
 }
 
-public class EventServiceDeregistered : Event
+public class ServiceDeregistered : Event
 {
 }
 
-public class EventSignal : Event
+public class GodotSignal : Event
 {
  	public string SignalName { get; set; }
  	public Variant[] SignalParams { get; set; }
 
 }
-static class EventSignalExtensionMethods
+static class SignalExtensionMethods
 {
-	static public T SetSignalName<T>(this T o, string signalName) where T : EventSignal
+	static public T SetSignalName<T>(this T o, string signalName) where T : GodotSignal
     {
 		o.SignalName = signalName;
         return o;
     }
-	static public T SetSignalParams<T>(this T o, Variant[] signalParams) where T : EventSignal
+	static public T SetSignalParams<T>(this T o, Variant[] signalParams) where T : GodotSignal
     {
 		o.SignalParams = signalParams;
         return o;
     }
 }
 
-public class EventCustom : Event
+public class NodeEvent : Event
 {
+	public Node NodeObj;
 }
-
-public class EventNode : Event
+static class NodeExtensionMethods
 {
-	public Node Node;
-}
-static class EventNodeExtensionMethods
-{
-	static public T SetNode<T>(this T o, Node node) where T : EventNode
+	static public T SetNode<T>(this T o, Node node) where T : NodeEvent
     {
-		o.Node = node;
+		o.NodeObj = node;
         return o;
     }
 }
 
-public class EventNodeAdded : EventNode
+public class NodeAdded : NodeEvent
 {
 }
 
-public class EventNodeRemoved : EventNode
-{
-}
-
-
-public class EventServiceReady : Event
+public class NodeRemoved : NodeEvent
 {
 }
 
 
-public class EventBackgroundJob : Event
+public class ServiceReady : Event
+{
+}
+
+
+public class BackgroundJobEvent : Event
 {
 	public object JobOwner;
 	public DoWorkEventArgs DoWorkEventArgs;
@@ -107,104 +104,104 @@ public class EventBackgroundJob : Event
 }
 static class EventBackgroundJobExtensionMethods
 {
-	static public T SetJobOwner<T>(this T o, object jobOwner) where T : EventBackgroundJob
+	static public T SetJobOwner<T>(this T o, object jobOwner) where T : BackgroundJobEvent
     {
 		o.JobOwner = jobOwner;
         return o;
     }
-	static public T SetDoWorkEventArgs<T>(this T o, DoWorkEventArgs e) where T : EventBackgroundJob
+	static public T SetDoWorkEventArgs<T>(this T o, DoWorkEventArgs e) where T : BackgroundJobEvent
     {
 		o.DoWorkEventArgs = e;
         return o;
     }
-	static public T SetProgressChangesEventArgs<T>(this T o, ProgressChangedEventArgs e) where T : EventBackgroundJob
+	static public T SetProgressChangesEventArgs<T>(this T o, ProgressChangedEventArgs e) where T : BackgroundJobEvent
     {
 		o.ProgressChangedEventArgs = e;
         return o;
     }
-	static public T SetRunWorkerCompletedEventArgs<T>(this T o, RunWorkerCompletedEventArgs e) where T : EventBackgroundJob
+	static public T SetRunWorkerCompletedEventArgs<T>(this T o, RunWorkerCompletedEventArgs e) where T : BackgroundJobEvent
     {
 		o.RunWorkerCompletedEventArgs = e;
         return o;
     }
 }
 
-public class EventBackgroundJobWorking : EventBackgroundJob
+public class BackgroundJobWorking : BackgroundJobEvent
 {
 }
-public class EventBackgroundJobProgress : EventBackgroundJob
+public class BackgroundJobProgress : BackgroundJobEvent
 {
 }
-public class EventBackgroundJobComplete : EventBackgroundJob
+public class BackgroundJobComplete : BackgroundJobEvent
 {
 }
-public class EventBackgroundJobError : EventBackgroundJob
+public class BackgroundJobError : BackgroundJobEvent
 {
 }
 
-public class EventDataOperationWorking : EventBackgroundJob
+public class DataOperationWorking : BackgroundJobEvent
 {
 }
-public class EventDataOperationProgress : EventBackgroundJob
+public class DataOperationProgress : BackgroundJobEvent
 {
 }
-public class EventDataOperationComplete : EventBackgroundJob
+public class DataOperationComplete : BackgroundJobEvent
 {
 }
-public class EventDataOperationError : EventBackgroundJob
+public class DataOperationError : BackgroundJobEvent
 {
 }
 
 // events for ValidatedValue<T> objects
-public class EventValidatedValue : Event
+public class ValidatedValueEvent : Event
 {
 	public object Value;
 	public object PrevValue;
 }
 
-static public class EventValidatedValueExtensions
+static public class ValidatedValueExtensions
 {
-	static public T SetValue<T>(this T o, object value) where T : EventValidatedValue
+	static public T SetValue<T>(this T o, object value) where T : ValidatedValueEvent
     {
         o.Value = value;
         return o;
     }
 
-	static public T SetPrevValue<T>(this T o, object value) where T : EventValidatedValue
+	static public T SetPrevValue<T>(this T o, object value) where T : ValidatedValueEvent
     {
         o.PrevValue = value;
         return o;
     }
 }
 
-public class EventValidatedValueChanged : EventValidatedValue
+public class ValidatedValueChanged : ValidatedValueEvent
 {
 }
 
-public class EventValidatedValueSet : EventValidatedValue
+public class ValidatedValueSet : ValidatedValueEvent
 {
 }
 
-public class EventConfigManagerLoader : EventBackgroundJob
+public class ConfigManagerLoader : BackgroundJobEvent
 {
-	public List<ConfigObject> ConfigObjects;
+	public List<Config.Object> ConfigObjects;
 	
 }
-static public class EventConfigManagerLoaderExtensions
+static public class ConfigManagerLoaderExtensions
 {
-	static public T SetConfigObjects<T>(this T o, List<ConfigObject> configObjects) where T : EventConfigManagerLoader
+	static public T SetConfigObjects<T>(this T o, List<Config.Object> configObjects) where T : ConfigManagerLoader
 	{
 		o.ConfigObjects = configObjects;
 		return o;
 	}
 }
 
-public class EventConfigManagerLoaderProgress : EventConfigManagerLoader
+public class ConfigManagerLoaderProgress : ConfigManagerLoader
 {
 }
-public class EventConfigManagerLoaderCompleted : EventConfigManagerLoader
+public class ConfigManagerLoaderCompleted : ConfigManagerLoader
 {
 }
-public class EventConfigManagerLoaderError : EventConfigManagerLoader
+public class ConfigManagerLoaderError : ConfigManagerLoader
 {
 }

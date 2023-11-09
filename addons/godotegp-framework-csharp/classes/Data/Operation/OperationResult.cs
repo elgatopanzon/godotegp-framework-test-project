@@ -1,11 +1,13 @@
-namespace Godot.EGP;
+namespace GodotEGP.Data.Operation;
 
-using Godot.EGP.ValidatedObjects;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
+using GodotEGP.Objects.Validated;
+using GodotEGP.Logging;
+
 // accept a result object and create a ValidatedObject from T
-public class DataOperationResult<T>
+public class OperationResult<T>
 {
 	private T _resultObject;
 
@@ -15,11 +17,11 @@ public class DataOperationResult<T>
 		set { _resultObject = value; }
 	}
 
-	public DataOperationResult(object rawObject)
+	public OperationResult(object rawObject)
 	{
 		LoggerManager.LogDebug("Creating result object from raw data", "", "raw", rawObject);
 
-		if (typeof(T).BaseType == typeof(ValidatedObject))
+		if (typeof(T).BaseType == typeof(VObject))
 		{
 			// hold deserialisation errors
 			List<string> errors = new List<string>();
