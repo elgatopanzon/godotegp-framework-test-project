@@ -2,7 +2,7 @@ namespace GodotEGP.Objects.Validated;
 
 using GodotEGP.Logging;
 
-public class VNative<T> : VValue<T> where T : VObject
+public partial class VNative<T> : VValue<T> where T : VObject
 {
 	public override VNative<T> Default(T defaultValue)
 	{

@@ -7,7 +7,7 @@ using GodotEGP.Event.Events;
 using GodotEGP.Logging;
 using GodotEGP.Objects.Extensions;
 
-public class Filter : IFilter
+public partial class Filter : IFilter
 {
 	public bool Match(IEvent matchEvent)
 	{
@@ -15,7 +15,7 @@ public class Filter : IFilter
 	}
 }
 
-public class OwnerObject : IFilter
+public partial class OwnerObject : IFilter
 {
 	private object _matchObject;
 
@@ -31,7 +31,7 @@ public class OwnerObject : IFilter
 	}
 }
 
-public class SignalType : IFilter
+public partial class SignalType : IFilter
 {
 	private string _matchSignal;
 
@@ -53,7 +53,7 @@ public class SignalType : IFilter
 	}
 }
 
-public class ObjectType : IFilter
+public partial class ObjectType : IFilter
 {
 	private Type _matchType;
 

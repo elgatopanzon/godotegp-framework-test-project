@@ -6,7 +6,7 @@ using System.Net.Http;
 using GodotEGP.Logging;
 
 // File object holding information about the provided filename and path
-public class HTTPEndpoint : IEndpoint
+public partial class HTTPEndpoint : IEndpoint
 {
 	private string _hostname;
 	public string Hostname

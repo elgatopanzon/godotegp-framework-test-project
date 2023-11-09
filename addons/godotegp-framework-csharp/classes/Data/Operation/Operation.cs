@@ -8,14 +8,14 @@ using GodotEGP.Event.Events;
 using GodotEGP.Data.Operator;
 using GodotEGP.Objects.Extensions;
 
-public abstract class Operation : BackgroundJob, IOperation
+public abstract partial class Operation : BackgroundJob, IOperation
 {
 	public abstract void Load();
 	public abstract void Save();
 }
 
 // base class for operation classes interfacing with operator classes
-public abstract class Operation<T> : Operation, IOperation
+public abstract partial class Operation<T> : Operation, IOperation
 {
 	public abstract IOperator CreateOperator();
 	public abstract Operator GetOperator();

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Godot;
 using GodotEGP.Objects.Validated;
 
-public class LoggerConfig : VObject
+public partial class LoggerConfig : VObject
 {
 	private readonly VValue<Logging.Message.LogLevel> _logLevel;
 

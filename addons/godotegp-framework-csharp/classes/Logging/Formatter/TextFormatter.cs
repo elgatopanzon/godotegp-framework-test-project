@@ -8,7 +8,7 @@ using Newtonsoft.Json.Converters;
 
 using GodotEGP.Logging.Formatter;
 
-public class TextFormatter : IFormatter
+public partial class TextFormatter : IFormatter
 {
 	protected string _createdTimeFormat = "dd MMM yyyy HH:mm:ss";
 	protected string _separator = " | ";

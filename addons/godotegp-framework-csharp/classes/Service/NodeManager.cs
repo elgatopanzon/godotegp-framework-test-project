@@ -217,7 +217,7 @@ public partial class NodeManager : Service
 		}
 	}
 
-	public class DeferredSignalSubscription
+	public partial class DeferredSignalSubscription
 	{
 		public string NodeId;
 		public string SignalName;

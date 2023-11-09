@@ -10,7 +10,7 @@ using GodotEGP.Data.Endpoint;
 using GodotEGP.Logging;
 
 // operates on file based objects 
-public class HTTPOperator : Operator, IOperator
+public partial class HTTPOperator : Operator, IOperator
 {
 	private HTTPEndpoint _httpEndpoint;
 	private int _operationType;

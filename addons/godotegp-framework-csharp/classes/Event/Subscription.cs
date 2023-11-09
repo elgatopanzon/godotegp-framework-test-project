@@ -8,7 +8,7 @@ using GodotEGP.Event.Events;
 using GodotEGP.Event.Filter;
 
 
-public class EventSubscription<T> : IEventSubscription<Event>
+public partial class EventSubscription<T> : IEventSubscription<Event>
 {
     public object Subscriber { get; }
     public Action<IEvent> CallbackMethod { get; }
@@ -34,7 +34,7 @@ public class EventSubscription<T> : IEventSubscription<Event>
     }
 }
 
-public static class EventSubscriptionExtensionMethods
+public static partial class EventSubscriptionExtensionMethods
 {
 	public static IEventSubscription<Event> Filters(this IEventSubscription<Event> obj, params IFilter[] filters)
 	{

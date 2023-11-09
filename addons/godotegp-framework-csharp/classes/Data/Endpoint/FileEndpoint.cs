@@ -3,7 +3,7 @@ namespace GodotEGP.Data.Endpoint;
 using GodotEGP.Logging;
 
 // File object holding information about the provided filename and path
-public class FileEndpoint : IEndpoint
+public partial class FileEndpoint : IEndpoint
 {
 	private string _path;
 	private string _extension;

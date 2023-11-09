@@ -8,7 +8,7 @@ using GodotEGP.Logging;
 using GodotEGP.Event.Events;
 using GodotEGP.Event.Filter;
 
-public class EventQueue
+public partial class EventQueue
 {
 	private Queue<IEvent> _eventQueue = new Queue<IEvent>();
 

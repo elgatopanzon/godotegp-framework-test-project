@@ -387,11 +387,11 @@ public partial class Main : Node
 
 	}
 
-	public class MoveState : HStateMachine { }
-	public class RunState : HStateMachine { }
-	public class JumpState : HStateMachine { }
-	public class OtherState : HStateMachine { }
-	public class Other2State : HStateMachine { }
+	public partial class MoveState : HStateMachine { }
+	public partial class RunState : HStateMachine { }
+	public partial class JumpState : HStateMachine { }
+	public partial class OtherState : HStateMachine { }
+	public partial class Other2State : HStateMachine { }
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
@@ -471,7 +471,7 @@ public partial class Main : Node
 	}
 }
 
-public class HTTPEchoResult : VObject
+public partial class HTTPEchoResult : VObject
 {
 	private readonly VValue<string> _method;
 
@@ -552,7 +552,7 @@ public class HTTPEchoResult : VObject
 //         }
 // 	}
 //
-// public class MyBackgroundJob : BackgroundJob
+// public partial class MyBackgroundJob : BackgroundJob
 // {
 // 	public override void DoWork(object sender, DoWorkEventArgs e)
 // 	{

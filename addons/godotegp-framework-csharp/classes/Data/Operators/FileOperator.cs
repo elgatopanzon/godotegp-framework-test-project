@@ -8,7 +8,7 @@ using GodotEGP.Logging;
 using GodotEGP.Data.Endpoint;
 
 // operates on file based objects 
-public class FileOperator : Operator, IOperator
+public partial class FileOperator : Operator, IOperator
 {
 	private FileEndpoint _fileEndpoint;
 	private int _operationType;

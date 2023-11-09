@@ -1,5 +1,5 @@
 namespace GodotEGP.Config;
 
-public interface IObject
+public partial interface IObject
 {
 }

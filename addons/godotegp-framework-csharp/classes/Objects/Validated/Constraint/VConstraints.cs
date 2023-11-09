@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Collections;
 using GodotEGP.Objects.Extensions;
 
-public class VConstraint<T>
+public partial class VConstraint<T>
 {
 	public virtual bool Validate(T value)
 	{
@@ -14,7 +14,7 @@ public class VConstraint<T>
 	}
 }
 
-public class UniqueItems<T> : VConstraint<T>
+public partial class UniqueItems<T> : VConstraint<T>
 {
 	public override bool Validate(T value)
 	{
@@ -38,7 +38,7 @@ public class UniqueItems<T> : VConstraint<T>
 		return true;
 	}
 
-	public class ValidationNonUniqueItemException : Exception
+	public partial class ValidationNonUniqueItemException : Exception
 	{
 		public ValidationNonUniqueItemException() { }
 		public ValidationNonUniqueItemException(string message) : base(message) { }
@@ -50,7 +50,7 @@ public class UniqueItems<T> : VConstraint<T>
 	}
 }
 
-public class MinMaxLength<T> : VConstraint<T>
+public partial class MinMaxLength<T> : VConstraint<T>
 {
 	private int _minLength;
 	private int _maxLength;
@@ -80,18 +80,18 @@ public class MinMaxLength<T> : VConstraint<T>
 	}
 
 	// exceptions
-	public class ValidationMinLengthException : Exception
+	public partial class ValidationMinLengthException : Exception
 	{
 		public ValidationMinLengthException(string message) : base(message) {}
 	}
 
-	public class ValidationMaxLengthException : Exception
+	public partial class ValidationMaxLengthException : Exception
 	{
 		public ValidationMaxLengthException(string message) : base(message) {}
 	}
 }
 
-public class MinMaxItems<T> : VConstraint<T>
+public partial class MinMaxItems<T> : VConstraint<T>
 {
 	private int _minItems;
 	private int _maxItems;
@@ -136,18 +136,18 @@ public class MinMaxItems<T> : VConstraint<T>
 	}
 
 	// exceptions
-	public class ValidationMinItemsException : Exception
+	public partial class ValidationMinItemsException : Exception
 	{
 		public ValidationMinItemsException(string message) : base(message) {}
 	}
 
-	public class ValidationMaxItemsException : Exception
+	public partial class ValidationMaxItemsException : Exception
 	{
 		public ValidationMaxItemsException(string message) : base(message) {}
 	}
 }
 
-public class MinMaxValue<T> : VConstraint<T>
+public partial class MinMaxValue<T> : VConstraint<T>
 {
 	private T _minValue;
 	private T _maxValue;
@@ -174,18 +174,18 @@ public class MinMaxValue<T> : VConstraint<T>
 	}
 
 	// exceptions
-	public class ValidationMinValueException : Exception
+	public partial class ValidationMinValueException : Exception
 	{
 		public ValidationMinValueException(string message) : base(message) {}
 	}
 
-	public class ValidationMaxValueException : Exception
+	public partial class ValidationMaxValueException : Exception
 	{
 		public ValidationMaxValueException(string message) : base(message) {}
 	}
 }
 
-public class Vector2MinMaxValue<T> : VConstraint<T>
+public partial class Vector2MinMaxValue<T> : VConstraint<T>
 {
 	private MinMaxValue<double> _xConstraint;
 	private MinMaxValue<double> _yConstraint;
@@ -225,18 +225,18 @@ public class Vector2MinMaxValue<T> : VConstraint<T>
 	}
 
 	// exceptions
-	public class ValidationXValueException : Exception
+	public partial class ValidationXValueException : Exception
 	{
 		public ValidationXValueException(string message) : base(message) {}
 	}
 
-	public class ValidationYValueException : Exception
+	public partial class ValidationYValueException : Exception
 	{
 		public ValidationYValueException(string message) : base(message) {}
 	}
 }
 
-public class AllowedValues<T> : VConstraint<T>
+public partial class AllowedValues<T> : VConstraint<T>
 {
 	private IList _allowedValues;
 
@@ -274,7 +274,7 @@ public class AllowedValues<T> : VConstraint<T>
 		return true;
 	}
 
-	public class ValidationIllegalItemException : Exception
+	public partial class ValidationIllegalItemException : Exception
 	{
 		public ValidationIllegalItemException() { }
 		public ValidationIllegalItemException(string message) : base(message) { }

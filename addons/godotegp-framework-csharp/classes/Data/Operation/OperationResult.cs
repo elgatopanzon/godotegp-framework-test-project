@@ -7,7 +7,7 @@ using GodotEGP.Objects.Validated;
 using GodotEGP.Logging;
 
 // accept a result object and create a ValidatedObject from T
-public class OperationResult<T>
+public partial class OperationResult<T>
 {
 	private T _resultObject;
 

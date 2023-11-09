@@ -5,7 +5,7 @@ using System;
 
 using GodotEGP.Logging.Destination;
 
-public class Logger
+public partial class Logger
 {
 	public Logging.Message.LogLevel LogLevel = Logging.Message.LogLevel.Debug; // debug by default
 

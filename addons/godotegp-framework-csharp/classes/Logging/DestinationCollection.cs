@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 using GodotEGP.Logging.Destination;
 
-public class DestinationCollection
+public partial class DestinationCollection
 {
 	private List<IDestination> _loggerDestinations = new List<IDestination>();
 

@@ -4,7 +4,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public class Message
+public partial class Message
 {
 	public DateTime Created { get; set; }
 	public ulong TicksMsec { get; set; }

@@ -211,7 +211,7 @@ public partial class LoggerManager : Service
 	}
 }
 
-public class LoggerManagerConfigHandler
+public partial class LoggerManagerConfigHandler
 {
 	public LoggerManagerConfigHandler()
 	{

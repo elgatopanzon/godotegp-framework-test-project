@@ -208,7 +208,7 @@ public partial class EventManager : Service
 	}
 }
 
-public class EventQueueDeferred : EventQueue
+public partial class EventQueueDeferred : EventQueue
 {
 	
 }

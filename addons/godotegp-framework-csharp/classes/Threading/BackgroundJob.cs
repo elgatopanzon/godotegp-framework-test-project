@@ -7,7 +7,7 @@ using GodotEGP.Logging;
 using GodotEGP.Event.Events;
 using GodotEGP.Objects.Extensions;
 
-public class BackgroundJob
+public partial class BackgroundJob
 {
 	protected BackgroundWorker worker = new BackgroundWorker();
 	public Action<DoWorkEventArgs> OnWorking;

@@ -1,6 +1,6 @@
 namespace GodotEGP.Objects.Validated;
 
-public interface IVValue
+public partial interface IVValue
 {
 	bool Validate();
 }

@@ -10,7 +10,7 @@ using GodotEGP.Data.Endpoint;
 using GodotEGP.Objects.Extensions;
 using GodotEGP.Event.Events;
 
-public class Loader : BackgroundJob
+public partial class Loader : BackgroundJob
 {
 	private Queue<Dictionary<string, object>> _loadQueue = new Queue<Dictionary<string, object>>();
 

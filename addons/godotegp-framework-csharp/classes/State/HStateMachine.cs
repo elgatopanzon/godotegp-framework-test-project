@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using GodotEGP.Logging;
 
-public class HStateMachine
+public partial class HStateMachine
 {
 	// owner object of this instance
 	private Object Owner;
@@ -139,17 +139,17 @@ public class HStateMachine
 	}
 }
 
-public class UnconsumedTransitionException : Exception
+public partial class UnconsumedTransitionException : Exception
 {
     public UnconsumedTransitionException(string message) : base(message) { }
 }
 
-public class InvalidChangeStateException : Exception
+public partial class InvalidChangeStateException : Exception
 {
     public InvalidChangeStateException(string message) : base(message) { }
 }
 
-public class StateExistsException : Exception
+public partial class StateExistsException : Exception
 {
     public StateExistsException(string message) : base(message) { }
 }

@@ -2,7 +2,7 @@ namespace GodotEGP.Event.Filter;
 
 using GodotEGP.Event.Events;
 
-public interface IFilter
+public partial interface IFilter
 {
 	bool Match(IEvent matchEvent);
 }

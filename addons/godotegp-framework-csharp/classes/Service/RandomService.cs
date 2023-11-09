@@ -47,7 +47,7 @@ public partial class RandomService : Service
 	}
 }
 
-public class RandomInstanceExistsException : Exception
+public partial class RandomInstanceExistsException : Exception
 {
 	public RandomInstanceExistsException(string message) : base(message)
 	{

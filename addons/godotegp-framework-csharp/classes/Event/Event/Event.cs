@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 using GodotEGP.Service;
 
-public class Event : IEvent
+public partial class Event : IEvent
 {
 	public object Owner { get; set; }
 	public object Data { get; set; }
@@ -40,15 +40,15 @@ static class EventExtensionMethods
     }
 }
 
-public class ServiceRegistered : Event
+public partial class ServiceRegistered : Event
 {
 }
 
-public class ServiceDeregistered : Event
+public partial class ServiceDeregistered : Event
 {
 }
 
-public class GodotSignal : Event
+public partial class GodotSignal : Event
 {
  	public string SignalName { get; set; }
  	public Variant[] SignalParams { get; set; }
@@ -68,7 +68,7 @@ static class SignalExtensionMethods
     }
 }
 
-public class NodeEvent : Event
+public partial class NodeEvent : Event
 {
 	public Node NodeObj;
 }
@@ -81,21 +81,21 @@ static class NodeExtensionMethods
     }
 }
 
-public class NodeAdded : NodeEvent
+public partial class NodeAdded : NodeEvent
 {
 }
 
-public class NodeRemoved : NodeEvent
-{
-}
-
-
-public class ServiceReady : Event
+public partial class NodeRemoved : NodeEvent
 {
 }
 
 
-public class BackgroundJobEvent : Event
+public partial class ServiceReady : Event
+{
+}
+
+
+public partial class BackgroundJobEvent : Event
 {
 	public object JobOwner;
 	public DoWorkEventArgs DoWorkEventArgs;
@@ -126,40 +126,40 @@ static class EventBackgroundJobExtensionMethods
     }
 }
 
-public class BackgroundJobWorking : BackgroundJobEvent
+public partial class BackgroundJobWorking : BackgroundJobEvent
 {
 }
-public class BackgroundJobProgress : BackgroundJobEvent
+public partial class BackgroundJobProgress : BackgroundJobEvent
 {
 }
-public class BackgroundJobComplete : BackgroundJobEvent
+public partial class BackgroundJobComplete : BackgroundJobEvent
 {
 }
-public class BackgroundJobError : BackgroundJobEvent
+public partial class BackgroundJobError : BackgroundJobEvent
 {
 }
 
-public class DataOperationWorking : BackgroundJobEvent
+public partial class DataOperationWorking : BackgroundJobEvent
 {
 }
-public class DataOperationProgress : BackgroundJobEvent
+public partial class DataOperationProgress : BackgroundJobEvent
 {
 }
-public class DataOperationComplete : BackgroundJobEvent
+public partial class DataOperationComplete : BackgroundJobEvent
 {
 }
-public class DataOperationError : BackgroundJobEvent
+public partial class DataOperationError : BackgroundJobEvent
 {
 }
 
 // events for ValidatedValue<T> objects
-public class ValidatedValueEvent : Event
+public partial class ValidatedValueEvent : Event
 {
 	public object Value;
 	public object PrevValue;
 }
 
-static public class ValidatedValueExtensions
+static public partial class ValidatedValueExtensions
 {
 	static public T SetValue<T>(this T o, object value) where T : ValidatedValueEvent
     {
@@ -174,20 +174,20 @@ static public class ValidatedValueExtensions
     }
 }
 
-public class ValidatedValueChanged : ValidatedValueEvent
+public partial class ValidatedValueChanged : ValidatedValueEvent
 {
 }
 
-public class ValidatedValueSet : ValidatedValueEvent
+public partial class ValidatedValueSet : ValidatedValueEvent
 {
 }
 
-public class ConfigManagerLoader : BackgroundJobEvent
+public partial class ConfigManagerLoader : BackgroundJobEvent
 {
 	public List<Config.Object> ConfigObjects;
 	
 }
-static public class ConfigManagerLoaderExtensions
+static public partial class ConfigManagerLoaderExtensions
 {
 	static public T SetConfigObjects<T>(this T o, List<Config.Object> configObjects) where T : ConfigManagerLoader
 	{
@@ -196,12 +196,12 @@ static public class ConfigManagerLoaderExtensions
 	}
 }
 
-public class ConfigManagerLoaderProgress : ConfigManagerLoader
+public partial class ConfigManagerLoaderProgress : ConfigManagerLoader
 {
 }
-public class ConfigManagerLoaderCompleted : ConfigManagerLoader
+public partial class ConfigManagerLoaderCompleted : ConfigManagerLoader
 {
 }
-public class ConfigManagerLoaderError : ConfigManagerLoader
+public partial class ConfigManagerLoaderError : ConfigManagerLoader
 {
 }

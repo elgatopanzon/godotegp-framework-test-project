@@ -2,7 +2,7 @@ namespace GodotEGP.Data;
 
 using System;
 
-public class MimeType
+public partial class MimeType
 {
 	public static string GetMimeType(string extension)
 	{

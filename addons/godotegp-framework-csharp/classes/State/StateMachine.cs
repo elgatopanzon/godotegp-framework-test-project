@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using GodotEGP.Logging;
 
-public class StateMachine
+public partial class StateMachine
 {
 	// holds object which owns the state
 	object _ownerObject;
@@ -150,7 +150,7 @@ public class StateMachine
 	}
 }
 
-public class InvalidStateException : Exception
+public partial class InvalidStateException : Exception
 {
     public InvalidStateException()
     {

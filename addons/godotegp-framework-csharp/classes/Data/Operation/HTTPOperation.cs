@@ -5,7 +5,7 @@ using GodotEGP.Data.Operator;
 using GodotEGP.Data.Endpoint;
 
 // operation class for File operators
-class HTTPOperation<T> : Operation<T>
+public partial class HTTPOperation<T> : Operation<T>
 {
 	HTTPOperator _dataOperator;
 

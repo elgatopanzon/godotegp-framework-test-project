@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using GodotEGP.Event.Events;
 using GodotEGP.Event.Filter;
 
-public interface IEventSubscription<in T> where T : Event
+public partial interface IEventSubscription<in T> where T : Event
 {
 	object Subscriber { get; }
 	Action<IEvent> CallbackMethod { get; }

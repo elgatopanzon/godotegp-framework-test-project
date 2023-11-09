@@ -3,7 +3,7 @@ namespace GodotEGP.Logging.Formatter;
 using Godot;
 using System;
 
-public interface IFormatter
+public partial interface IFormatter
 {
 	public object Format(Logging.Message loggerMessage);
 }

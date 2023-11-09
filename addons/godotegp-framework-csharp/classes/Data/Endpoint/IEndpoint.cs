@@ -1,6 +1,6 @@
 namespace GodotEGP.Data.Endpoint;
 
-public interface IEndpoint
+public partial interface IEndpoint
 {
 	
 }

@@ -6,7 +6,7 @@ using GodotEGP.Data.Endpoint;
 using GodotEGP.Logging;
 
 // operation class for File operators
-class FileOperation<T> : Operation<T>
+public partial class FileOperation<T> : Operation<T>
 {
 	FileOperator _dataOperator;
 

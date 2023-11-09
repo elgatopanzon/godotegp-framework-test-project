@@ -2,7 +2,7 @@ namespace GodotEGP.Event.Events;
 
 using System;
 
-public interface IEvent
+public partial interface IEvent
 {
 	DateTime Created { get; set; }
 	object Owner { get; set; }

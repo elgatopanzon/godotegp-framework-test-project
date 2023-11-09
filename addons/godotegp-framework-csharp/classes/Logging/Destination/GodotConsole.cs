@@ -7,7 +7,7 @@ using Newtonsoft.Json.Converters;
 
 using GodotEGP.Logging.Formatter;
 
-public class GodotConsole : IDestination
+public partial class GodotConsole : IDestination
 {
 	public bool Enabled { get; set; }
 

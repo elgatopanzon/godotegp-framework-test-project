@@ -8,7 +8,7 @@ using GodotEGP.Data.Endpoint;
 using GodotEGP.Event.Events;
 using GodotEGP.Objects.Extensions;
 
-public class OperationProcess<T>
+public partial class OperationProcess<T>
 {
 	protected object _dataObject;
 
@@ -47,7 +47,7 @@ public class OperationProcess<T>
 	}
 }
 
-public class DataOperationProcessFile<T> : OperationProcess<T>
+public partial class DataOperationProcessFile<T> : OperationProcess<T>
 {
 	public DataOperationProcessFile(string filePath, object dataObject, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null) : base(new FileOperation<T>(new FileEndpoint(filePath), dataObject), onWorkingCb, onProgressCb, onCompleteCb, onErrorCb)
 	{
@@ -58,7 +58,7 @@ public class DataOperationProcessFile<T> : OperationProcess<T>
 	}
 }
 
-public class DataOperationProcessHTTP<T> : OperationProcess<T>
+public partial class DataOperationProcessHTTP<T> : OperationProcess<T>
 {
 	public DataOperationProcessHTTP(string hostname, int port = 443, string path = "/", Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null, object dataObject = null, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null) : base(new HTTPOperation<T>(new HTTPEndpoint(hostname, port, path, urlParams, requestMethod, verifySSL, timeout, headers), dataObject), onWorkingCb, onProgressCb, onCompleteCb, onErrorCb)
 	{

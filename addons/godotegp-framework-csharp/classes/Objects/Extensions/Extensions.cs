@@ -9,7 +9,7 @@ using GodotEGP.Event.Events;
 using GodotEGP.Event.Filter;
 using GodotEGP.Service;
 
-public static class ObjectExtensions
+public static partial class ObjectExtensions
 {
 	public static bool TryCast<T>(this object obj, out T result)
 	{
@@ -63,7 +63,7 @@ public static class ObjectExtensions
 	}
 }
 
-public static class EventManagerObjectExtensions
+public static partial class EventManagerObjectExtensions
 {
 	public static EventSubscription<T> Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null) where T : Event
 	{

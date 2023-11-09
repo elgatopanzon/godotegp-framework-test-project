@@ -5,7 +5,7 @@ using System;
 using System.Dynamic;
 using System.Collections.Generic;
 
-public class DynamicDictionary : DynamicObject
+public partial class DynamicDictionary : DynamicObject
 {
     // Inner dictionary object holding properties.
     Dictionary<string, object> dictionary

@@ -3,7 +3,7 @@ namespace GodotEGP.Logging.Formatter;
 using Godot;
 using System;
 
-public class GodotRichFormatter : TextFormatter
+public partial class GodotRichFormatter : TextFormatter
 {
 	public GodotRichFormatter()
 	{

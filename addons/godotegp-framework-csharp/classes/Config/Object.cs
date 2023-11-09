@@ -9,7 +9,7 @@ using GodotEGP.Data.Operation;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
 
-public abstract class Object : IObject
+public abstract partial class Object : IObject
 {
 	internal abstract object RawValue { get; set; }
 	internal abstract IEndpoint DataEndpoint { get; set; }
@@ -26,7 +26,7 @@ public abstract class Object : IObject
     }
 }
 
-public class Object<T> : Object where T : VObject, new()
+public partial class Object<T> : Object where T : VObject, new()
 {
 	private bool _loading;
 	internal override bool Loading

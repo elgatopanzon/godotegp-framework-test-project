@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 using GodotEGP.Logging;
 
-public class ObjectPool<T> where T: class
+public partial class ObjectPool<T> where T: class
 {
 	private Stack<T> _objects;
 	private int _capacityInitial;

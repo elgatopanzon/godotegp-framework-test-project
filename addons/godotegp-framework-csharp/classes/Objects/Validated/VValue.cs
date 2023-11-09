@@ -9,7 +9,7 @@ using System.Reflection;
 using GodotEGP.Logging;
 using GodotEGP.Objects.Validated.Constraint;
 
-public abstract class VValue : Validated.IVValue
+public abstract partial class VValue : Validated.IVValue
 {
 	public abstract bool Validate();
 	public abstract bool IsDefault();
@@ -19,7 +19,7 @@ public abstract class VValue : Validated.IVValue
 	internal abstract object Parent {set; get;}
 }
 
-public class VValue<T> : VValue
+public partial class VValue<T> : VValue
 {
 	protected T _value;
 	protected T _default;
@@ -196,7 +196,7 @@ public class VValue<T> : VValue
 		return true;
 	}
 
-	public class ValidationValueIsNullException : Exception
+	public partial class ValidationValueIsNullException : Exception
 	{
 		public ValidationValueIsNullException() { }
 		public ValidationValueIsNullException(string message) : base(message) { }

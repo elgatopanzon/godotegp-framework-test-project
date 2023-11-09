@@ -10,7 +10,7 @@ using System.Linq;
 using GodotEGP.Logging;
 using GodotEGP.Event.Events;
 
-public class VObject
+public partial class VObject
 {
 	protected VObject _parent;
 
@@ -129,7 +129,7 @@ public interface IMergeFrom<in T>
     void MergeFrom(T sourceObj);
 }
 
-public class ObjectTest : VObject
+public partial class ObjectTest : VObject
 {
 	private readonly VValue<List<string>> _stringListTest;
 	private readonly VValue<Dictionary<string, int>> _dictionarySizeTest;
@@ -327,7 +327,7 @@ public class ObjectTest : VObject
 
 }
 
-public class ObjectTest2 : VObject
+public partial class ObjectTest2 : VObject
 {
 	private readonly VValue<string> _stringTest;
 

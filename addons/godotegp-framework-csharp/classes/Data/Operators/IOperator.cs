@@ -4,7 +4,7 @@ using GodotEGP.Data.Endpoint;
 
 // interface for classes which perform direct data operations using
 // IDataEndpointObject instances
-public interface IOperator
+public partial interface IOperator
 {
 	void SetDataEndpoint(IEndpoint dataEndpoint);
 	void Load();

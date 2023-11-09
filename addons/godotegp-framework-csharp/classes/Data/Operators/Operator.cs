@@ -2,7 +2,7 @@ namespace GodotEGP.Data.Operator;
 
 using GodotEGP.Threading;
 
-public abstract class Operator : BackgroundJob
+public abstract partial class Operator : BackgroundJob
 {
 
 }
