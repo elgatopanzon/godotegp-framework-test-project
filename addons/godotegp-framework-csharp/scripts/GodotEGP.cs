@@ -29,6 +29,9 @@ public partial class GodotEGP : Node
 	{
 		ServiceRegistry.Get<ConfigManager>();
 		ServiceRegistry.Get<DataService>();
+
+		var lmch = new LoggerManagerConfigHandler();
+
 		// ServiceRegistry.Instance.RegisterService(new EventService(), "Events");
         //
 		// ServiceRegistry.Instance.RegisterService(LoggerManager.Instance, "Log");

@@ -169,3 +169,11 @@ public partial class LoggerManager : Service
 		_Log(LoggerMessage.LogLevel.Critical, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
 }
+
+public class LoggerManagerConfigHandler
+{
+	public LoggerManagerConfigHandler()
+	{
+		ServiceRegistry.Get<ConfigManager>().Subscribe<EventServiceReady>((e) => LoggerManager.LogDebug("LoggerManagerConfigHandler", "", "e", "e")).Owner(ServiceRegistry.Get<ConfigManager>());
+	}
+}
