@@ -97,7 +97,7 @@ public partial class LoggerManager : Service
 		var currentLogLevel = LoggerMessage.DefaultLogLevel;
 		if (Instance.Config != null)
 		{
-			currentLogLevel = Instance.Config.LogLevel;
+			currentLogLevel = Instance.Config.GetMatchingLogLevelOverride(sourceType.Name);
 		}
 
 		if (logLevel >= currentLogLevel)
@@ -127,7 +127,7 @@ public partial class LoggerManager : Service
 	// update config object in various moving parts
 	public void OnConfigObjectUpdated()
 	{
-		LoggerManager.LogDebug("Updating config");
+		LoggerManager.LogDebug("Config updated", "", "config", Config);
 	}
 
 	/***********************************

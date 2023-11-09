@@ -1,5 +1,10 @@
 {
   "LoggerConfig": {
-    "LogLevel": 0
+    "LogLevel": 0,
+    "LogLevelOverrides": {
+      "EventManager": 0,
+      "EventFilter": 0,
+      "ValidatedValue": 0
+    }
   }
 }

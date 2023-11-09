@@ -1,6 +1,7 @@
 namespace Godot.EGP.Config;
 
 using System;
+using System.Collections.Generic;
 using Godot.EGP.ValidatedObjects;
 
 public class CoreEngineConfig : ValidatedObject
@@ -31,6 +32,14 @@ public class LoggerConfig : ValidatedObject
 		set { _logLevel.Value = value; }
 	}
 
+	private readonly ValidatedValue<Dictionary<string, LoggerMessage.LogLevel>> _logLevelOverrides;
+
+	public Dictionary<string, LoggerMessage.LogLevel> LogLevelOverrides
+	{
+		get { return _logLevelOverrides.Value; }
+		set { _logLevelOverrides.Value = value; }
+	}
+
 	public LoggerConfig(ValidatedObject parent = null) : base(parent)
 	{
         _logLevel = AddValidatedValue<LoggerMessage.LogLevel>(this)
@@ -38,5 +47,23 @@ public class LoggerConfig : ValidatedObject
             .AllowedValues(LoggerMessage.LogLevel.GetValues<LoggerMessage.LogLevel>())
         	.ChangeEventsEnabled()
             ;
+
+        _logLevelOverrides = AddValidatedValue<Dictionary<string, LoggerMessage.LogLevel>>(this)
+            .Default(new Dictionary<string, LoggerMessage.LogLevel>())
+        	.ChangeEventsEnabled()
+            ;
+	}
+
+	public LoggerMessage.LogLevel GetMatchingLogLevelOverride(string match)
+	{
+		foreach (KeyValuePair<string, LoggerMessage.LogLevel> levelOverride in LogLevelOverrides)
+		{
+			if (match.Contains(levelOverride.Key))
+			{
+				return levelOverride.Value;
+			}
+		}
+
+		return LogLevel;
 	}
 }
