@@ -52,6 +52,11 @@ public partial class ConfigManager : Service
 	// Called when service is registered in manager
 	public override void _OnServiceRegistered()
 	{
+		DiscoveryConfigFiles();
+	}
+
+	public void DiscoveryConfigFiles()
+	{
 		Queue<Dictionary<string, object>> fileQueue = new Queue<Dictionary<string, object>>();
 
 		foreach (string configDataPath in _configDataDirs)
