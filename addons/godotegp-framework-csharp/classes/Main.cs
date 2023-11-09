@@ -31,5 +31,6 @@ public partial class Main : Node
 		// trigger lazy load ConfigManager to trigger initial load
 		ServiceRegistry.Get<DataService>();
 		ServiceRegistry.Get<ConfigManager>();
+		ServiceRegistry.Get<NodeManager>();
 	}
 }

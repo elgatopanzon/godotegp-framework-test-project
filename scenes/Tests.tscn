@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3 uid="uid://dyulet4ssd3y3"]
+
+[ext_resource type="Script" path="res://scenes/Tests.cs" id="1_hhdyv"]
+
+[node name="Tests" type="Node2D"]
+script = ExtResource("1_hhdyv")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+text = "Save game test"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="SaveName" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+metadata/id = "UITests.Save.Name"
+
+[node name="Save" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Save"
+metadata/id = "UITests.Save.Save"
+
+[node name="Load" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Load"
+metadata/id = "UITests.Save.Load"
