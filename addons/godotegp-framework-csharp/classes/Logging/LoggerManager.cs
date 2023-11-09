@@ -28,7 +28,7 @@ public partial class LoggerManager : Service
 	}
 
 	private LoggerConfig _loggerConfig;
-	public LoggerConfig Config
+	private LoggerConfig Config
 	{
 		get { 
 			return _loggerConfig;
@@ -129,6 +129,11 @@ public partial class LoggerManager : Service
 		GetLoggerInstance(typeof(T)).LoggerDestinationCollection = ldc;
 	}
 
+	public void SetConfig(LoggerConfig config)
+	{
+		Config = config;
+	}
+
 	// update config object in various moving parts
 	public void OnConfigObjectUpdated()
 	{
@@ -210,7 +215,7 @@ public class LoggerManagerConfigHandler
 {
 	public LoggerManagerConfigHandler()
 	{
-		ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().SubscribeOwner<ValidatedValueChanged>(_On_ConfigManager_ValueChanged);
+		ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().LoggerConfig.SubscribeOwner<ValidatedValueChanged>(_On_ConfigManager_ValueChanged);
 
 	}
 
@@ -218,9 +223,9 @@ public class LoggerManagerConfigHandler
 	{
 		if (e is ValidatedValueChanged ev)
 		{
-			if (ev.Owner is EngineConfig cec)
+			if (ev.Owner is LoggerConfig cec)
 			{
-				LoggerManager.Instance.Config = cec.LoggerConfig;
+				LoggerManager.Instance.SetConfig(cec);
 			}
 		}
 	}
