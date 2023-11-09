@@ -169,6 +169,22 @@ public partial class ConfigManager : Service
 		return (T) GetConfigObjectInstance(typeof(T));
 	}
 
+	public void SaveConfigObjectInstance(Type configInstanceType)
+	{
+		// generate default filepath for type we are saving
+		DataEndpointFile fileEndpoint = new DataEndpointFile(Path.Combine(_configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, "config.json"));
+
+		ConfigObject configObject = GetConfigObjectInstance(configInstanceType);
+
+		configObject.DataEndpoint = fileEndpoint;
+		configObject.Save();
+	}
+
+	public void Save<T>() where T : ConfigObject
+	{
+		SaveConfigObjectInstance(typeof(T));
+	}
+
 	// Called when service is deregistered from manager
 	public override void _OnServiceDeregistered()
 	{
