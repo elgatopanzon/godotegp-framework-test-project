@@ -169,20 +169,23 @@ public partial class ConfigManager : Service
 		return (T) GetConfigObjectInstance(typeof(T));
 	}
 
-	public void SaveConfigObjectInstance(Type configInstanceType)
+	public void SaveConfigObjectInstance(Type configInstanceType, IDataEndpointObject dataEndpoint = null)
 	{
 		// generate default filepath for type we are saving
-		DataEndpointFile fileEndpoint = new DataEndpointFile(Path.Combine(_configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, "config.json"));
+		if (dataEndpoint == null)
+		{
+			dataEndpoint = new DataEndpointFile(Path.Combine(_configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, "config.json"));
+		}
 
 		ConfigObject configObject = GetConfigObjectInstance(configInstanceType);
 
-		configObject.DataEndpoint = fileEndpoint;
+		configObject.DataEndpoint = dataEndpoint;
 		configObject.Save();
 	}
 
-	public void Save<T>() where T : ConfigObject
+	public void Save<T>(IDataEndpointObject dataEndpoint = null) where T : ConfigObject
 	{
-		SaveConfigObjectInstance(typeof(T));
+		SaveConfigObjectInstance(typeof(T), dataEndpoint);
 	}
 
 	// Called when service is deregistered from manager
