@@ -116,18 +116,17 @@ public partial class ConfigManager : Service
 		}
 	}
 
-	public void MergeConfigObjects(Dictionary<Type, ConfigObject> configObjects)
+	public void MergeConfigObjects(List<ConfigObject> configObjects)
 	{
-    	foreach (KeyValuePair<Type, ConfigObject> pair in configObjects)
+    	foreach (ConfigObject obj in configObjects)
     	{
-        	Type key = pair.Key;
-        	ConfigObject value = pair.Value;
+        	Type type = obj.RawValue.GetType();
 
-
-        	if (GetConfigObjectInstance(key).RawValue is ValidatedObject vo)
+        	if (GetConfigObjectInstance(type).RawValue is ValidatedObject vo)
         	{
-        		LoggerManager.LogDebug("Merging config object", "", "objType", key);
-        		vo.MergeFrom(value.RawValue as ValidatedObject);
+        		LoggerManager.LogDebug("Merging config object", "", "objType", type);
+        		vo.MergeFrom(obj.RawValue as ValidatedObject);
+        		LoggerManager.LogDebug("Merged config object", "", "obj", vo);
         	}
     	}
 	}

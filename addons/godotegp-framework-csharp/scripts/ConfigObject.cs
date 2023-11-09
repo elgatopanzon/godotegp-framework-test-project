@@ -80,12 +80,15 @@ public class ConfigObject<T> : ConfigObject where T : ValidatedObject, new()
 		{
 			if (ee.RunWorkerCompletedEventArgs.Result is DataOperationResult<T> resultObj)
 			{
-				if (RawValue is T co)
-				{
-					co.MergeFrom((T) resultObj.ResultObject);
-				}
+				// if (RawValue is T co)
+				// {
+				// 	co.MergeFrom((T) resultObj.ResultObject);
+				// }
 
-				LoggerManager.LogDebug("Config object merged with registery object", "", "configObj", RawValue);
+				// LoggerManager.LogDebug("Config object merged with loaded object", "", "configObj", RawValue);
+
+				// overwrite created object's values with loaded object
+				RawValue = resultObj.ResultObject;
 
 				_loading = false;
 			}

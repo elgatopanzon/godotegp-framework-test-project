@@ -187,12 +187,12 @@ public class EventValidatedValueSet : EventValidatedValue
 
 public class EventConfigManagerLoader : EventBackgroundJob
 {
-	public Dictionary<Type, ConfigObject> ConfigObjects;
+	public List<ConfigObject> ConfigObjects;
 	
 }
 static public class EventConfigManagerLoaderExtensions
 {
-	static public T SetConfigObjects<T>(this T o, Dictionary<Type, ConfigObject> configObjects) where T : EventConfigManagerLoader
+	static public T SetConfigObjects<T>(this T o, List<ConfigObject> configObjects) where T : EventConfigManagerLoader
 	{
 		o.ConfigObjects = configObjects;
 		return o;

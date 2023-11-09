@@ -15,7 +15,7 @@ public class ConfigLoader : BackgroundJob
 		return _loadQueue.Count;
 	} }
 
-	private Dictionary<Type, ConfigObject> _configObjects = new Dictionary<Type, ConfigObject>();
+	private List<ConfigObject> _configObjects = new List<ConfigObject>();
 
 	public ConfigLoader(Queue<Dictionary<string, object>> loadQueue)
 	{
@@ -41,12 +41,8 @@ public class ConfigLoader : BackgroundJob
 				{
 					LoggerManager.LogDebug("Loading config item", "", "config", queuedItem);
 
-					// fetch any existing and known objects of the same type
-					// otherwise create a fresh one
-					if (!_configObjects.TryGetValue(Type.GetType(queuedItem["configType"].ToString()), out ConfigObject obj))
-					{
-						obj = ConfigObject.Create(queuedItem["configType"].ToString());
-					}
+					// create config object instance to load into
+					var obj = ConfigObject.Create(queuedItem["configType"].ToString());
 
 
 					// set data endpoint to current instance's file path
@@ -66,7 +62,7 @@ public class ConfigLoader : BackgroundJob
 					LoggerManager.LogDebug("Loading config item process finished", "", "config", queuedItem);
 
 					// add loaded object to list
-					_configObjects.TryAdd(_currentlyLoadingObj.RawValue.GetType(), _currentlyLoadingObj);
+					_configObjects.Add(_currentlyLoadingObj);
 
 					e.Result = _configObjects;
 
