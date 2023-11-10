@@ -126,3 +126,20 @@ public static partial class ObjectPoolServiceObjectExtensions
 		return ServiceRegistry.Get<ObjectPoolService>().Get<T>();
 	}
 }
+
+public static partial class NodeManagerObjectExtension
+{
+	public static T Node<T>(this string obj) where T : Node
+	{
+		return ServiceRegistry.Get<NodeManager>().GetNode<T>(obj);
+	}
+	public static List<T> Nodes<T>(this string obj) where T : Node
+	{
+		return ServiceRegistry.Get<NodeManager>().GetNodes<T>(obj);
+	}
+
+	public static void Connect(this string obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
+	{
+		ServiceRegistry.Get<NodeManager>().SubscribeSignal(obj, signalName, hasParams, callbackMethod, isHighPriority, oneshot, eventFilters);
+	}
+}

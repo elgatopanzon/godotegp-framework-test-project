@@ -13,12 +13,12 @@ public partial class Tests : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		ServiceRegistry.Get<NodeManager>().SubscribeSignal("UITests.Save.Save", "pressed", false, _On_SaveTest_Save_pressed, isHighPriority: true);
-		ServiceRegistry.Get<NodeManager>().SubscribeSignal("UITests.Save.Load", "pressed", false, _On_SaveTest_Load_pressed, isHighPriority: true);
-		ServiceRegistry.Get<NodeManager>().SubscribeSignal("UITests.Save.Delete", "pressed", false, _On_SaveTest_Delete_pressed, isHighPriority: true);
+		"UITests.Save.Save".Connect("pressed", false, _On_SaveTest_Save_pressed, isHighPriority: true);
+		"UITests.Save.Load".Connect("pressed", false, _On_SaveTest_Load_pressed, isHighPriority: true);
+		"UITests.Save.Delete".Connect("pressed", false, _On_SaveTest_Delete_pressed, isHighPriority: true);
 
-		ServiceRegistry.Get<NodeManager>().SubscribeSignal("UITests.Save.Copy", "pressed", false, _On_SaveTest_Copy_pressed, isHighPriority: true);
-		ServiceRegistry.Get<NodeManager>().SubscribeSignal("UITests.Save.Move", "pressed", false, _On_SaveTest_Move_pressed, isHighPriority: true);
+		"UITests.Save.Copy".Connect("pressed", false, _On_SaveTest_Copy_pressed, isHighPriority: true);
+		"UITests.Save.Move".Connect("pressed", false, _On_SaveTest_Move_pressed, isHighPriority: true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -81,7 +81,7 @@ public partial class Tests : Node2D
 
 	public string GetSaveTestName()
 	{
-		return ServiceRegistry.Get<NodeManager>().GetNode<TextEdit>("UITests.Save.Name").Text;
+		return "UITests.Save.Name".Node<TextEdit>().Text;
 	}
 
 	public void _On_SaveTest_Copy_pressed(IEvent e)
@@ -90,7 +90,7 @@ public partial class Tests : Node2D
 
 		if (ServiceRegistry.Get<SaveDataManager>().GetReady())
 		{
-			ServiceRegistry.Get<SaveDataManager>().Copy(ServiceRegistry.Get<NodeManager>().GetNode<TextEdit>("UITests.Save.CopyFrom").Text, ServiceRegistry.Get<NodeManager>().GetNode<TextEdit>("UITests.Save.CopyTo").Text);
+			ServiceRegistry.Get<SaveDataManager>().Copy("UITests.Save.CopyFrom".Node<TextEdit>().Text, "UITests.Save.CopyTo".Node<TextEdit>().Text);
 		}
 	}
 	public void _On_SaveTest_Move_pressed(IEvent e)
@@ -99,7 +99,7 @@ public partial class Tests : Node2D
 
 		if (ServiceRegistry.Get<SaveDataManager>().GetReady())
 		{
-			ServiceRegistry.Get<SaveDataManager>().Move(ServiceRegistry.Get<NodeManager>().GetNode<TextEdit>("UITests.Save.CopyFrom").Text, ServiceRegistry.Get<NodeManager>().GetNode<TextEdit>("UITests.Save.CopyTo").Text);
+			ServiceRegistry.Get<SaveDataManager>().Move("UITests.Save.CopyFrom".Node<TextEdit>().Text, "UITests.Save.CopyTo".Node<TextEdit>().Text);
 		}
 	}
 }
