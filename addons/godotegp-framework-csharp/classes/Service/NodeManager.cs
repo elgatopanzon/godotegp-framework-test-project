@@ -172,6 +172,32 @@ public partial class NodeManager : Service
 		return false;
 	}
 
+	public T GetNode<T>(string nodeId) where T : Node
+	{
+		if (TryGetNode(nodeId, out Node node))
+		{
+			return (T) node;
+		}
+
+		return null;
+	}
+	public List<T> GetNodes<T>(string nodeId) where T : Node
+	{
+		if (TryGetNodes(nodeId, out List<Node> nodes))
+		{
+			List<T> list = new List<T>();
+
+			foreach (Node n in nodes)
+			{
+				list.Add((T) n);
+			}
+
+			return list;
+		}
+
+		return null;
+	}
+
 	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
 	{
 		// converts params to object
