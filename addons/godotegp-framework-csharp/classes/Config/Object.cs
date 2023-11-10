@@ -3,6 +3,7 @@ namespace GodotEGP.Config;
 using System;
 
 using GodotEGP.Objects.Validated;
+using GodotEGP.Objects.Extensions;
 using GodotEGP.Logging;
 using GodotEGP.Data.Endpoint;
 using GodotEGP.Data.Operation;
@@ -14,6 +15,7 @@ public abstract partial class Object : IObject
 	internal abstract object RawValue { get; set; }
 	internal abstract IEndpoint DataEndpoint { get; set; }
 	internal abstract bool Loading { get; set; }
+	internal abstract string Name { get; set; }
 
 	public abstract void Load();
 	public abstract void Save();
@@ -28,6 +30,13 @@ public abstract partial class Object : IObject
 
 public partial class Object<T> : Object where T : VObject, new()
 {
+	private string _name;
+	internal override string Name
+	{
+		get { return _name; }
+		set { _name = value; }
+	}
+
 	private bool _loading;
 	internal override bool Loading
 	{
@@ -93,12 +102,22 @@ public partial class Object<T> : Object where T : VObject, new()
 				RawValue = resultObj.ResultObject;
 
 				_loading = false;
+
+				this.Emit<DataOperationComplete>((eee) => {
+						eee.SetRunWorkerCompletedEventArgs(ee.RunWorkerCompletedEventArgs);
+					});
 			}
 		}
 	}
 	public void _OnErrorCb(IEvent e)
 	{
-		LoggerManager.LogDebug("ASDAS...");
 		_loading = false;
+
+		if (e is DataOperationError ee)
+		{
+			this.Emit<DataOperationError>((eee) => {
+					eee.SetRunWorkerCompletedEventArgs(ee.RunWorkerCompletedEventArgs);
+				});
+		}
 	}
 }
