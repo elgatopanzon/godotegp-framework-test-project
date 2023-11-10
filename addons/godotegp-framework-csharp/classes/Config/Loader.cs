@@ -50,6 +50,16 @@ public partial class Loader : BackgroundJob
 					// create config object instance to load into
 					var obj = Object.Create(queuedItem["configType"].ToString());
 
+					if (queuedItem.TryGetValue("name", out object name))
+					{
+						obj.Name = name.ToString();
+					}
+					else
+					{
+						// use a generic name when the dictionary doesn't
+						// include a name
+						obj.Name = queuedItem["configType"].ToString()+(_queueSize - _queueSizeCurrent).ToString();
+					}
 
 					// set data endpoint to current instance's file path
 					obj.DataEndpoint = new FileEndpoint(queuedItem["path"].ToString());
