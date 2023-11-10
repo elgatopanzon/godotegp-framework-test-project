@@ -53,6 +53,11 @@ layout_mode = 2
 text = "Delete"
 metadata/id = "UITests.Save.Delete"
 
+[node name="TimedAutosave" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Timed Autosave"
+metadata/id = "UITests.Save.TimedAutosave"
+
 [node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 

@@ -22,11 +22,24 @@ public partial class Tests : Node2D
 		"UITests.Save.Move".Connect("pressed", false, _On_SaveTest_Move_pressed, isHighPriority: true);
 
 		"UITests.Save.ListSlots".Connect("pressed", false, _On_SaveTest_ListSlots_pressed, isHighPriority: true);
+		"UITests.Save.TimedAutosave".Connect("pressed", false, _On_SaveTest_TimedAutosave_pressed, isHighPriority: true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+	}
+
+	public void _On_SaveTest_TimedAutosave_pressed(IEvent e)
+	{
+		string saveName = GetSaveTestName();
+
+		LoggerManager.LogDebug("TimedAutosave pressed", "", "saveName", saveName);
+
+		if (ServiceRegistry.Get<SaveDataManager>().GetReady())
+		{
+			ServiceRegistry.Get<SaveDataManager>().SetLoaded(saveName);
+		}
 	}
 
 	public void _On_SaveTest_Create_pressed(IEvent e)

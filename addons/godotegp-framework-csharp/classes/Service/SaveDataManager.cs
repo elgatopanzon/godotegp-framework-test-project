@@ -28,12 +28,22 @@ public partial class SaveDataManager : Service
 
 	private Dictionary<string, Config.Object> _saveData = new Dictionary<string, Config.Object>();
 
+	private Timer _timedAutosaveTimer;
+
 	public SaveDataManager()
 	{
 		_saveBaseDir = "Save";
 
 		// create base System data
 		Create<SystemData>("System");
+	}
+
+	public void _On_TimedAutoSave_timeout(IEvent e)
+	{
+		LoggerManager.LogDebug("TimedAutosave timeout", "");
+		_timedAutosaveTimer.WaitTime = _config.AutosaveTimeDefaultSec;
+
+		CreateAutosaves();
 	}
 
 	public void SetConfig(SaveDataManagerConfig config)
@@ -46,6 +56,13 @@ public partial class SaveDataManager : Service
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		// TimedAutosave timer
+		_timedAutosaveTimer = new Timer();
+		_timedAutosaveTimer.OneShot = false;
+		_timedAutosaveTimer.SetMeta("id", "SaveDataManager.TimedAutosaveTimer");
+		_timedAutosaveTimer.SubscribeSignal("timeout", false, _On_TimedAutoSave_timeout);
+
+		AddChild(_timedAutosaveTimer);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -256,6 +273,59 @@ public partial class SaveDataManager : Service
 	public void CreateAutosave(string saveName)
 	{
 		string autosaveName = saveName+"_autosave";
+
+		LoggerManager.LogDebug("Creating autosave", "", "saveName", saveName);
+	}
+
+	public void SetLoaded(string saveName, bool loadedState = true)
+	{
+		if (Exists(saveName))
+		{
+			if (Get(saveName).RawValue is SaveData.Data sd && sd.SaveType == SaveDataType.Manual)
+			{
+				sd.Loaded = loadedState;
+
+				StartTimedAutosave();
+			}
+		}
+	}
+
+	public void StartTimedAutosave()
+	{
+		_timedAutosaveTimer.WaitTime = _config.AutosaveTimeDefaultSec;
+		if (_config.TimedAutosaveEnabled)
+		{
+			_timedAutosaveTimer.Start();
+		}
+	}
+
+	public void CreateAutosaves()
+	{
+		foreach (var save in GetLoadedSaves())
+		{
+			if (save.RawValue is SaveData.Data sd)
+			{
+				CreateAutosave(sd.Name);
+			}
+		}
+	}
+
+	public List<Config.Object> GetLoadedSaves()
+	{
+		List<Config.Object> loadedSaves = new List<Config.Object>();
+
+		foreach (var save in GetSaves())
+		{
+			if (save.Value.RawValue is SaveData.Data sd)
+			{
+				if (sd.Loaded)
+				{
+					loadedSaves.Add(save.Value);
+				}
+			}
+		}
+
+		return loadedSaves;
 	}
 
 	public void Copy(string fromName, string toName)
