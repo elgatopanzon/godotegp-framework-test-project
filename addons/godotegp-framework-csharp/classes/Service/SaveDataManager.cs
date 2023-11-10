@@ -169,11 +169,11 @@ public partial class SaveDataManager : Service
 		}
 	}
 
-	public Config.Object<T> Get<T>(string saveName) where T : SaveData.Data, new()
+	public T Get<T>(string saveName) where T : SaveData.Data, new()
 	{
 		if (_saveData.TryGetValue(saveName, out Config.Object obj))
 		{
-			return (Config.Object<T>) obj;
+			return (T) obj.RawValue;
 		}
 
 		throw new SaveDataNotFoundException($"Save data with the name {saveName} doesn't exist!");
@@ -189,20 +189,21 @@ public partial class SaveDataManager : Service
 		throw new SaveDataNotFoundException($"Save data with the name {saveName} doesn't exist!");
 	}
 
-	public Config.Object Create<T>(string saveName) where T : SaveData.Data, new()
+	public T Create<T>(string saveName) where T : SaveData.Data, new()
 	{
-		if (_saveData.TryAdd(saveName, new Config.Object<T>()))
-		{
-			var obj = Get<T>(saveName);
-			obj.Name = saveName;
-			obj.Value.Name = saveName;
-			obj.DataEndpoint = new FileEndpoint(OS.GetUserDataDir()+"/"+_saveBaseDir+"/"+obj.RawValue.ToString()+"/"+obj.Name+".json");
+		Config.Object<T> save = new Config.Object<T>();
 
-			LoggerManager.LogDebug("Creating new save data instance", "", "saveData", obj);
+		if (_saveData.TryAdd(saveName, save))
+		{
+			save.Name = saveName;
+			save.Value.Name = saveName;
+			save.DataEndpoint = new FileEndpoint(OS.GetUserDataDir()+"/"+_saveBaseDir+"/"+save.RawValue.ToString()+"/"+save.Name+".json");
+
+			LoggerManager.LogDebug("Creating new save data instance", "", "saveData", save);
 
 			Save(saveName);
 
-			return obj;
+			return save.Value;
 		}
 		else
 		{
@@ -487,12 +488,12 @@ public partial class SaveDataManager : Service
 	}
 
 	// save slot wrapper methods
-	public Config.Object GetSlot(int slotNumber)
+	public GameSaveFile GetSlot(int slotNumber)
 	{
-		return Get($"Save{slotNumber}");
+		return Get<GameSaveFile>($"Save{slotNumber}");
 	}
 
-	public Config.Object CreateSlot(int slotNumber)
+	public GameSaveFile CreateSlot(int slotNumber)
 	{
 		 return Create<GameSaveFile>($"Save{slotNumber}");
 	}
@@ -527,9 +528,9 @@ public partial class SaveDataManager : Service
 		Move($"Save{fromSlot}", $"Save{toSlot}");
 	}
 
-	public List<Config.Object> GetSlotSaves(int maxSlots)
+	public List<GameSaveFile> GetSlotSaves(int maxSlots)
 	{
-		List<Config.Object> saveSlots = new List<Config.Object>();
+		List<GameSaveFile> saveSlots = new List<GameSaveFile>();
 
 		for (int i = 0; i < maxSlots; i++)
 		{
