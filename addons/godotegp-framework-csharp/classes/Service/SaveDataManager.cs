@@ -24,6 +24,8 @@ public partial class SaveDataManager : Service
 {
 	private string _saveBaseDir = "Save";
 
+	private SaveDataManagerConfig _config = new SaveDataManagerConfig();
+
 	private Dictionary<string, Config.Object> _saveData = new Dictionary<string, Config.Object>();
 
 	public SaveDataManager()
@@ -32,6 +34,13 @@ public partial class SaveDataManager : Service
 
 		// create base System data
 		Create<SystemData>("System");
+	}
+
+	public void SetConfig(SaveDataManagerConfig config)
+	{
+		LoggerManager.LogDebug("Setting config", "", "config", config);
+
+		_config = config;
 	}
 
 	// Called when the node enters the scene tree for the first time.

@@ -26,7 +26,7 @@ public partial class OwnerObject : IFilter
 
 	public bool Match(IEvent matchEvent)
 	{
-		LoggerManager.LogDebug("match result", "", "result", matchEvent.Owner.Equals(_matchObject));
+		// LoggerManager.LogDebug("match result", "", "result", matchEvent.Owner.Equals(_matchObject));
 		return matchEvent.Owner.Equals(_matchObject);
 	}
 }
@@ -44,7 +44,7 @@ public partial class SignalType : IFilter
 	{
 		if (matchEvent.TryCast(out Events.GodotSignal e))
 		{
-			LoggerManager.LogDebug("match result", "", "result", e.SignalName == _matchSignal);
+			// LoggerManager.LogDebug("match result", "", "result", e.SignalName == _matchSignal);
 
 			return e.SignalName == _matchSignal;
 		}

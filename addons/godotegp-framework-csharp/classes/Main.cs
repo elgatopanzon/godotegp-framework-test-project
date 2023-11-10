@@ -19,8 +19,7 @@ using GodotEGP.Data.Operation;
 
 public partial class Main : Node
 {
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
+	public Main()
 	{
 		// create instance of ServiceRegistry
 		AddChild(new ServiceRegistry());
@@ -28,9 +27,19 @@ public partial class Main : Node
 		// register LoggerManager singleton as service to trigger ready state
 		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance);
 
+		ServiceRegistry.Instance.SubscribeOwner<ServiceReady>(_On_ConfigManager_Ready).Filters(new ObjectType(typeof(ConfigManager)));
+
 		// trigger lazy load ConfigManager to trigger initial load
 		ServiceRegistry.Get<DataService>();
 		ServiceRegistry.Get<ConfigManager>();
+	}
+	// Called when the node enters the scene tree for the first time.
+	public override void _Ready()
+	{
+	}
+
+	public void _On_ConfigManager_Ready(IEvent e)
+	{
 		ServiceRegistry.Get<NodeManager>();
 	}
 }

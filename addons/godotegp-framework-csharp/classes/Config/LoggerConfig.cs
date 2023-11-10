@@ -32,7 +32,14 @@ public partial class LoggerConfig : VObject
             ;
 
         _logLevelOverrides = AddValidatedValue<Dictionary<string, Logging.Message.LogLevel>>(this)
-            .Default(new Dictionary<string, Logging.Message.LogLevel>())
+            .Default(new Dictionary<string, Logging.Message.LogLevel>() {
+					{"EventManager", Logging.Message.LogLevel.Info},
+    				{"EventFilter", Logging.Message.LogLevel.Info},
+    				{"VValue", Logging.Message.LogLevel.Info},
+    				{"VObject", Logging.Message.LogLevel.Info},
+    				{"VNative", Logging.Message.LogLevel.Info},
+    				{"ObjectPool", Logging.Message.LogLevel.Info},
+            	})
         	.ChangeEventsEnabled()
             ;
 	}

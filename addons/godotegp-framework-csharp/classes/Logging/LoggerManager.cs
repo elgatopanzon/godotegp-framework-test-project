@@ -73,6 +73,11 @@ public partial class LoggerManager : Service
 	public override void _Ready()
 	{
 		_SetServiceReady(true);
+	}
+
+	public override void _OnServiceRegistered()
+	{
+		Instance._loggerConfig = new LoggerConfig();
 
 		// create instance of 
 		AddChild(new ConfigHandler());

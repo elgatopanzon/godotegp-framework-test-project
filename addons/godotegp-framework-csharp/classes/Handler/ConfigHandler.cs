@@ -10,17 +10,18 @@ public partial class ConfigHandler : Handler
 {
 	public ConfigHandler()
 	{
-		ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().LoggerConfig.SubscribeOwner<ValidatedValueChanged>(_On_ConfigManager_ValueChanged, isHighPriority: true);
-
+		ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().SubscribeOwner<ValidatedValueChanged>(_On_EngineConfig_ValueChanged, isHighPriority: true);
 	}
 
-	private void _On_ConfigManager_ValueChanged(IEvent e)
+	public void _On_EngineConfig_ValueChanged(IEvent e)
 	{
 		if (e is ValidatedValueChanged ev)
 		{
-			if (ev.Owner is LoggerConfig cec)
+			if (ev.Owner is EngineConfig ec)
 			{
-				LoggerManager.Instance.SetConfig(cec);
+				// set configs
+				LoggerManager.Instance.SetConfig(ec.LoggerManager);
+				ServiceRegistry.Get<SaveDataManager>().SetConfig(ec.SaveDataManager);
 			}
 		}
 	}

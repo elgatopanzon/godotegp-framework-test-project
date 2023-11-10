@@ -1,0 +1,11 @@
+{
+  "LoggerManager": {
+    "LogLevel": 0,
+    "LogLevelOverrides": {
+      "EventManager": 2,
+      "EventFilter": 2,
+      "VValue": 2,
+      "ObjectPool": 2
+    }
+  }
+}

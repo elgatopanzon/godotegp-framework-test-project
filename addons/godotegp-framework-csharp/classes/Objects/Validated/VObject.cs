@@ -108,9 +108,9 @@ public partial class VObject
 	public void _onValueChange(object o, object v, object nv)
 	{
 		LoggerManager.LogDebug("Value changed in object", "", "owner", this.GetType().Name);
-		LoggerManager.LogDebug("", "", "vo", o.GetType().FullName);
-		LoggerManager.LogDebug("", "", "value", v);
-		LoggerManager.LogDebug("", "", "newValue", nv);
+		// LoggerManager.LogDebug("", "", "vo", o.GetType().FullName);
+		// LoggerManager.LogDebug("", "", "value", v);
+		// LoggerManager.LogDebug("", "", "newValue", nv);
 
 		this.Emit<ValidatedValueChanged>((e) => {
 			e.SetValue(nv);
