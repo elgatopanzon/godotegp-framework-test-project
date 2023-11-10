@@ -127,7 +127,10 @@ public partial class SaveDataManager : Service
 				Register(obj.Name, obj);
 			}
 
-			_SetServiceReady(true);
+			if (!GetReady())
+			{
+				_SetServiceReady(true);
+			}
 		}
 	}
 
@@ -144,6 +147,16 @@ public partial class SaveDataManager : Service
 		if (_saveData.TryGetValue(saveName, out Config.Object obj))
 		{
 			return (Config.Object<T>) obj;
+		}
+
+		throw new SaveDataNotFoundException($"Save data with the name {saveName} doesn't exist!");
+	}
+
+	public Config.Object Get(string saveName)
+	{
+		if (_saveData.TryGetValue(saveName, out Config.Object obj))
+		{
+			return obj;
 		}
 
 		throw new SaveDataNotFoundException($"Save data with the name {saveName} doesn't exist!");
@@ -225,57 +238,164 @@ public partial class SaveDataManager : Service
 		}
 	}
 
-	// public void LoadSaveData()
-	// {
-	// 	Queue<Dictionary<string, object>> fileQueue = new Queue<Dictionary<string, object>>();
-    //
-	// 	string configPath = Path.Combine(_saveDataPath, _configBaseDir);
-    //
-	// 	if (Directory.Exists(configPath))
-	// 	{
-	// 		DirectoryInfo d = new DirectoryInfo(configPath);
-	// 		foreach (DirectoryInfo dir in d.GetDirectories())
-	// 		{
-	// 			string configDirName = dir.ToString().GetFile();
-    //
-	// 			LoggerManager.LogDebug("Save data directory", "", "dirName", configDirName);
-    //
-	// 			// trigger creation of base object in the register
-	// 			// before queueing files for loading
-	// 			GetConfigObjectInstance(Type.GetType(configDirName.ToString()));
-    //
-	// 			foreach (FileInfo file in dir.GetFiles("*.json"))
-	// 			{
-	// 				LoggerManager.LogDebug("Queueing file for content load", "", "file", file.ToString());
-    //
-	// 				fileQueue.Enqueue(new Dictionary<string, object> {{"configType", configDirName}, {"path", "/"+file.ToString().Replace(System.Environment.CurrentDirectory, "")}});
-	// 			}
-	// 		}
-	// 	}
-	// 	else
-	// 	{
-	// 		LoggerManager.LogDebug("Save data directory doesn't exist", "", "path", configPath);
-	// 	}
-    //
-	// 	if (fileQueue.Count > 0)
-	// 	{
-	// 		// load all the save data files using ConfigManagerLoader
-	// 		Config.Loader configLoader = new Config.Loader(fileQueue);
-    //
-	// 		configLoader.SubscribeOwner<ConfigManagerLoaderCompleted>(_On_ConfigManagerLoaderCompleted, oneshot: true, isHighPriority: true);
-	// 		configLoader.SubscribeOwner<ConfigManagerLoaderError>(_On_ConfigManagerLoaderError, oneshot: true, isHighPriority: true);
-	// 	}
-	// }
-    //
-	// public new T Get<T>() where T : SaveData.Data
-	// {
-	// 	return (T) base.Get<T>();
-	// }
-    //
-	// public new void Save<T>(IEndpoint dataEndpoint = null) where T : SaveData.Data
-	// {
-	// 	base.Save<T>();
-	// }
+	public void CreateAutosave(string saveName)
+	{
+		string autosaveName = saveName+"_autosave";
+	}
+
+	public void Copy(string fromName, string toName)
+	{
+		if (!Exists(fromName))
+		{
+			var ex = new SaveDataNotFoundException($"Cannot copy from non-existant save data {fromName}!");
+			this.Emit<SaveDataMoveError>((e) => {
+				e.SetName(toName);
+				e.SetException(ex);
+				});
+
+			throw ex;
+		}
+		if (Exists(toName))
+		{
+			var ex = new SaveDataExistsException($"Cannot copy to existing save data {toName}!");
+			this.Emit<SaveDataMoveError>((e) => {
+				e.SetName(toName);
+				e.SetException(ex);
+				});
+
+			throw ex;
+		}
+
+		if (Exists(fromName) && !Exists(toName))
+		{
+			// copy the save file on the filesystem
+			var obj = Get(fromName);
+
+			if (obj.DataEndpoint is FileEndpoint fe)
+			{
+				string filePath = fe.Path;
+				string filePathNew = Path.Combine(filePath.GetBaseDir(), toName+"."+filePath.GetExtension());
+
+				LoggerManager.LogDebug("Copy save data", "", "fromTo", $"{filePath} => {filePathNew}");
+
+				File.Copy(filePath, filePathNew);
+
+				// trigger config loader for the copy
+				Queue<Dictionary<string, object>> fileQueue = new Queue<Dictionary<string, object>>();
+				fileQueue.Enqueue(new Dictionary<string, object> {{"configType", obj.RawValue.GetType().Namespace+"."+obj.RawValue.GetType().Name}, {"path", filePathNew}, {"name", toName}});
+
+				Config.Loader configLoader = new Config.Loader(fileQueue);
+
+				// subscribe to the loaded event
+				configLoader.SubscribeOwner<ConfigManagerLoaderCompleted>(_On_SaveDataCopy_Completed, oneshot: true, isHighPriority: true);
+				configLoader.SubscribeOwner<ConfigManagerLoaderError>(_On_SaveDataCopy_Error, oneshot: true, isHighPriority: true);
+			}
+		}
+	}
+
+	public void _On_SaveDataCopy_Completed(IEvent e)
+	{
+		_On_SaveDataLoad_Completed(e);
+
+		LoggerManager.LogDebug("Copy process complete", "", "e", e);
+
+		if (e is ConfigManagerLoaderCompleted ec)
+		{
+			foreach (var obj in ec.ConfigObjects)
+			{
+				this.Emit<SaveDataCopyComplete>((ee) => {
+						ee.SetName(obj.Name);
+						ee.SetSaveData(obj);
+					});
+			}
+		}
+	}
+	public void _On_SaveDataCopy_Error(IEvent e)
+	{
+		_On_SaveDataLoad_Error(e);
+
+		if (e is ConfigManagerLoaderError ele)
+		{
+			foreach (var obj in ele.ConfigObjects)
+			{
+				this.Emit<SaveDataCopyError>((en) => {
+						en.SetName(obj.Name); 
+						en.SetRunWorkerCompletedEventArgs(ele.RunWorkerCompletedEventArgs);
+						en.SetSaveData(obj);
+						en.SetException(ele.RunWorkerCompletedEventArgs.Error);
+					});
+			}
+		}
+	}
+
+	public void Move(string fromName, string toName)
+	{
+		try
+		{
+			Copy(fromName, toName);
+		}
+		catch (System.Exception ex)
+		{
+			this.Emit<SaveDataMoveError>((e) => {
+				e.SetName(toName);
+				e.SetException(ex);
+				});
+		}
+
+		this.SubscribeOwner<SaveDataCopyComplete>((e) => {
+			if (e is SaveDataCopyComplete ec)
+			{
+				// delete the old save if the event is for the copied one
+				if (ec.SaveData.Name == toName)
+				{
+					LoggerManager.LogDebug("Deleting moved save data", "", "saveName", fromName);
+
+					Remove(fromName);
+
+					this.Emit<SaveDataMoveComplete>((en) => {
+							en.SetRunWorkerCompletedEventArgs(ec.RunWorkerCompletedEventArgs);
+							en.SetName(ec.SaveData.Name);
+							en.SetSaveData(ec.SaveData);
+						});
+				}
+			}
+			});
+		this.SubscribeOwner<SaveDataCopyError>((e) => {
+			if (e is SaveDataCopyError ec)
+			{
+				this.Emit<SaveDataMoveError>((en) => {
+						en.SetRunWorkerCompletedEventArgs(ec.RunWorkerCompletedEventArgs);
+						en.SetName(ec.SaveData.Name);
+						en.SetSaveData(ec.SaveData);
+						en.SetException(ec.RunWorkerCompletedEventArgs.Error);
+					});
+			}
+			});
+	}
+
+	public void Remove(string saveName)
+	{
+		try
+		{
+			if (Get(saveName).DataEndpoint is FileEndpoint fe)
+			{
+				File.Delete(fe.Path);
+				_saveData.Remove(saveName);
+
+				this.Emit<SaveDataRemoveComplete>((e) => {
+					e.SetName(saveName);
+					});
+			}
+		}
+		catch (System.Exception ex)
+		{
+			this.Emit<SaveDataRemoveError>((e) => {
+				e.SetName(saveName);
+				e.SetException(ex);
+				});
+		}
+
+	}
 }
 
 public class SaveDataNotFoundException : Exception

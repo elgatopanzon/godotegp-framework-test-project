@@ -2,9 +2,10 @@
   "LoggerConfig": {
     "LogLevel": 0,
     "LogLevelOverrides": {
-      "EventManager": 0,
-      "EventFilter": 0,
-      "ValidatedValue": 0
+      "EventManager": 3,
+      "EventFilter": 3,
+      "VValue": 0,
+      "ObjectPool": 3
     }
   }
 }

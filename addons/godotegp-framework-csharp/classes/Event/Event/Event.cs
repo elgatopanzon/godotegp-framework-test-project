@@ -12,6 +12,7 @@ public partial class Event : IEvent
 	public object Owner { get; set; }
 	public object Data { get; set; }
 	public DateTime Created { get; set; }
+	public Exception Exception { get; set; }
 
 	public Event()
 	{
@@ -29,6 +30,11 @@ static class EventExtensionMethods
 	static public T SetData<T>(this T o, params object[] data) where T : Event
     {
 		o.Data = data;
+        return o;
+    }
+	static public T SetException<T>(this T o, Exception ex) where T : Event
+    {
+		o.Exception = ex;
         return o;
     }
 
@@ -204,4 +210,56 @@ public partial class ConfigManagerLoaderCompleted : ConfigManagerLoader
 }
 public partial class ConfigManagerLoaderError : ConfigManagerLoader
 {
+}
+
+public partial class SaveDataEvent : BackgroundJobEvent
+{
+	public string Name;
+	public Config.Object SaveData;
+}
+static public partial class SaveDataEventExtensions
+{
+	static public T SetName<T>(this T o, string name) where T : SaveDataEvent
+	{
+		o.Name = name;
+		return o;
+	}
+	static public T SetSaveData<T>(this T o, Config.Object SaveData) where T : SaveDataEvent
+	{
+		o.SaveData = SaveData;
+		return o;
+	}
+}
+
+public class SaveDataLoadComplete : SaveDataEvent
+{
+	
+}
+public class SaveDataLoadError : SaveDataEvent
+{
+	
+}
+public class SaveDataCopyComplete : SaveDataEvent
+{
+	
+}
+public class SaveDataCopyError : SaveDataEvent
+{
+	
+}
+public class SaveDataMoveComplete : SaveDataEvent
+{
+	
+}
+public class SaveDataMoveError : SaveDataEvent
+{
+	
+}
+public class SaveDataRemoveComplete : SaveDataEvent
+{
+	
+}
+public class SaveDataRemoveError : SaveDataEvent
+{
+	
 }
