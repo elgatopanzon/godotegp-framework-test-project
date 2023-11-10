@@ -15,7 +15,7 @@ using GodotEGP.Objects.Extensions;
 
 public partial class ConfigManager : Service
 {
-	private string _configBaseDir = "config";
+	private string _configBaseDir = "Config";
 	public string ConfigBaseDir
 	{
 		get { return _configBaseDir; }
@@ -86,7 +86,7 @@ public partial class ConfigManager : Service
 						{
 							LoggerManager.LogDebug("Queueing file for content load", "", "file", file.ToString());
 
-							fileQueue.Enqueue(new Dictionary<string, object> {{"configType", configDirName}, {"path", "/"+file.ToString().Replace(System.Environment.CurrentDirectory, "")}});
+							fileQueue.Enqueue(new Dictionary<string, object> {{"configType", configDirName}, {"path", file.ToString()}});
 						}
 					}
 				}
