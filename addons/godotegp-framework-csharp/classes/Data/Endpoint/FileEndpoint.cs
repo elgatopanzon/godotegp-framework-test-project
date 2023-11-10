@@ -31,7 +31,15 @@ public partial class FileEndpoint : IEndpoint
 	{
         // get platform safe path from a provided unix path (because we use
         // that, because godot uses that even for windows)
-        _path = System.IO.Path.GetFullPath(System.IO.Path.Combine(filePath.Split("/")));
+        LoggerManager.LogDebug("", "", "path", filePath);
+        if (filePath.StartsWith("/"))
+        {
+        	_path = "/"+System.IO.Path.Combine(filePath.Split("/"));
+        }
+        else
+        {
+        	_path = System.IO.Path.GetFullPath(System.IO.Path.Combine(filePath.Split("/")));
+        }
         _extension = System.IO.Path.GetExtension(_path);
         _mimetype = MimeType.GetMimeType(_extension);
 
