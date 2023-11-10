@@ -28,6 +28,7 @@ public enum SaveDataType
 
 public partial class Data : VObject
 {
+	// keep track of the save structure and use it for future migrations
 	internal readonly VValue<int> _saveVersion;
 
 	public int SaveVersion
@@ -36,6 +37,7 @@ public partial class Data : VObject
 		set { _saveVersion.Value = value; }
 	}
 
+	// save type easily indicated for processing/UI uses
 	internal readonly VValue<SaveDataType> _saveType;
 
 	public SaveDataType SaveType
@@ -44,6 +46,7 @@ public partial class Data : VObject
 		set { _saveType.Value = value; }
 	}
 
+	// timestamps
 	internal readonly VValue<DateTime> _dateCreated;
 
 	public DateTime DateCreated
@@ -68,6 +71,41 @@ public partial class Data : VObject
 		set { _dateLoaded.Value = value; }
 	}
 
+	internal readonly VValue<DateTime> _dateAutosaved;
+
+	public DateTime DateAutosaved
+	{
+		get { return _dateAutosaved.Value; }
+		set { _dateAutosaved.Value = value; }
+	}
+
+	// friendly name for the save (usually the same as the filename)
+	internal readonly VValue<string> _name;
+
+	public string Name
+	{
+		get { return _name.Value; }
+		set { _name.Value = value; }
+	}
+
+	// indicates if save belongs to another save name
+	internal readonly VValue<string> _parentName;
+
+	public string ParentName
+	{
+		get { return _parentName.Value; }
+		set { _parentName.Value = value; }
+	}
+
+	// indicate if the save is currently active and loaded
+	internal readonly VValue<bool> _loaded;
+
+	public bool Loaded
+	{
+		get { return _loaded.Value; }
+		set { _loaded.Value = value; }
+	}
+
 	public Data()
 	{
         _saveVersion = AddValidatedValue<int>(this)
@@ -89,6 +127,23 @@ public partial class Data : VObject
         _dateLoaded = AddValidatedValue<DateTime>(this)
         	.Default(DateTime.Now)
         	.ChangeEventsEnabled();
+
+		// set default as last saved time
+        _dateAutosaved = AddValidatedValue<DateTime>(this)
+        	.Default(_dateSaved.Value)
+        	.ChangeEventsEnabled();
+
+        _name = AddValidatedValue<string>(this)
+        	.ChangeEventsEnabled();
+
+		_parentName = AddValidatedValue<string>(this)
+	    	.Default(null)
+	    	.ChangeEventsEnabled();
+
+		_loaded = AddValidatedValue<bool>(this)
+	    	.Default(false)
+	    	.ChangeEventsEnabled();
+
 	}
 
 	public void UpdateDateSaved()

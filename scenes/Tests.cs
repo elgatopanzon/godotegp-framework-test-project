@@ -13,6 +13,7 @@ public partial class Tests : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		"UITests.Save.Create".Connect("pressed", false, _On_SaveTest_Create_pressed, isHighPriority: true);
 		"UITests.Save.Save".Connect("pressed", false, _On_SaveTest_Save_pressed, isHighPriority: true);
 		"UITests.Save.Load".Connect("pressed", false, _On_SaveTest_Load_pressed, isHighPriority: true);
 		"UITests.Save.Delete".Connect("pressed", false, _On_SaveTest_Delete_pressed, isHighPriority: true);
@@ -28,6 +29,17 @@ public partial class Tests : Node2D
 	{
 	}
 
+	public void _On_SaveTest_Create_pressed(IEvent e)
+	{
+		string saveName = GetSaveTestName();
+
+		LoggerManager.LogDebug("Create pressed", "", "saveName", saveName);
+
+		if (ServiceRegistry.Get<SaveDataManager>().GetReady())
+		{
+			ServiceRegistry.Get<SaveDataManager>().Create<GameSaveFile>(saveName);
+		}
+	}
 	public void _On_SaveTest_Save_pressed(IEvent e)
 	{
 		string saveName = GetSaveTestName();

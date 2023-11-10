@@ -33,6 +33,11 @@ layout_mode = 2
 placeholder_text = "Save name"
 metadata/id = "UITests.Save.Name"
 
+[node name="Create" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Create"
+metadata/id = "UITests.Save.Create"
+
 [node name="Save" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Save"

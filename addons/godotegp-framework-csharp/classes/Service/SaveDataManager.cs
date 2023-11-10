@@ -143,7 +143,7 @@ public partial class SaveDataManager : Service
 		}
 	}
 
-	public Config.Object Get<T>(string saveName) where T : SaveData.Data, new()
+	public Config.Object<T> Get<T>(string saveName) where T : SaveData.Data, new()
 	{
 		if (_saveData.TryGetValue(saveName, out Config.Object obj))
 		{
@@ -168,10 +168,13 @@ public partial class SaveDataManager : Service
 		if (_saveData.TryAdd(saveName, new Config.Object<T>()))
 		{
 			var obj = Get<T>(saveName);
-			obj.Name= saveName;
+			obj.Name = saveName;
+			obj.Value.Name = saveName;
 			obj.DataEndpoint = new FileEndpoint(OS.GetUserDataDir()+"/"+_saveBaseDir+"/"+obj.RawValue.ToString()+"/"+obj.Name+".json");
 
 			LoggerManager.LogDebug("Creating new save data instance", "", "saveData", obj);
+
+			Save(saveName);
 
 			return obj;
 		}
