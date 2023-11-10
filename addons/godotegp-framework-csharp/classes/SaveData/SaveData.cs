@@ -47,8 +47,8 @@ public partial class Data : VObject
 
 	public DateTime DateLoaded
 	{
-		get { return _dateSaved.Value; }
-		set { _dateSaved.Value = value; }
+		get { return _dateLoaded.Value; }
+		set { _dateLoaded.Value = value; }
 	}
 
 	public Data()
