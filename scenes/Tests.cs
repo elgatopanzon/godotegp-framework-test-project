@@ -68,13 +68,15 @@ public partial class Tests : Node2D
 	{
 		string saveName = GetSaveTestName();
 
+		LoggerManager.LogDebug("All saves", "", "systemData", ServiceRegistry.Get<SaveDataManager>().GetSaves());
+
 		LoggerManager.LogDebug("System data", "", "systemData", ServiceRegistry.Get<SaveDataManager>().Get<SystemData>("System"));
+		LoggerManager.LogDebug("System data endpoint", "", "endpoint", ServiceRegistry.Get<SaveDataManager>().Get<SystemData>("System").DataEndpoint);
 
 		if (ServiceRegistry.Get<SaveDataManager>().Exists(saveName))
 		{
 			LoggerManager.LogDebug("Game data", "", "gameData", ServiceRegistry.Get<SaveDataManager>().Get<GameSaveFile>(saveName));
 			LoggerManager.LogDebug("Game data endpoint", "", "endpoint", ServiceRegistry.Get<SaveDataManager>().Get<GameSaveFile>(saveName).DataEndpoint);
-			LoggerManager.LogDebug("System data endpoint", "", "endpoint", ServiceRegistry.Get<SaveDataManager>().Get<SystemData>("System").DataEndpoint);
 		}
 
 	}

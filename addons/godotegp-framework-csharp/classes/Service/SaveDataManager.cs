@@ -9,6 +9,7 @@ namespace GodotEGP.Service;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -80,7 +81,7 @@ public partial class SaveDataManager : Service
 				// ValidatedObject, then let's load the content
 				if (configDirType != null && configDirType.Namespace == typeof(SaveData.Data).Namespace)
 				{
-					foreach (FileInfo file in dir.GetFiles("*.json"))
+					foreach (FileInfo file in dir.GetFiles("*.json").OrderBy((f) => f.ToString()))
 					{
 						LoggerManager.LogDebug("Queueing file for content load", "", "file", file.ToString());
 
@@ -394,7 +395,11 @@ public partial class SaveDataManager : Service
 				e.SetException(ex);
 				});
 		}
+	}
 
+	public Dictionary<string, Config.Object> GetSaves()
+	{
+		return _saveData;
 	}
 }
 

@@ -4,6 +4,7 @@ using Godot;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 using GodotEGP.Objects.Validated;
 using GodotEGP.Service;
@@ -82,7 +83,7 @@ public partial class ConfigManager : Service
 						// before queueing files for loading
 						GetConfigObjectInstance(Type.GetType(configDirName.ToString()));
 
-						foreach (FileInfo file in dir.GetFiles("*.json"))
+						foreach (FileInfo file in dir.GetFiles("*.json").OrderBy((f) => f.ToString()))
 						{
 							LoggerManager.LogDebug("Queueing file for content load", "", "file", file.ToString());
 
