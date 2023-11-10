@@ -75,11 +75,13 @@ public partial class FileOperator : Operator, IOperator
 	{
 		LoggerManager.LogDebug("Save operation starting", "", "object", _dataObject);
 
+		EnsureDirectoryExists(_fileEndpoint.Path);
+
     	using (StreamWriter writer = new StreamWriter(_fileEndpoint.Path))
     	{
 			// for now, serialise the object as json
 			var jsonString = JsonConvert.SerializeObject(
-        	_dataObject, Formatting.Indented);
+        			_dataObject, Formatting.Indented);
 
     		writer.WriteLine(jsonString);
 
@@ -120,6 +122,15 @@ public partial class FileOperator : Operator, IOperator
 	public override void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
 	{
 		LoggerManager.LogDebug("Data operator failed");
+	}
+
+	private static void EnsureDirectoryExists(string filePath) 
+	{ 
+  		FileInfo fi = new FileInfo(filePath);
+  		if (!fi.Directory.Exists) 
+  		{ 
+    		System.IO.Directory.CreateDirectory(fi.DirectoryName); 
+  		} 
 	}
 }
 
