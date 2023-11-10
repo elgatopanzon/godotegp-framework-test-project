@@ -163,7 +163,7 @@ public partial class SaveDataManager : Service
 		throw new SaveDataNotFoundException($"Save data with the name {saveName} doesn't exist!");
 	}
 
-	public void Create<T>(string saveName) where T : SaveData.Data, new()
+	public Config.Object Create<T>(string saveName) where T : SaveData.Data, new()
 	{
 		if (_saveData.TryAdd(saveName, new Config.Object<T>()))
 		{
@@ -172,6 +172,8 @@ public partial class SaveDataManager : Service
 			obj.DataEndpoint = new FileEndpoint(OS.GetUserDataDir()+"/"+_saveBaseDir+"/"+obj.RawValue.ToString()+"/"+obj.Name+".json");
 
 			LoggerManager.LogDebug("Creating new save data instance", "", "saveData", obj);
+
+			return obj;
 		}
 		else
 		{
@@ -400,6 +402,66 @@ public partial class SaveDataManager : Service
 	public Dictionary<string, Config.Object> GetSaves()
 	{
 		return _saveData;
+	}
+
+	// save slot wrapper methods
+	public Config.Object GetSlot(int slotNumber)
+	{
+		return Get($"Save{slotNumber}");
+	}
+
+	public Config.Object CreateSlot(int slotNumber)
+	{
+		 return Create<GameSaveFile>($"Save{slotNumber}");
+	}
+
+	public bool SlotExists(int slotNumber)
+	{
+		return Exists($"Save{slotNumber}");
+	}
+
+	public void SetSlot(int slotNumber, Config.Object saveData)
+	{
+		 Set($"Save{slotNumber}", saveData);
+	}
+
+	public void SaveSlot(int slotNumber)
+	{
+		Save($"Save{slotNumber}");
+	}
+
+	public void RemoveSlot(int slotNumber)
+	{
+		Remove($"Save{slotNumber}");
+	}
+
+	public void CopySlot(int fromSlot, int toSlot)
+	{
+		Copy($"Save{fromSlot}", $"Save{toSlot}");
+	}
+
+	public void MoveSlot(int fromSlot, int toSlot)
+	{
+		Move($"Save{fromSlot}", $"Save{toSlot}");
+	}
+
+	public List<Config.Object> GetSlotSaves(int maxSlots)
+	{
+		List<Config.Object> saveSlots = new List<Config.Object>();
+
+		for (int i = 0; i < maxSlots; i++)
+		{
+			if (SlotExists(i))
+			{
+				saveSlots.Add(GetSlot(i));
+			}
+			else
+			{
+				saveSlots.Add(null);
+			}
+		}
+
+		return saveSlots;
 	}
 }
 

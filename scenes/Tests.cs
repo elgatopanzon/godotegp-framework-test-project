@@ -19,6 +19,8 @@ public partial class Tests : Node2D
 
 		"UITests.Save.Copy".Connect("pressed", false, _On_SaveTest_Copy_pressed, isHighPriority: true);
 		"UITests.Save.Move".Connect("pressed", false, _On_SaveTest_Move_pressed, isHighPriority: true);
+
+		"UITests.Save.ListSlots".Connect("pressed", false, _On_SaveTest_ListSlots_pressed, isHighPriority: true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -102,6 +104,16 @@ public partial class Tests : Node2D
 		if (ServiceRegistry.Get<SaveDataManager>().GetReady())
 		{
 			ServiceRegistry.Get<SaveDataManager>().Move("UITests.Save.CopyFrom".Node<TextEdit>().Text, "UITests.Save.CopyTo".Node<TextEdit>().Text);
+		}
+	}
+
+	public void _On_SaveTest_ListSlots_pressed(IEvent e)
+	{
+		LoggerManager.LogDebug("ListSlots pressed");
+
+		if (ServiceRegistry.Get<SaveDataManager>().GetReady())
+		{
+			LoggerManager.LogDebug("List of save slots", "", "saveSlots", ServiceRegistry.Get<SaveDataManager>().GetSlotSaves(10));
 		}
 	}
 }
