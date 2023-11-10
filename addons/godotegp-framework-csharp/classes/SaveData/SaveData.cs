@@ -19,6 +19,14 @@ using GodotEGP.Config;
 
 public partial class Data : VObject
 {
+	internal readonly VValue<int> _saveVersion;
+
+	public int SaveVersion
+	{
+		get { return _saveVersion.Value; }
+		set { _saveVersion.Value = value; }
+	}
+
 	internal readonly VValue<DateTime> _dateCreated;
 
 	public DateTime DateCreated
@@ -45,6 +53,10 @@ public partial class Data : VObject
 
 	public Data()
 	{
+        _saveVersion = AddValidatedValue<int>(this)
+        	.Default(1)
+        	.ChangeEventsEnabled();
+
         _dateCreated = AddValidatedValue<DateTime>(this)
         	.Default(DateTime.Now)
         	.ChangeEventsEnabled();
