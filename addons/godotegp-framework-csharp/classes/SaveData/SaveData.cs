@@ -17,6 +17,15 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+public enum SaveDataType
+{
+	Manual,
+	System,
+	Autosave,
+	Suspend,
+	Backup
+}
+
 public partial class Data : VObject
 {
 	internal readonly VValue<int> _saveVersion;
@@ -25,6 +34,14 @@ public partial class Data : VObject
 	{
 		get { return _saveVersion.Value; }
 		set { _saveVersion.Value = value; }
+	}
+
+	internal readonly VValue<SaveDataType> _saveType;
+
+	public SaveDataType SaveType
+	{
+		get { return _saveType.Value; }
+		set { _saveType.Value = value; }
 	}
 
 	internal readonly VValue<DateTime> _dateCreated;
@@ -55,6 +72,10 @@ public partial class Data : VObject
 	{
         _saveVersion = AddValidatedValue<int>(this)
         	.Default(1)
+        	.ChangeEventsEnabled();
+
+        _saveType = AddValidatedValue<SaveDataType>(this)
+        	.Default(SaveDataType.Manual)
         	.ChangeEventsEnabled();
 
         _dateCreated = AddValidatedValue<DateTime>(this)
@@ -89,6 +110,7 @@ public partial class SystemData : Data
 {
 	public SystemData() : base()
 	{
+		_saveType.Value = SaveDataType.System;
 	}
 }
 
