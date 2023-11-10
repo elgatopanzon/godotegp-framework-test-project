@@ -21,7 +21,7 @@ public partial class OperationResult<T>
 	{
 		LoggerManager.LogDebug("Creating result object from raw data", "", "raw", rawObject);
 
-		if (typeof(T).BaseType == typeof(VObject))
+		if (typeof(T).IsSubclassOf(typeof(VObject)) && rawObject is string)
 		{
 			// hold deserialisation errors
 			List<string> errors = new List<string>();
