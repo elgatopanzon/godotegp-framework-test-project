@@ -73,7 +73,7 @@ public partial class Data : VObject
 
 	internal readonly VValue<DateTime> _dateAutosaved;
 
-	public DateTime DateAutosaved
+	internal DateTime DateAutosaved
 	{
 		get { return _dateAutosaved.Value; }
 		set { _dateAutosaved.Value = value; }
@@ -100,7 +100,7 @@ public partial class Data : VObject
 	// indicate if the save is currently active and loaded
 	internal readonly VValue<bool> _loaded;
 
-	public bool Loaded
+	internal bool Loaded
 	{
 		get { return _loaded.Value; }
 		set { _loaded.Value = value; }
