@@ -16,9 +16,20 @@ using GodotEGP.Config;
 
 public partial class GlobalConfig : VConfig
 {
+	// used for migrations
+	internal readonly VValue<int> _configVersion;
+
+	public int ConfigVersion
+	{
+		get { return _configVersion.Value; }
+		set { _configVersion.Value = value; }
+	}
+
 	public GlobalConfig()
 	{
-		
+		_configVersion = AddValidatedValue<int>(this)
+		    .Default(1)
+		    .ChangeEventsEnabled();
 	}
 }
 
