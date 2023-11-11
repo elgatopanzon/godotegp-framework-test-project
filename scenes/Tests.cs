@@ -13,6 +13,8 @@ public partial class Tests : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		"UITests.Test".Connect("pressed", false, _On_Test_pressed, isHighPriority: true);
+		
 		"UITests.Save.Create".Connect("pressed", false, _On_SaveTest_Create_pressed, isHighPriority: true);
 		"UITests.Save.Save".Connect("pressed", false, _On_SaveTest_Save_pressed, isHighPriority: true);
 		"UITests.Save.Load".Connect("pressed", false, _On_SaveTest_Load_pressed, isHighPriority: true);
@@ -28,6 +30,12 @@ public partial class Tests : Node2D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+	}
+
+	// general testing method hooked to the Test button
+	public void _On_Test_pressed(IEvent e)
+	{
+		LoggerManager.LogDebug("Testing stuff!");
 	}
 
 	public void _On_SaveTest_TimedAutosave_pressed(IEvent e)
