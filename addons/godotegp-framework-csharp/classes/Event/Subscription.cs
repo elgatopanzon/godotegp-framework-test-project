@@ -33,22 +33,3 @@ public partial class EventSubscription<T> : IEventSubscription<Event>
         EventFilters = eventFilters;
     }
 }
-
-public static partial class EventSubscriptionExtensionMethods
-{
-	public static IEventSubscription<Event> Filters(this IEventSubscription<Event> obj, params IFilter[] filters)
-	{
-		foreach (IFilter filter in filters)
-		{
-			obj.EventFilters.Add(filter);
-		}
-		return obj;
-	}
-
-	public static IEventSubscription<Event> Owner(this IEventSubscription<Event> obj, object ownerObject)
-	{
-		obj.Filters(new OwnerObject(ownerObject));
-
-		return obj;
-	}
-}

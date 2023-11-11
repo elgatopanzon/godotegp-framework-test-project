@@ -16,6 +16,7 @@ using GodotEGP.Objects.Extensions;
 using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
+using GodotEGP.Event.Filter;
 using GodotEGP.Config;
 using GodotEGP.SaveData;
 using GodotEGP.Data.Endpoint;
@@ -28,7 +29,7 @@ public partial class SaveDataManager : Service
 
 	private Dictionary<string, Config.Object> _saveData = new Dictionary<string, Config.Object>();
 
-	private Timer _timedAutosaveTimer;
+	private Timer _timedAutosaveTimer = new Timer();
 
 	public SaveDataManager()
 	{
@@ -36,14 +37,6 @@ public partial class SaveDataManager : Service
 
 		// create base System data
 		Create<SystemData>("System");
-	}
-
-	public void _On_TimedAutoSave_timeout(IEvent e)
-	{
-		LoggerManager.LogDebug("TimedAutosave timeout", "");
-		_timedAutosaveTimer.WaitTime = _config.AutosaveTimeDefaultSec;
-
-		CreateAutosaves();
 	}
 
 	public void SetConfig(SaveDataManagerConfig config)
@@ -56,13 +49,6 @@ public partial class SaveDataManager : Service
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		// TimedAutosave timer
-		_timedAutosaveTimer = new Timer();
-		_timedAutosaveTimer.OneShot = false;
-		_timedAutosaveTimer.SetMeta("id", "SaveDataManager.TimedAutosaveTimer");
-		_timedAutosaveTimer.SubscribeSignal("timeout", false, _On_TimedAutoSave_timeout);
-
-		AddChild(_timedAutosaveTimer);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -74,6 +60,9 @@ public partial class SaveDataManager : Service
 	public override void _OnServiceRegistered()
 	{
 		LoadSaveData();
+
+		// create the timer required for timed autosaves
+		SetupTimedAutosave();
 	}
 
 	// Called when service is deregistered from manager
@@ -274,6 +263,9 @@ public partial class SaveDataManager : Service
 		}
 	}
 
+	/**************
+	*  Autosave  *
+	**************/
 	public void CreateAutosave(string saveName)
 	{
 		string autosaveName = saveName+"_autosave";
@@ -281,17 +273,29 @@ public partial class SaveDataManager : Service
 		LoggerManager.LogDebug("Creating autosave", "", "saveName", saveName);
 	}
 
-	public void SetLoaded(string saveName, bool loadedState = true)
+	public void SetupTimedAutosave()
 	{
-		if (Exists(saveName))
-		{
-			if (Get(saveName).RawValue is SaveData.Data sd && sd.SaveType == SaveDataType.Manual)
-			{
-				sd.Loaded = loadedState;
+		// TimedAutosave timer
+		_timedAutosaveTimer.OneShot = false;
+		_timedAutosaveTimer.SetMeta("id", "SaveDataManager.TimedAutosaveTimer");
+		_timedAutosaveTimer.SubscribeSignal("timeout", false, _On_TimedAutoSave_timeout);
 
-				StartTimedAutosave();
-			}
-		}
+		AddChild(_timedAutosaveTimer);
+
+		// watch for object changes by subscribing to all validated value
+		// changes on SaveData.Data objects, starting the timer if one is Loaded
+		this.Subscribe<ValidatedValueChanged>((e) => {
+				if (e.Owner is Data sd && _config.TimedAutosaveEnabled)
+				{
+					// if one of the objects is Loaded, start the timer if it's
+					// not already started
+					if (sd.Loaded && _timedAutosaveTimer.IsStopped())
+					{
+						StartTimedAutosave();
+					}
+				}
+			// });
+			}).Filters(new OwnerObjectType(typeof(Data)));
 	}
 
 	public void StartTimedAutosave()
@@ -299,8 +303,18 @@ public partial class SaveDataManager : Service
 		_timedAutosaveTimer.WaitTime = _config.AutosaveTimeDefaultSec;
 		if (_config.TimedAutosaveEnabled)
 		{
+			LoggerManager.LogDebug("Starting Timed Autosave timer", "", "waitTime", _timedAutosaveTimer.WaitTime);
+
 			_timedAutosaveTimer.Start();
 		}
+	}
+
+	public void _On_TimedAutoSave_timeout(IEvent e)
+	{
+		LoggerManager.LogDebug("TimedAutosave timeout", "");
+		_timedAutosaveTimer.WaitTime = _config.AutosaveTimeDefaultSec;
+
+		CreateAutosaves();
 	}
 
 	public void CreateAutosaves()

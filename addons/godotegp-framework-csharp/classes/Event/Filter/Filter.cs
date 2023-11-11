@@ -64,6 +64,21 @@ public partial class ObjectType : IFilter
 
 	public bool Match(IEvent matchEvent)
 	{
-		return matchEvent.GetType() == _matchType;
+		return matchEvent.GetType().IsSubclassOf(_matchType);
+	}
+}
+
+public partial class OwnerObjectType : IFilter
+{
+	private Type _matchType;
+
+	public OwnerObjectType(Type matchType)
+	{
+		_matchType = matchType;
+	}
+
+	public bool Match(IEvent matchEvent)
+	{
+		return matchEvent.Owner.GetType().IsSubclassOf(_matchType);
 	}
 }

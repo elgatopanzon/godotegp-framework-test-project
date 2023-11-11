@@ -38,7 +38,10 @@ public partial class Tests : Node2D
 
 		if (ServiceRegistry.Get<SaveDataManager>().GetReady())
 		{
-			ServiceRegistry.Get<SaveDataManager>().SetLoaded(saveName);
+			if (ServiceRegistry.Get<SaveDataManager>().Get(saveName).RawValue is Data sd)
+			{
+				sd.Loaded = true;
+			}
 		}
 	}
 
