@@ -440,11 +440,11 @@ public partial class SaveDataManager : Service
 	// 	}
 	// }
 
-	public void Move(string fromName, string toName)
+	public void Move(string fromName, string toName, bool replace = true)
 	{
 		try
 		{
-			Copy(fromName, toName);
+			Copy(fromName, toName, replace);
 		}
 		catch (System.Exception ex)
 		{
