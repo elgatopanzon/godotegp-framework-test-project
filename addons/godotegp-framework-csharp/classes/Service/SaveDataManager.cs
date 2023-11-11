@@ -39,13 +39,11 @@ public partial class SaveDataManager : Service
 		Create<SystemData>("System");
 	}
 
-	public void SetConfig(SaveDataManagerConfig config)
-	{
-		LoggerManager.LogDebug("Setting config", "", "config", config);
 
-		_config = config;
-	}
-
+	/*******************
+	*  Godot methods  *
+	*******************/
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -56,6 +54,11 @@ public partial class SaveDataManager : Service
 	{
 	}
 
+
+	/*********************
+	*  Service methods  *
+	*********************/
+	
 	// Called when service is registered in manager
 	public override void _OnServiceRegistered()
 	{
@@ -73,6 +76,18 @@ public partial class SaveDataManager : Service
 	// Called when service is considered ready
 	public override void _OnServiceReady()
 	{
+	}
+
+
+	/*****************************************
+	*  Save data object management methods  *
+	*****************************************/
+
+	public void SetConfig(SaveDataManagerConfig config)
+	{
+		LoggerManager.LogDebug("Setting config", "", "config", config);
+
+		_config = config;
 	}
 
 	public void LoadSaveData()
@@ -125,39 +140,6 @@ public partial class SaveDataManager : Service
 		
 	}
 
-	public void _On_SaveDataLoad_Completed(IEvent e)
-	{
-		if (e is ConfigManagerLoaderCompleted ec)
-		{
-			LoggerManager.LogDebug("Loading of save files completed", "", "e", ec.ConfigObjects);	
-
-			foreach (Config.Object obj in ec.ConfigObjects)
-			{
-				// when we load saves from disk, they are always overwritten
-				// with the new objects
-				_saveData.Remove(obj.Name);
-				if (obj.RawValue is SaveData.Data sd)
-				{
-					sd.UpdateDateLoaded();
-				}
-				Register(obj.Name, obj);
-			}
-
-			if (!GetReady())
-			{
-				_SetServiceReady(true);
-			}
-		}
-	}
-
-	public void _On_SaveDataLoad_Error(IEvent e)
-	{
-		if (e is ConfigManagerLoaderError ee)
-		{
-			throw ee.RunWorkerCompletedEventArgs.Error;
-		}
-	}
-
 	public T Get<T>(string saveName) where T : SaveData.Data, new()
 	{
 		if (_saveData.TryGetValue(saveName, out Config.Object obj))
@@ -178,30 +160,6 @@ public partial class SaveDataManager : Service
 		throw new SaveDataNotFoundException($"Save data with the name {saveName} doesn't exist!");
 	}
 
-	public T Create<T>(string saveName, bool saveCreated = true) where T : SaveData.Data, new()
-	{
-		Config.Object<T> save = new Config.Object<T>();
-
-		if (_saveData.TryAdd(saveName, save))
-		{
-			save.Name = saveName;
-			save.Value.Name = saveName;
-			save.DataEndpoint = new FileEndpoint(OS.GetUserDataDir()+"/"+_saveBaseDir+"/"+save.RawValue.ToString()+"/"+save.Name+".json");
-
-			LoggerManager.LogDebug("Creating new save data instance", "", "saveData", save);
-
-			if (saveCreated)
-			{
-				Save(saveName);
-			}
-
-			return save.Value;
-		}
-		else
-		{
-			throw new SaveDataExistsException($"Save data with the name {saveName} already exists!");
-		}
-	}
 
 	public void Register(string saveName, Config.Object saveData)
 	{
@@ -215,57 +173,11 @@ public partial class SaveDataManager : Service
 		}
 	}
 
-	public bool Exists(string saveName)
-	{
-		return _saveData.ContainsKey(saveName);
-	}
 
-	public void Set(string saveName, Config.Object saveData)
-	{
-		_saveData[saveName] = saveData;
-	}
-
-	public void Save(string saveName)
-	{
-		var obj = _saveData[saveName];
-
-		if (obj.RawValue is SaveData.Data sd)
-		{
-			sd.UpdateDateSaved();
-		}
-
-		obj.SubscribeOwner<DataOperationComplete>(_On_SaveDataSave_Complete, oneshot: true);
-		obj.SubscribeOwner<DataOperationError>(_On_SaveDataSave_Error, oneshot: true);
-
-		obj.Save();
-	}
-
-	public void SaveAll()
-	{
-		foreach (var obj in _saveData)
-		{
-			Save(obj.Key);
-		}
-	}
-
-	public void _On_SaveDataSave_Complete(IEvent e)
-	{
-		if (e is DataOperationComplete ee)
-		{
-			LoggerManager.LogDebug("Save data object saved", "", "saveName", (e.Owner as Config.Object).Name);
-		}
-	}
-	public void _On_SaveDataSave_Error(IEvent e)
-	{
-		if (e is DataOperationError ee)
-		{
-			LoggerManager.LogDebug("Save data object save failed", "", "saveName", (e.Owner as Config.Object).Name);
-		}
-	}
-
-	/**************
-	*  Autosave  *
-	**************/
+	/**********************
+	*  Autosave methods  *
+	**********************/
+	
 	public void CreateAutosave(string saveName)
 	{
 		string autosaveName = saveName+"_autosave";
@@ -328,23 +240,59 @@ public partial class SaveDataManager : Service
 		}
 	}
 
-	public List<Config.Object> GetLoadedSaves()
-	{
-		List<Config.Object> loadedSaves = new List<Config.Object>();
 
-		foreach (var save in GetSaves())
+	/*****************************
+	*  Save management methods  *
+	*****************************/
+
+	public T Create<T>(string saveName, bool saveCreated = true) where T : SaveData.Data, new()
+	{
+		Config.Object<T> save = new Config.Object<T>();
+
+		if (_saveData.TryAdd(saveName, save))
 		{
-			if (save.Value.RawValue is SaveData.Data sd)
+			save.Name = saveName;
+			save.Value.Name = saveName;
+			save.DataEndpoint = new FileEndpoint(OS.GetUserDataDir()+"/"+_saveBaseDir+"/"+save.RawValue.ToString()+"/"+save.Name+".json");
+
+			LoggerManager.LogDebug("Creating new save data instance", "", "saveData", save);
+
+			if (saveCreated)
 			{
-				if (sd.Loaded)
-				{
-					loadedSaves.Add(save.Value);
-				}
+				Save(saveName);
 			}
+
+			return save.Value;
+		}
+		else
+		{
+			throw new SaveDataExistsException($"Save data with the name {saveName} already exists!");
+		}
+	}
+
+	public void Save(string saveName)
+	{
+		var obj = _saveData[saveName];
+
+		if (obj.RawValue is SaveData.Data sd)
+		{
+			sd.UpdateDateSaved();
 		}
 
-		return loadedSaves;
+		obj.SubscribeOwner<DataOperationComplete>(_On_SaveDataSave_Complete, oneshot: true);
+		obj.SubscribeOwner<DataOperationError>(_On_SaveDataSave_Error, oneshot: true);
+
+		obj.Save();
 	}
+
+	public void SaveAll()
+	{
+		foreach (var obj in _saveData)
+		{
+			Save(obj.Key);
+		}
+	}
+
 
 	public void Copy(string fromName, string toName, bool replace = true)
 	{
@@ -527,7 +475,10 @@ public partial class SaveDataManager : Service
 		return _saveData;
 	}
 
-	// save slot wrapper methods
+	/***********************
+	*  Save slot methods  *
+	***********************/
+	
 	public GameSaveFile GetSlot(int slotNumber)
 	{
 		return Get<GameSaveFile>($"Save{slotNumber}");
@@ -585,6 +536,92 @@ public partial class SaveDataManager : Service
 		}
 
 		return saveSlots;
+	}
+
+
+	/********************
+	*  Helper methods  *
+	********************/
+
+	public List<Config.Object> GetLoadedSaves()
+	{
+		List<Config.Object> loadedSaves = new List<Config.Object>();
+
+		foreach (var save in GetSaves())
+		{
+			if (save.Value.RawValue is SaveData.Data sd)
+			{
+				if (sd.Loaded)
+				{
+					loadedSaves.Add(save.Value);
+				}
+			}
+		}
+
+		return loadedSaves;
+	}
+
+	public bool Exists(string saveName)
+	{
+		return _saveData.ContainsKey(saveName);
+	}
+
+	public void Set(string saveName, Config.Object saveData)
+	{
+		_saveData[saveName] = saveData;
+	}
+
+
+	/***************************
+	*  Event handler methods  *
+	***************************/
+
+	public void _On_SaveDataSave_Complete(IEvent e)
+	{
+		if (e is DataOperationComplete ee)
+		{
+			LoggerManager.LogDebug("Save data object saved", "", "saveName", (e.Owner as Config.Object).Name);
+		}
+	}
+	public void _On_SaveDataSave_Error(IEvent e)
+	{
+		if (e is DataOperationError ee)
+		{
+			LoggerManager.LogDebug("Save data object save failed", "", "saveName", (e.Owner as Config.Object).Name);
+		}
+	}
+
+	public void _On_SaveDataLoad_Completed(IEvent e)
+	{
+		if (e is ConfigManagerLoaderCompleted ec)
+		{
+			LoggerManager.LogDebug("Loading of save files completed", "", "e", ec.ConfigObjects);	
+
+			foreach (Config.Object obj in ec.ConfigObjects)
+			{
+				// when we load saves from disk, they are always overwritten
+				// with the new objects
+				_saveData.Remove(obj.Name);
+				if (obj.RawValue is SaveData.Data sd)
+				{
+					sd.UpdateDateLoaded();
+				}
+				Register(obj.Name, obj);
+			}
+
+			if (!GetReady())
+			{
+				_SetServiceReady(true);
+			}
+		}
+	}
+
+	public void _On_SaveDataLoad_Error(IEvent e)
+	{
+		if (e is ConfigManagerLoaderError ee)
+		{
+			throw ee.RunWorkerCompletedEventArgs.Error;
+		}
 	}
 }
 
