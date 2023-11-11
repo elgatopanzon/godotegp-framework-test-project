@@ -89,8 +89,14 @@ public partial class VObject
 					if (!sourceProperty.IsDefault())
 					{
 						// LoggerManager.LogDebug("Merging!", "", "sourceProp", sourceProperty);
-
-						Properties[i].RawValue = sourceProperty.RawValue;
+						if (sourceProperty.MergeCollections)
+						{
+							Properties[i].MergeCollection(sourceProperty);
+						}
+						else
+						{
+							Properties[i].RawValue = sourceProperty.RawValue;
+						}
 					}
 				}
 			}

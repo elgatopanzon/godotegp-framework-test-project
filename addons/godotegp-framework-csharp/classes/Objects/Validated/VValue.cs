@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Reflection;
+using System.Linq;
 
 using GodotEGP.Logging;
 using GodotEGP.Objects.Validated.Constraint;
@@ -15,8 +16,11 @@ public abstract partial class VValue : Validated.IVValue
 	public abstract bool IsDefault();
 	public abstract bool IsNull();
 
+	public abstract void MergeCollection(VValue mergeFromVV);
+
 	internal abstract object RawValue {set; get;}
 	internal abstract object Parent {set; get;}
+	internal abstract bool MergeCollections {get; set;}
 }
 
 public partial class VValue<T> : VValue
@@ -56,6 +60,16 @@ public partial class VValue<T> : VValue
 			_SetValue(value);
 		}
 	}
+    protected bool _mergeCollections = false;
+    internal override bool MergeCollections {
+		get {
+			return _mergeCollections;
+		}
+		set {
+			_mergeCollections = value;
+		}
+    }
+
 	private void _SetValue(T newValue)
 	{
 		LoggerManager.LogDebug($"Setting value {this.GetType().Name}<{this.GetType().GetTypeInfo().GenericTypeArguments[0]}>", "", "value", newValue);
@@ -205,6 +219,31 @@ public partial class VValue<T> : VValue
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)
 				: base(info, context) { }
+	}
+
+	// provide method to merge collections
+	public override void MergeCollection(VValue mergeFromVV)
+	{
+		if (Value is IDictionary col && mergeFromVV.RawValue is IDictionary sourceCol)
+		{
+			LoggerManager.LogInfo($"Merging collection of type {typeof(T).FullName}");
+
+			foreach (DictionaryEntry entry in sourceCol)
+			{
+				// if the target dict does not contain a key from the source,
+				// then add it to the target
+				if (!col.Contains(entry.Key))
+				{
+					col.Add(entry.Key, entry.Value);
+				}
+			}
+
+			LoggerManager.LogInfo($"Merging collection result {typeof(T).FullName}", "", "obj", Value);
+		}
+		else
+		{
+			LoggerManager.LogInfo($"Value of type {typeof(T).FullName} does not implement ICollection");
+		}
 	}
 }
 
