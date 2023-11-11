@@ -329,7 +329,7 @@ public partial class SaveDataManager : Service
 		return loadedSaves;
 	}
 
-	public void Copy(string fromName, string toName)
+	public void Copy(string fromName, string toName, bool replace = true)
 	{
 		if (!Exists(fromName))
 		{
@@ -341,7 +341,7 @@ public partial class SaveDataManager : Service
 
 			throw ex;
 		}
-		if (Exists(toName))
+		if (Exists(toName) && replace == false)
 		{
 			var ex = new SaveDataExistsException($"Cannot copy to existing save data {toName}!");
 			this.Emit<SaveDataMoveError>((e) => {
@@ -352,8 +352,14 @@ public partial class SaveDataManager : Service
 			throw ex;
 		}
 
-		if (Exists(fromName) && !Exists(toName))
+		if (Exists(fromName) && (!Exists(toName) || replace))
 		{
+			if (replace && Exists(toName))
+			{
+				// happens right away so we don't need to wait
+				Remove(toName);
+			}
+
 			// copy the save file on the filesystem
 			var obj = Get(fromName);
 
