@@ -8,6 +8,8 @@ using GodotEGP.Objects.Extensions;
 using GodotEGP.Event.Events;
 using GodotEGP.SaveData;
 
+using GodotEGP.Config;
+
 public partial class Tests : Node2D
 {
 	// Called when the node enters the scene tree for the first time.
@@ -36,6 +38,9 @@ public partial class Tests : Node2D
 	public void _On_Test_pressed(IEvent e)
 	{
 		LoggerManager.LogDebug("Testing stuff!");
+
+		// resource configs
+		LoggerManager.LogDebug("Resource definitions", "", "resourceDefinitions", ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>());
 	}
 
 	public void _On_SaveTest_TimedAutosave_pressed(IEvent e)

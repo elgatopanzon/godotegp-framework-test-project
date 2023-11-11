@@ -236,6 +236,11 @@ public partial class VValue<T> : VValue
 				{
 					col.Add(entry.Key, entry.Value);
 				}
+				// if it exists, overwrite the value with source
+				else
+				{
+					col[entry.Key] = entry.Value;
+				}
 			}
 
 			LoggerManager.LogInfo($"Merging collection result {typeof(T).FullName}", "", "obj", Value);
