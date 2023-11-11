@@ -2,7 +2,7 @@ namespace GodotEGP.Config;
 
 using GodotEGP.Objects.Validated;
 
-public partial class EngineConfig : VObject
+public partial class EngineConfig : VConfig
 {
 	private readonly VNative<LoggerConfig> _loggerManagerConfig;
 

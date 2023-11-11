@@ -1,7 +1,7 @@
 /**
  * @author      : ElGatoPanzon (contact@elgatopanzon.io) Copyright (c) ElGatoPanzon
- * @file        : GlobalConfig
- * @created     : Saturday Nov 11, 2023 00:30:00 CST
+ * @file        : VConfig
+ * @created     : Saturday Nov 11, 2023 01:11:51 CST
  */
 
 namespace GodotEGP.Config;
@@ -14,9 +14,9 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
-public partial class GlobalConfig : VConfig
+public partial class VConfig : VObject
 {
-	public GlobalConfig()
+	public VConfig()
 	{
 		
 	}

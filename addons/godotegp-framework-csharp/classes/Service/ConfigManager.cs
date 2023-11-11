@@ -77,7 +77,7 @@ public partial class ConfigManager : Service
 
 					// if it's a valid config object, and if the base type is
 					// ValidatedObject, then let's load the content
-					if (configDirType != null && configDirType.BaseType.Equals(typeof(VObject)))
+					if (configDirType != null && configDirType.BaseType.Equals(typeof(VConfig)))
 					{
 						// trigger creation of base object in the register
 						// before queueing files for loading
