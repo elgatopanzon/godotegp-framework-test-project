@@ -191,13 +191,18 @@ public partial class ConfigManager : Service
 		// generate default filepath for type we are saving
 		if (dataEndpoint == null)
 		{
-			dataEndpoint = new FileEndpoint(Path.Combine(_configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, "config.json"));
+			dataEndpoint = GetDefaultSaveEndpoint(configInstanceType);
 		}
 
 		Config.Object configObject = GetConfigObjectInstance(configInstanceType);
 
 		configObject.DataEndpoint = dataEndpoint;
 		configObject.Save();
+	}
+
+	public IEndpoint GetDefaultSaveEndpoint(Type configInstanceType)
+	{
+		return new FileEndpoint(Path.Combine(OS.GetUserDataDir(), _configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, "Config.json"));
 	}
 
 	public void Save<T>(IEndpoint dataEndpoint = null) where T : VObject
@@ -213,5 +218,20 @@ public partial class ConfigManager : Service
 	// Called when service is considered ready
 	public override void _OnServiceReady()
 	{
+		// create instance of GlobalConfig if config doesn't exist already
+		if (!_configObjects.TryGetValue(typeof(GlobalConfig), out var obj))
+		{
+			LoggerManager.LogDebug("Creating default config instance", "", "type", typeof(GlobalConfig).Name);
+
+			var globalConfig = GetConfigObjectInstance(typeof(GlobalConfig));
+			globalConfig.DataEndpoint = GetDefaultSaveEndpoint(globalConfig.GetType());
+
+			Save<GlobalConfig>();
+		}
+		else
+		{
+			// save it so we include any new values
+			Save<GlobalConfig>();
+		}
 	}
 }
