@@ -3,6 +3,8 @@ namespace GodotEGP.Objects.Extensions;
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 
 using GodotEGP.Event;
 using GodotEGP.Event.Events;
@@ -60,6 +62,20 @@ public static partial class ObjectExtensions
 	public static bool HasProperty(this object obj, string propertyName)
 	{
     	return obj.GetType().GetProperty(propertyName) != null;
+	}
+
+	public static T DeepCopy<T>(this T object2Copy)
+	{
+    	using (var stream = new MemoryStream())
+    	{
+        	var serializer = new XmlSerializer(typeof(T));
+
+        	serializer.Serialize(stream, object2Copy);
+        	stream.Position = 0;
+        	var objectCopy = (T)serializer.Deserialize(stream);
+
+        	return objectCopy;
+    	}
 	}
 }
 

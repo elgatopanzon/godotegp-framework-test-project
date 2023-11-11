@@ -103,7 +103,14 @@ public partial class Data : VObject
 	internal bool Loaded
 	{
 		get { return _loaded.Value; }
-		set { _loaded.Value = value; }
+		set { 
+			_loaded.Value = value;
+
+			if (value == true)
+			{
+				UpdateDateLoaded();
+			}
+		}
 	}
 
 	public Data()
@@ -157,6 +164,12 @@ public partial class Data : VObject
 		_dateLoaded.Value = DateTime.Now;
 
 		LoggerManager.LogDebug("Updating loaded date", "", "date", _dateLoaded.Value);
+	}
+
+	public bool AutosaveSupported()
+	{
+		// ignore backup and autosave saves from being backed up
+		return (SaveType != SaveDataType.Autosave && SaveType != SaveDataType.Backup);
 	}
 }
 

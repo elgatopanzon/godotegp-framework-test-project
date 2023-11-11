@@ -161,11 +161,13 @@ public partial class SaveDataManager : Service
 	}
 
 
-	public void Register(string saveName, Config.Object saveData)
+	public bool Register(string saveName, Config.Object saveData)
 	{
 		if (_saveData.TryAdd(saveName, saveData))
 		{
 			LoggerManager.LogDebug("Registering new save data instance", "", "save", saveName);
+
+			return true;
 		}
 		else
 		{
@@ -178,11 +180,29 @@ public partial class SaveDataManager : Service
 	*  Autosave methods  *
 	**********************/
 	
-	public void CreateAutosave(string saveName)
+	public void CreateAutosave(string saveName, SaveDataType saveType = SaveDataType.Autosave)
 	{
-		string autosaveName = saveName+"_autosave";
+		string autosaveName = GetAutosaveName(saveName, saveType);
 
-		LoggerManager.LogDebug("Creating autosave", "", "saveName", saveName);
+		LoggerManager.LogDebug("Creating autosave", "", "saveName", autosaveName);
+
+		Copy(saveName, autosaveName, replace: false, saveCopy: false);
+
+		if (Exists(autosaveName))
+		{
+			var autosave = Get<Data>(autosaveName);
+
+			autosave.Loaded = false;
+			autosave.SaveType = SaveDataType.Autosave;
+			autosave.ParentName = saveName; // TODO: update this value when moving/copying/deleting the linked save
+
+			Save(autosaveName);
+		}
+	}
+
+	public string GetAutosaveName(string saveName, SaveDataType saveType)
+	{
+		return saveName+"_"+saveType.ToString()+"_"+DateTime.Now.ToString("yyyyMMddHHmmss");
 	}
 
 	public void SetupTimedAutosave()
@@ -227,6 +247,7 @@ public partial class SaveDataManager : Service
 		_timedAutosaveTimer.WaitTime = _config.AutosaveTimeDefaultSec;
 
 		CreateAutosaves();
+		PurgeOldAutosaves();
 	}
 
 	public void CreateAutosaves()
@@ -235,21 +256,67 @@ public partial class SaveDataManager : Service
 		{
 			if (save.RawValue is SaveData.Data sd)
 			{
-				CreateAutosave(sd.Name);
+				if (sd.AutosaveSupported())
+				{
+					CreateAutosave(sd.Name);
+				}
 			}
 		}
 	}
 
+	public void PurgeOldAutosaves()
+	{
+		foreach (var save in GetSaves())
+		{
+			if (save.Value.RawValue is Data sd)
+			{
+				if (sd.SaveType == SaveDataType.Autosave || sd.SaveType == SaveDataType.Backup)
+				{
+					continue;
+				}
+
+				List<Data> autosaves = new List<Data>();
+
+				foreach (var csave in GetChildSaves(sd.Name))
+				{
+					if (csave.SaveType == SaveDataType.Autosave)
+					{
+						autosaves.Add(csave);			
+					}
+				}
+
+				// if found autosaves are more than the allowed max, start purging
+				// them
+				if (autosaves.Count > _config.AutosaveMax)
+				{
+					autosaves = autosaves
+						.OrderByDescending(p => p.DateSaved)
+						.ToList()
+						.GetRange(_config.AutosaveMax, autosaves.Count - _config.AutosaveMax)
+						;
+
+					LoggerManager.LogDebug($"Autosaves to purge for save {sd.Name}", "", "autosaves", autosaves);
+
+					foreach (var autosave in autosaves)
+					{
+						Remove(autosave.Name);
+					}
+
+				}
+			}
+
+		}
+	}
 
 	/*****************************
 	*  Save management methods  *
 	*****************************/
 
-	public T Create<T>(string saveName, bool saveCreated = true) where T : SaveData.Data, new()
+	public Config.Object Create<T>(string saveName, bool saveCreated = true) where T : SaveData.Data, new()
 	{
 		Config.Object<T> save = new Config.Object<T>();
 
-		if (_saveData.TryAdd(saveName, save))
+		if (Register(saveName, save))
 		{
 			save.Name = saveName;
 			save.Value.Name = saveName;
@@ -262,7 +329,7 @@ public partial class SaveDataManager : Service
 				Save(saveName);
 			}
 
-			return save.Value;
+			return save;
 		}
 		else
 		{
@@ -294,7 +361,7 @@ public partial class SaveDataManager : Service
 	}
 
 
-	public void Copy(string fromName, string toName, bool replace = true)
+	public void Copy(string fromName, string toName, bool replace = true, bool saveCopy = true)
 	{
 		if (!Exists(fromName))
 		{
@@ -351,14 +418,18 @@ public partial class SaveDataManager : Service
 			var obj = Get(fromName);
 			var objNew = Create<GameSaveFile>(toName, saveCreated: false);
 
-			if (obj.RawValue is SaveData.Data sd)
+			// only works with GameSaveFile for now
+			if (obj.RawValue is Data sd && objNew.RawValue is Data sdn)
 			{
-				objNew.MergeFrom(sd);
+				sdn.MergeFrom(sd);
+				sdn.Name = toName;
+				sdn.Loaded = false;
 			}
 
-			objNew.Name = toName;
-
-			Save(toName);
+			if (saveCopy)
+			{
+				Save(toName);
+			}
 
 			this.Emit<SaveDataCopyComplete>((ee) => {
 					ee.SetName(objNew.Name);
@@ -453,6 +524,7 @@ public partial class SaveDataManager : Service
 		{
 			if (Get(saveName).DataEndpoint is FileEndpoint fe)
 			{
+				LoggerManager.LogDebug($"Removing save data {saveName}", "", "filePath", fe.Path);
 				File.Delete(fe.Path);
 				_saveData.Remove(saveName);
 
@@ -486,7 +558,7 @@ public partial class SaveDataManager : Service
 
 	public GameSaveFile CreateSlot(int slotNumber)
 	{
-		 return Create<GameSaveFile>($"Save{slotNumber}");
+		 return (GameSaveFile) Create<GameSaveFile>($"Save{slotNumber}").RawValue;
 	}
 
 	public bool SlotExists(int slotNumber)
@@ -571,6 +643,23 @@ public partial class SaveDataManager : Service
 		_saveData[saveName] = saveData;
 	}
 
+	public List<Data> GetChildSaves(string parentSave)
+	{
+		List<Data> parentSaves = new List<Data>();
+
+		foreach (var save in GetSaves())
+		{
+			if (save.Value.RawValue is Data sd)
+			{
+				if (sd.ParentName == parentSave)
+				{
+					parentSaves.Add(sd);			
+				}
+			}
+		}
+
+		return parentSaves;
+	}
 
 	/***************************
 	*  Event handler methods  *
@@ -602,10 +691,10 @@ public partial class SaveDataManager : Service
 				// when we load saves from disk, they are always overwritten
 				// with the new objects
 				_saveData.Remove(obj.Name);
-				if (obj.RawValue is SaveData.Data sd)
-				{
-					sd.UpdateDateLoaded();
-				}
+				// if (obj.RawValue is SaveData.Data sd)
+				// {
+				// 	sd.UpdateDateLoaded();
+				// }
 				Register(obj.Name, obj);
 			}
 
