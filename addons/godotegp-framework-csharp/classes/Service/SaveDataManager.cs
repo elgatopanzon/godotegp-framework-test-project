@@ -189,7 +189,7 @@ public partial class SaveDataManager : Service
 		throw new SaveDataNotFoundException($"Save data with the name {saveName} doesn't exist!");
 	}
 
-	public T Create<T>(string saveName) where T : SaveData.Data, new()
+	public T Create<T>(string saveName, bool saveCreated = true) where T : SaveData.Data, new()
 	{
 		Config.Object<T> save = new Config.Object<T>();
 
@@ -201,7 +201,10 @@ public partial class SaveDataManager : Service
 
 			LoggerManager.LogDebug("Creating new save data instance", "", "saveData", save);
 
-			Save(saveName);
+			if (saveCreated)
+			{
+				Save(saveName);
+			}
 
 			return save.Value;
 		}
@@ -360,65 +363,82 @@ public partial class SaveDataManager : Service
 				Remove(toName);
 			}
 
-			// copy the save file on the filesystem
+			// // copy the save file on the filesystem
+			// var obj = Get(fromName);
+            //
+			// if (obj.DataEndpoint is FileEndpoint fe)
+			// {
+			// 	string filePath = fe.Path;
+			// 	string filePathNew = Path.Combine(filePath.GetBaseDir(), toName+"."+filePath.GetExtension());
+            //
+			// 	LoggerManager.LogDebug("Copy save data", "", "fromTo", $"{filePath} => {filePathNew}");
+            //
+			// 	File.Copy(filePath, filePathNew);
+            //
+			// 	// trigger config loader for the copy
+			// 	Queue<Dictionary<string, object>> fileQueue = new Queue<Dictionary<string, object>>();
+			// 	fileQueue.Enqueue(new Dictionary<string, object> {{"configType", obj.RawValue.GetType().Namespace+"."+obj.RawValue.GetType().Name}, {"path", filePathNew}, {"name", toName}});
+            //
+			// 	Config.Loader configLoader = new Config.Loader(fileQueue);
+            //
+			// 	// subscribe to the loaded event
+			// 	configLoader.SubscribeOwner<ConfigManagerLoaderCompleted>(_On_SaveDataCopy_Completed, oneshot: true, isHighPriority: true);
+			// 	configLoader.SubscribeOwner<ConfigManagerLoaderError>(_On_SaveDataCopy_Error, oneshot: true, isHighPriority: true);
+			// }
+
 			var obj = Get(fromName);
+			var objNew = Create<GameSaveFile>(toName, saveCreated: false);
 
-			if (obj.DataEndpoint is FileEndpoint fe)
+			if (obj.RawValue is SaveData.Data sd)
 			{
-				string filePath = fe.Path;
-				string filePathNew = Path.Combine(filePath.GetBaseDir(), toName+"."+filePath.GetExtension());
-
-				LoggerManager.LogDebug("Copy save data", "", "fromTo", $"{filePath} => {filePathNew}");
-
-				File.Copy(filePath, filePathNew);
-
-				// trigger config loader for the copy
-				Queue<Dictionary<string, object>> fileQueue = new Queue<Dictionary<string, object>>();
-				fileQueue.Enqueue(new Dictionary<string, object> {{"configType", obj.RawValue.GetType().Namespace+"."+obj.RawValue.GetType().Name}, {"path", filePathNew}, {"name", toName}});
-
-				Config.Loader configLoader = new Config.Loader(fileQueue);
-
-				// subscribe to the loaded event
-				configLoader.SubscribeOwner<ConfigManagerLoaderCompleted>(_On_SaveDataCopy_Completed, oneshot: true, isHighPriority: true);
-				configLoader.SubscribeOwner<ConfigManagerLoaderError>(_On_SaveDataCopy_Error, oneshot: true, isHighPriority: true);
+				objNew.MergeFrom(sd);
 			}
+
+			objNew.Name = toName;
+
+			Save(toName);
+
+			this.Emit<SaveDataCopyComplete>((ee) => {
+					ee.SetName(objNew.Name);
+					ee.SetSaveData(Get(toName));
+				});
 		}
 	}
 
-	public void _On_SaveDataCopy_Completed(IEvent e)
-	{
-		_On_SaveDataLoad_Completed(e);
-
-		LoggerManager.LogDebug("Copy process complete", "", "e", e);
-
-		if (e is ConfigManagerLoaderCompleted ec)
-		{
-			foreach (var obj in ec.ConfigObjects)
-			{
-				this.Emit<SaveDataCopyComplete>((ee) => {
-						ee.SetName(obj.Name);
-						ee.SetSaveData(obj);
-					});
-			}
-		}
-	}
-	public void _On_SaveDataCopy_Error(IEvent e)
-	{
-		_On_SaveDataLoad_Error(e);
-
-		if (e is ConfigManagerLoaderError ele)
-		{
-			foreach (var obj in ele.ConfigObjects)
-			{
-				this.Emit<SaveDataCopyError>((en) => {
-						en.SetName(obj.Name); 
-						en.SetRunWorkerCompletedEventArgs(ele.RunWorkerCompletedEventArgs);
-						en.SetSaveData(obj);
-						en.SetException(ele.RunWorkerCompletedEventArgs.Error);
-					});
-			}
-		}
-	}
+	// public void _On_SaveDataCopy_Completed(IEvent e)
+	// {
+	// 	_On_SaveDataLoad_Completed(e);
+    //
+	// 	LoggerManager.LogDebug("Copy process complete", "", "e", e);
+    //
+	// 	if (e is ConfigManagerLoaderCompleted ec)
+	// 	{
+	// 		foreach (var obj in ec.ConfigObjects)
+	// 		{
+	// 			this.Emit<SaveDataCopyComplete>((ee) => {
+	// 					ee.SetName(obj.Name);
+	// 					ee.SetSaveData(obj);
+	// 				});
+	// 		}
+	// 	}
+	// }
+	// public void _On_SaveDataCopy_Error(IEvent e)
+	// {
+	// 	_On_SaveDataLoad_Error(e);
+    //
+	// 	if (e is ConfigManagerLoaderError ele)
+	// 	{
+	// 		foreach (var obj in ele.ConfigObjects)
+	// 		{
+	// 			this.Emit<SaveDataCopyError>((en) => {
+	// 					en.SetName(obj.Name); 
+	// 					en.SetRunWorkerCompletedEventArgs(ele.RunWorkerCompletedEventArgs);
+	// 					en.SetSaveData(obj);
+	// 					en.SetException(ele.RunWorkerCompletedEventArgs.Error);
+	// 				});
+	// 		}
+	// 	}
+	// }
 
 	public void Move(string fromName, string toName)
 	{
