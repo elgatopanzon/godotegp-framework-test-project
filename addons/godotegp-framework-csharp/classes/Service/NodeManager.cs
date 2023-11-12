@@ -56,7 +56,7 @@ public partial class NodeManager : Service
 	}
 	public void __On_EventNodeRemoved(IEvent eventObj)
 	{
-		NodeAdded e = (NodeAdded) eventObj;
+		NodeRemoved e = (NodeRemoved) eventObj;
 		
 		DeregisterNode(e.NodeObj);
 	}
