@@ -147,6 +147,24 @@ public partial class ResourceManager : Service
 		return false;
 	}
 
+	public Dictionary<string, ResourceBase> GetResources<T>() where T : Godot.Resource
+	{
+		var matchingResources = new Dictionary<string, ResourceBase>();
+
+		foreach (var resourceCat in _resources)
+		{
+			foreach (var resourceObj in resourceCat.Value)
+			{
+				if (resourceObj.Value.RawValue is T)
+				{
+					matchingResources.Add(resourceObj.Key, resourceObj.Value);
+				}
+			}
+		}
+
+		return matchingResources;
+	}
+
 	/**********************
 	*  Callback methods  *
 	**********************/
