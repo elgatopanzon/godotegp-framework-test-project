@@ -195,6 +195,8 @@ public partial class EventManager : Service
 		else
 		{
 			LoggerManager.LogWarning("Signal already connected", "", "signal", new Dictionary<string, string> { {"objectType", connectObject.GetType().Name}, {"signalName", signalName}  });
+
+			return;
 		}
 
 
