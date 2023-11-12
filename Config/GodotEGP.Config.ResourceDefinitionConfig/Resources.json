@@ -1,0 +1,22 @@
+{
+  "Resources": {
+    "Images": {
+      "icon": {
+        "Path": "res://icon.svg",
+        "Class": "Godot.CompressedTexture2D"
+      },
+      "square": {
+        "Path": "res://square.png",
+        "Class": "Godot.CompressedTexture2D"
+      }
+    },
+    "AudioEffects": {
+      "testfilter": {
+        "Class": "Godot.AudioEffectHighPassFilter",
+        "Config": {
+          "CutoffHz": 1000
+        }
+      }
+    }
+  }
+}

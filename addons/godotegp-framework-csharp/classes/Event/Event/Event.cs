@@ -7,6 +7,8 @@ using System.ComponentModel;
 
 using GodotEGP.Service;
 
+using GodotEGP.Resource;
+
 public partial class Event : IEvent
 {
 	public object Owner { get; set; }
@@ -262,4 +264,28 @@ public class SaveDataRemoveComplete : SaveDataEvent
 public class SaveDataRemoveError : SaveDataEvent
 {
 	
+}
+
+public partial class ResourceLoaderEvent : BackgroundJobEvent
+{
+	public List<LoaderQueueItem> Resources;
+	
+}
+static public partial class ResourceLoaderEventExtensions
+{
+	static public T SetResources<T>(this T o, List<LoaderQueueItem> resources) where T : ResourceLoaderEvent
+	{
+		o.Resources = resources;
+		return o;
+	}
+}
+
+public partial class ResourceLoaderProgress : ResourceLoaderEvent
+{
+}
+public partial class ResourceLoaderCompleted : ResourceLoaderEvent
+{
+}
+public partial class ResourceLoaderError : ResourceLoaderEvent
+{
 }
