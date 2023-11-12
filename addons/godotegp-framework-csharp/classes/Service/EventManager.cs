@@ -126,6 +126,15 @@ public partial class EventManager : Service
 	{
 		bool eventConsumed = false;
 
+		if (_eventSubscriptions == null)
+		{
+			LoggerManager.LogError("event subs null");
+		}
+		if (eventObj == null)
+		{
+			LoggerManager.LogError("event object null");
+		}
+
 		// emit the event to high-priority subscribers
 		if (_eventSubscriptions.TryGetValue(eventObj.GetType(), out List<IEventSubscription<Event>> subList))
 		{
