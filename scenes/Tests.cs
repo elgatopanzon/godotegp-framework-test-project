@@ -217,6 +217,8 @@ public partial class Tests : Node2D
 	public void _On_SceneTest_Reload_pressed(IEvent e)
 	{
 		LoggerManager.LogDebug("Scene reload pressed");
+
+		ServiceRegistry.Get<SceneManager>().ReloadCurrentScene();
 	}
 	public void _On_SceneTest_Unload_pressed(IEvent e)
 	{

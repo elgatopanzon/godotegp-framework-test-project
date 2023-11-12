@@ -153,6 +153,14 @@ public partial class SceneManager : Service
 		}
 	}
 
+	public void ReloadCurrentScene()
+	{
+		LoadScene(_currentSceneId);
+
+		// prevent history from including the reload
+		_sceneIdHistory.Pop();
+	}
+
 	/**********************
 	*  Callback methods  *
 	**********************/
