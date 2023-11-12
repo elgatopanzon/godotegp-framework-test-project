@@ -97,7 +97,9 @@ public partial class SceneManager : Service
 		{
 			LoggerManager.LogDebug("Loading scene", "", "sceneId", sceneId);
 
+
 			UnloadManagedScenes();
+			this.Emit<SceneUnloaded>((e) => e.SetSceneId(_currentSceneId));
 
 			_currentSceneId = sceneId;
 			_currentSceneInstance = GetSceneInstance(sceneId);
@@ -113,6 +115,10 @@ public partial class SceneManager : Service
 	public void AddCurrentScene()
 	{
 		AddChild(_currentSceneInstance);
+		this.Emit<SceneLoaded>((e) => {
+				e.SetSceneId(_currentSceneId);
+				e.SetSceneInstance(_currentSceneInstance);
+			});
 	}
 
 	public Node GetSceneInstance(string sceneId)

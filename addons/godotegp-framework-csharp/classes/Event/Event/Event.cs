@@ -289,3 +289,30 @@ public partial class ResourceLoaderCompleted : ResourceLoaderEvent
 public partial class ResourceLoaderError : ResourceLoaderEvent
 {
 }
+
+public partial class SceneEvent : Event
+{
+	public string SceneId;
+	public Node SceneInstance;
+	
+}
+static public partial class SceneEventExtensions
+{
+	static public T SetSceneId<T>(this T o, string sceneId) where T : SceneEvent
+	{
+		o.SceneId = sceneId;
+		return o;
+	}
+	static public T SetSceneInstance<T>(this T o, Node scene) where T : SceneEvent
+	{
+		o.SceneInstance = scene;
+		return o;
+	}
+}
+
+public partial class SceneLoaded : SceneEvent
+{
+}
+public partial class SceneUnloaded : SceneEvent
+{
+}
