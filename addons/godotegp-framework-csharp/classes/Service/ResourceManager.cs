@@ -23,7 +23,7 @@ public partial class ResourceManager : Service
 {
 	private ResourceDefinitionConfig _resourceDefinitions;
 
-	private Dictionary<string, ResourceBase> _resources = new Dictionary<string, ResourceBase>();
+	private Dictionary<string, Dictionary<string, ResourceBase>> _resources = new Dictionary<string, Dictionary<string, ResourceBase>>();
 
 	public ResourceManager()
 	{
@@ -103,25 +103,35 @@ public partial class ResourceManager : Service
 	*  Resource management methods  *
 	*********************************/
 	
-	public void SetResourceObject(string id, ResourceBase resource)
+	public void SetResourceObject(string category, string id, ResourceBase resource)
 	{
 		LoggerManager.LogDebug($"Setting resource object {id}", "", "resource", resource);
-		_resources[id] = resource;
+
+		if (!_resources.TryGetValue(category, out var d))
+		{
+			d = new Dictionary<string, ResourceBase>();
+			_resources[category] = d;
+		}
+
+		_resources[category][id] = resource;
 	}
 
-	public ResourceBase GetResourceObject(string id)
+	public ResourceBase GetResourceObject(string category, string id)
 	{
-		if (_resources.TryGetValue(id, out ResourceBase r))
+		if (_resources.TryGetValue(category, out var d))
 		{
-			return r;
+			if (d.TryGetValue(id, out ResourceBase r))
+			{
+				return r;
+			}
 		}
 
 		throw new InvalidResourcIdException($"No resource exists with the id {id}");
 	}
 
-	public T Get<T>(string id) where T : Godot.Resource
+	public T Get<T>(string category, string id) where T : Godot.Resource
 	{
-		return (T) GetResourceObject(id).RawValue;
+		return (T) GetResourceObject(category, id).RawValue;
 	}
 
 	/**********************
@@ -137,7 +147,7 @@ public partial class ResourceManager : Service
 			foreach (var resource in ec.Resources)
 			{
 				// set each resource
-				SetResourceObject(resource.Id, resource.ResourceObject);
+				SetResourceObject(resource.Category, resource.Id, resource.ResourceObject);
 			}
 			
 			this.Emit<ResourceLoaderCompleted>();

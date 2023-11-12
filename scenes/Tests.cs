@@ -79,7 +79,7 @@ public partial class Tests : Node2D
 		// init ResourceManager service
 		// ServiceRegistry.Get<ResourceManager>();
 		//
-		LoggerManager.LogDebug("Test loading resource", "", "r", ServiceRegistry.Get<ResourceManager>().Get<CompressedTexture2D>("square"));
+		LoggerManager.LogDebug("Test loading resource", "", "r", ServiceRegistry.Get<ResourceManager>().Get<CompressedTexture2D>("Images", "square"));
 
 		// ServiceRegistry.Get<ResourceManager>().SubscribeOwner<ResourceLoaderCompleted>((e) => {
 		// 		LoggerManager.LogDebug("Test loading resource", "", "r", ServiceRegistry.Get<ResourceManager>().Get<CompressedTexture2D>("square"));
