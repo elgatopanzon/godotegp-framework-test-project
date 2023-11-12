@@ -30,6 +30,17 @@ public partial class ResourceManager : Service
 		
 	}
 
+	public void SetConfig(ResourceDefinitionConfig config)
+	{
+		_resourceDefinitions = config;
+
+		LoadResources();
+	}
+
+	/*******************
+	*  Godot methods  *
+	*******************/
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -41,12 +52,13 @@ public partial class ResourceManager : Service
 	{
 	}
 
+	/*********************
+	*  Service methods  *
+	*********************/
+	
 	// Called when service is registered in manager
 	public override void _OnServiceRegistered()
 	{
-		_resourceDefinitions = ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>();
-
-		LoadResources();
 	}
 
 	// Called when service is deregistered from manager
@@ -83,8 +95,8 @@ public partial class ResourceManager : Service
 		ThreadedResourceLoader resourceLoader = new ThreadedResourceLoader(resourceQueue);
 
 		// subscribe to resource loader events
-		resourceLoader.SubscribeOwner<ResourceLoaderCompleted>(_On_ResourceLoader_Completed, oneshot: true);
-		resourceLoader.SubscribeOwner<ResourceLoaderError>(_On_ResourceLoader_Error, oneshot: true);
+		resourceLoader.SubscribeOwner<ResourceLoaderCompleted>(_On_ResourceLoader_Completed, oneshot: true, isHighPriority: true);
+		resourceLoader.SubscribeOwner<ResourceLoaderError>(_On_ResourceLoader_Error, oneshot: true, isHighPriority: true);
 	}
 
 	/*********************************
@@ -129,6 +141,8 @@ public partial class ResourceManager : Service
 			}
 			
 			this.Emit<ResourceLoaderCompleted>();
+
+			_SetServiceReady(true);
 		}
 	}
 	public void _On_ResourceLoader_Error(IEvent e)

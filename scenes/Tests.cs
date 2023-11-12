@@ -43,45 +43,47 @@ public partial class Tests : Node2D
 		LoggerManager.LogDebug("Testing stuff!");
 
 		// resource configs
-		var resourceConfig = ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>();
-		LoggerManager.LogDebug("Resource definitions", "", "resourceDefinitions", resourceConfig);
-
-		LoggerManager.LogDebug(new AudioEffectHighPassFilter().GetType());
-
-		var hpfc = resourceConfig.Resources["AudioEffects"];
-		foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-     	{
-         	Type type = asm.GetType("Godot.AudioEffectHighPassFilter");
-         	if (type != null)
-         	{
-             	AudioEffectHighPassFilter r = (AudioEffectHighPassFilter) Activator.CreateInstance(type);
-				LoggerManager.LogDebug(r);
-				LoggerManager.LogDebug(r.CutoffHz);
-
-				OperationResult<AudioEffectHighPassFilter> or = new OperationResult<AudioEffectHighPassFilter>(JsonConvert.SerializeObject(hpfc["testfilter"].Config, Formatting.Indented));
-
-				Newtonsoft.Json.JsonConvert.PopulateObject((string) JsonConvert.SerializeObject(hpfc["testfilter"].Config, Formatting.Indented),
-						r,
-					new JsonSerializerSettings
-    				{
-        				Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
-        				{
-            				args.ErrorContext.Handled = true;
-        				},
-        				ObjectCreationHandling = ObjectCreationHandling.Replace
-    				}
-				);
-
-				LoggerManager.LogDebug(r.CutoffHz);
-			}
-     	}
+		// var resourceConfig = ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>();
+		// LoggerManager.LogDebug("Resource definitions", "", "resourceDefinitions", resourceConfig);
+        //
+		// LoggerManager.LogDebug(new AudioEffectHighPassFilter().GetType());
+        //
+		// var hpfc = resourceConfig.Resources["AudioEffects"];
+		// foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+     	// {
+        //  	Type type = asm.GetType("Godot.AudioEffectHighPassFilter");
+        //  	if (type != null)
+        //  	{
+        //      	AudioEffectHighPassFilter r = (AudioEffectHighPassFilter) Activator.CreateInstance(type);
+		// 		LoggerManager.LogDebug(r);
+		// 		LoggerManager.LogDebug(r.CutoffHz);
+        //
+		// 		OperationResult<AudioEffectHighPassFilter> or = new OperationResult<AudioEffectHighPassFilter>(JsonConvert.SerializeObject(hpfc["testfilter"].Config, Formatting.Indented));
+        //
+		// 		Newtonsoft.Json.JsonConvert.PopulateObject((string) JsonConvert.SerializeObject(hpfc["testfilter"].Config, Formatting.Indented),
+		// 				r,
+		// 			new JsonSerializerSettings
+    	// 			{
+        // 				Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) =>
+        // 				{
+        //     				args.ErrorContext.Handled = true;
+        // 				},
+        // 				ObjectCreationHandling = ObjectCreationHandling.Replace
+    	// 			}
+		// 		);
+        //
+		// 		LoggerManager.LogDebug(r.CutoffHz);
+		// 	}
+     	// }
 
 		// init ResourceManager service
-		ServiceRegistry.Get<ResourceManager>();
+		// ServiceRegistry.Get<ResourceManager>();
+		//
+		LoggerManager.LogDebug("Test loading resource", "", "r", ServiceRegistry.Get<ResourceManager>().Get<CompressedTexture2D>("square"));
 
-		ServiceRegistry.Get<ResourceManager>().SubscribeOwner<ResourceLoaderCompleted>((e) => {
-				LoggerManager.LogDebug("Test loading resource", "", "r", ServiceRegistry.Get<ResourceManager>().Get<CompressedTexture2D>("square"));
-			});
+		// ServiceRegistry.Get<ResourceManager>().SubscribeOwner<ResourceLoaderCompleted>((e) => {
+		// 		LoggerManager.LogDebug("Test loading resource", "", "r", ServiceRegistry.Get<ResourceManager>().Get<CompressedTexture2D>("square"));
+		// 	});
 	}
 
 	public void _On_SaveTest_TimedAutosave_pressed(IEvent e)

@@ -226,7 +226,7 @@ public partial class VValue<T> : VValue
 	{
 		if (Value is IDictionary col && mergeFromVV.RawValue is IDictionary sourceCol)
 		{
-			LoggerManager.LogInfo($"Merging collection of type {typeof(T).FullName}");
+			LoggerManager.LogDebug($"Merging collection of type {typeof(T).FullName}");
 
 			foreach (DictionaryEntry entry in sourceCol)
 			{
@@ -243,11 +243,11 @@ public partial class VValue<T> : VValue
 				}
 			}
 
-			LoggerManager.LogInfo($"Merging collection result {typeof(T).FullName}", "", "obj", Value);
+			LoggerManager.LogDebug($"Merging collection result {typeof(T).FullName}", "", "obj", Value);
 		}
 		else
 		{
-			LoggerManager.LogInfo($"Value of type {typeof(T).FullName} does not implement ICollection");
+			LoggerManager.LogDebug($"Value of type {typeof(T).FullName} does not implement ICollection");
 		}
 	}
 }

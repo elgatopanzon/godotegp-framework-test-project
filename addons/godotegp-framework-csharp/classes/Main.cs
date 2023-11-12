@@ -27,7 +27,7 @@ public partial class Main : Node
 		// register LoggerManager singleton as service to trigger ready state
 		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance);
 
-		ServiceRegistry.Instance.SubscribeOwner<ServiceReady>(_On_ConfigManager_Ready).Filters(new ObjectType(typeof(ConfigManager)));
+		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ConfigManager_Ready).Filters(new OwnerObjectType(typeof(ConfigManager)));
 
 		// trigger lazy load ConfigManager to trigger initial load
 		ServiceRegistry.Get<DataService>();
@@ -41,5 +41,7 @@ public partial class Main : Node
 	public void _On_ConfigManager_Ready(IEvent e)
 	{
 		ServiceRegistry.Get<NodeManager>();
+
+		ServiceRegistry.Get<ResourceManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>());
 	}
 }

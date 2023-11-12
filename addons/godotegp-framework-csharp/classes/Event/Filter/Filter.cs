@@ -79,6 +79,6 @@ public partial class OwnerObjectType : IFilter
 
 	public bool Match(IEvent matchEvent)
 	{
-		return matchEvent.Owner.GetType().IsSubclassOf(_matchType);
+		return (matchEvent.Owner.GetType().IsSubclassOf(_matchType) || matchEvent.Owner.GetType().Equals(_matchType));
 	}
 }
