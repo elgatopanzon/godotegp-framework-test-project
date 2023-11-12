@@ -34,6 +34,7 @@ public partial class Tests : Node2D
 		"UITests.Scene.Load".Connect("pressed", false, _On_SceneTest_Load_pressed, isHighPriority: true);
 		"UITests.Scene.Reload".Connect("pressed", false, _On_SceneTest_Reload_pressed, isHighPriority: true);
 		"UITests.Scene.Unload".Connect("pressed", false, _On_SceneTest_Unload_pressed, isHighPriority: true);
+		"UITests.Scene.LoadPrev".Connect("pressed", false, _On_SceneTest_LoadPrev_pressed, isHighPriority: true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -222,5 +223,11 @@ public partial class Tests : Node2D
 		LoggerManager.LogDebug("Scene unload pressed");
 
 		ServiceRegistry.Get<SceneManager>().UnloadManagedScenes();
+	}
+	public void _On_SceneTest_LoadPrev_pressed(IEvent e)
+	{
+		LoggerManager.LogDebug("Scene load prev pressed");
+
+		ServiceRegistry.Get<SceneManager>().LoadPreviousScene();
 	}
 }

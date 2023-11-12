@@ -22,8 +22,17 @@ public partial class SceneManager : Service
 {
 	private Dictionary<string, ResourceBase> _sceneDefinitions = new Dictionary<string, ResourceBase>();
 
-	private string _currentSceneId;
+	private string _currentSceneId {
+		get {
+			return _sceneIdHistory.Peek();
+		}
+		set {
+			_sceneIdHistory.Push(value);
+		}
+	}
 	private Node _currentSceneInstance;
+
+	private Stack<string> _sceneIdHistory = new Stack<string>();
 
 	public SceneManager()
 	{
@@ -131,6 +140,16 @@ public partial class SceneManager : Service
 			{
 				node.QueueFree();
 			}
+		}
+	}
+
+	public void LoadPreviousScene()
+	{
+		if (_sceneIdHistory.TryPop(out string prevId))
+		{
+			LoggerManager.LogDebug("Loading previous scene", "", "scene", prevId);
+
+			LoadScene(prevId);
 		}
 	}
 
