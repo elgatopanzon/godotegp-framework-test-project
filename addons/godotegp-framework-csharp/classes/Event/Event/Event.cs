@@ -316,3 +316,25 @@ public partial class SceneLoaded : SceneEvent
 public partial class SceneUnloaded : SceneEvent
 {
 }
+
+public partial class ScreenTransitionEvent : Event
+{
+}
+public partial class ScreenTransitionStarting : ScreenTransitionEvent
+{
+}
+public partial class ScreenTransitionShowing : ScreenTransitionEvent
+{
+}
+public partial class ScreenTransitionShown : ScreenTransitionEvent
+{
+}
+public partial class ScreenTransitionHiding : ScreenTransitionEvent
+{
+}
+public partial class ScreenTransitionHidden : ScreenTransitionEvent
+{
+}
+public partial class ScreenTransitionFinished : ScreenTransitionEvent
+{
+}
