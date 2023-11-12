@@ -17,6 +17,12 @@
           "CutoffHz": 1000
         }
       }
+    },
+    "Scenes": {
+      "tests": {
+        "Path": "res://scenes/Tests.tscn",
+        "Class": "Godot.PackedScene"
+      }
     }
   }
 }
