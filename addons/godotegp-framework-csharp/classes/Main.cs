@@ -53,9 +53,6 @@ public partial class Main : Node
 		LoggerManager.LogDebug("ResourceManager service ready");
 
 		// set scene definitions from loaded resources
-		if (ServiceRegistry.Get<ResourceManager>().TryGetCategory("Scenes", out var sceneResources))
-		{
-			ServiceRegistry.Get<SceneManager>().SetConfig(sceneResources);
-		}
+		ServiceRegistry.Get<SceneManager>().SetConfig(ServiceRegistry.Get<ResourceManager>().GetResources<PackedScene>());
 	}
 }
