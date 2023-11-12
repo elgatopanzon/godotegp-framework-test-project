@@ -146,7 +146,8 @@ public partial class LoggerManager : Service
 	// update config object in various moving parts
 	public void OnConfigObjectUpdated()
 	{
-		LoggerManager.LogDebug("Config updated", "", "config", Config);
+		// LoggerManager.LogDebug("Config updated", "", "config", Config);
+		LoggerManager.LogDebug("Config updated");
 	}
 
 	/***********************************

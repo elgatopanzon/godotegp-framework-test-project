@@ -112,7 +112,8 @@ public partial class ConfigManager : Service
 	{
 		if (e is ConfigManagerLoaderCompleted ec)
 		{
-			LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "e", ec.ConfigObjects);	
+			// LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "e", ec.ConfigObjects);	
+			LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "loadedCount", ec.ConfigObjects.Count);	
 
 			MergeConfigObjects(ec.ConfigObjects);
 
@@ -138,7 +139,7 @@ public partial class ConfigManager : Service
         	{
         		LoggerManager.LogDebug("Merging config object", "", "objType", type);
         		vo.MergeFrom(obj.RawValue as VObject);
-        		LoggerManager.LogDebug("Merged config object", "", "obj", vo);
+        		// LoggerManager.LogDebug("Merged config object", "", "obj", vo);
         	}
     	}
 	}

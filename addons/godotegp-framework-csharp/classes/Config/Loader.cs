@@ -111,7 +111,8 @@ public partial class Loader : BackgroundJob
 
 	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
-		LoggerManager.LogDebug("Loading configs completed", "", "result", e.Result);
+		// LoggerManager.LogDebug("Loading configs completed", "", "result", e.Result);
+		LoggerManager.LogDebug("Loading configs completed");
 
 		this.Emit<ConfigManagerLoaderCompleted>((ee) => ee.SetConfigObjects(_configObjects).SetRunWorkerCompletedEventArgs(e));
 	}

@@ -19,7 +19,8 @@ public partial class OperationResult<T>
 
 	public OperationResult(object rawObject)
 	{
-		LoggerManager.LogDebug("Creating result object from raw data", "", "raw", rawObject);
+		// LoggerManager.LogDebug("Creating result object from raw data", "", "raw", rawObject);
+		LoggerManager.LogDebug("Creating result object", "", "rawType", rawObject.GetType().Name);
 
 		if (typeof(T).IsSubclassOf(typeof(VObject)) && rawObject is string)
 		{
@@ -40,7 +41,8 @@ public partial class OperationResult<T>
     			}
 			);
 			
-			LoggerManager.LogDebug($"{typeof(T).BaseType} object deserialised as {typeof(T).Name}", "", "object", deserialisedObj);
+			// LoggerManager.LogDebug($"{typeof(T).BaseType} object deserialised as {typeof(T).Name}", "", "object", deserialisedObj);
+			LoggerManager.LogDebug($"{typeof(T).BaseType} object deserialised as {typeof(T).Name}");
 
 			// store the deserialsed object
 			ResultObject = deserialisedObj;

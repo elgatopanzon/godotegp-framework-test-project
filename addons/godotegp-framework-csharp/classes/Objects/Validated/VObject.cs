@@ -103,7 +103,8 @@ public partial class VObject
 
 		}
 
-		LoggerManager.LogDebug($"Merging {sourceObj.GetType().Name} finished", "", "obj", this);
+		// LoggerManager.LogDebug($"Merging {sourceObj.GetType().Name} finished", "", "obj", this);
+		LoggerManager.LogDebug($"Merging {sourceObj.GetType().Name} finished");
 	}
 
 	public List<VValue> GetProperties()

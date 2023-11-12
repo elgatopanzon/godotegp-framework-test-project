@@ -27,7 +27,7 @@ public partial class FileOperator : Operator, IOperator
 	public void Save(object dataObj)
 	{
 		LoggerManager.LogDebug($"Save to endpoint", "", "endpoint", _fileEndpoint);
-		LoggerManager.LogDebug($"", "", "dataObj", dataObj);
+		// LoggerManager.LogDebug($"", "", "dataObj", dataObj);
 
 		_dataObject = dataObj;
 
@@ -73,7 +73,8 @@ public partial class FileOperator : Operator, IOperator
 
 	public void SaveOperationDoWork(object sender, DoWorkEventArgs e)
 	{
-		LoggerManager.LogDebug("Save operation starting", "", "object", _dataObject);
+		// LoggerManager.LogDebug("Save operation starting", "", "object", _dataObject);
+		LoggerManager.LogDebug("Save operation starting");
 
 		EnsureDirectoryExists(_fileEndpoint.Path);
 
@@ -112,7 +113,8 @@ public partial class FileOperator : Operator, IOperator
 
 	public void LoadOperationRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
-		LoggerManager.LogDebug("Load operation completed", "", "result", e.Result);
+		// LoggerManager.LogDebug("Load operation completed", "", "result", e.Result);
+		LoggerManager.LogDebug("Load operation completed");
 	}
 	public void SaveOperationRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{

@@ -47,7 +47,9 @@ public abstract partial class Operation<T> : Operation, IOperation
 		{
 			OperationResult<T> resultObj = new OperationResult<T>(_completedArgs.Result);
 
-			LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
+			// LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
+			LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}");
+
 			if (resultObj.ResultObject != null)
 			{
 				e.Result = resultObj;

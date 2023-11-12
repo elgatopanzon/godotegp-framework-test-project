@@ -44,7 +44,7 @@ public partial class ThreadedResourceLoader : BackgroundJob
 	{
 		var item =_loadQueue.Dequeue();
 
-		LoggerManager.LogDebug("Loading resource", "", "resource", item);
+		LoggerManager.LogDebug("Loading resource", "", "resource", $"{item.Category}:{item.Id}");
 
 		var resourceObject = (dynamic) ResourceBase.Create(item.ResourceDefinition.ClassType);
 
@@ -57,7 +57,7 @@ public partial class ThreadedResourceLoader : BackgroundJob
 				throw new ResourceNotFoundException($"Resource not found {item.ResourceDefinition.Path}");
 			}
 
-			LoggerManager.LogDebug("Loaded resource from path", "", "resource", r);
+			LoggerManager.LogDebug("Loaded resource from path", "", "resource", r.GetType().Name);
 
 			resourceObject.Value = (dynamic) r;
 		}

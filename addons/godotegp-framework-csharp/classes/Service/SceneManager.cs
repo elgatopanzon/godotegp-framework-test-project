@@ -41,7 +41,8 @@ public partial class SceneManager : Service
 
 	public void SetConfig(Dictionary<string, ResourceBase> config)
 	{
-		LoggerManager.LogDebug("Setting scene definition config", "", "scenes", config);
+		// LoggerManager.LogDebug("Setting scene definition config", "", "scenes", config);
+		LoggerManager.LogDebug("Setting scene definition config");
 		
 		_sceneDefinitions = config;
 

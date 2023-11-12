@@ -85,7 +85,8 @@ public partial class SaveDataManager : Service
 
 	public void SetConfig(SaveDataManagerConfig config)
 	{
-		LoggerManager.LogDebug("Setting config", "", "config", config);
+		// LoggerManager.LogDebug("Setting config", "", "config", config);
+		LoggerManager.LogDebug("Setting config");
 
 		_config = config;
 	}
@@ -322,7 +323,7 @@ public partial class SaveDataManager : Service
 			save.Value.Name = saveName;
 			save.DataEndpoint = new FileEndpoint(OS.GetUserDataDir()+"/"+_saveBaseDir+"/"+save.RawValue.ToString()+"/"+save.Name+".json");
 
-			LoggerManager.LogDebug("Creating new save data instance", "", "saveData", save);
+			LoggerManager.LogDebug("Creating new save data instance", "", "saveDataType", typeof(T).Name);
 
 			if (saveCreated)
 			{
@@ -684,7 +685,8 @@ public partial class SaveDataManager : Service
 	{
 		if (e is ConfigManagerLoaderCompleted ec)
 		{
-			LoggerManager.LogDebug("Loading of save files completed", "", "e", ec.ConfigObjects);	
+			// LoggerManager.LogDebug("Loading of save files completed", "", "e", ec.ConfigObjects);	
+			LoggerManager.LogDebug("Loading of save files completed", "", "loadedCount", ec.ConfigObjects.Count);	
 
 			foreach (Config.Object obj in ec.ConfigObjects)
 			{
