@@ -27,6 +27,12 @@
         "Path": "res://scenes/Tests.tscn",
         "Class": "Godot.PackedScene"
       }
+    },
+    "TransitionScenes": {
+      "base": {
+        "Path": "res://addons/godotegp-framework-csharp/scenes/ScreenTransition.tscn",
+        "Class": "Godot.PackedScene"
+      }
     }
   }
 }
