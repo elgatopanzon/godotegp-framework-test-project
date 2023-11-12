@@ -134,6 +134,18 @@ public partial class ResourceManager : Service
 		return (T) GetResourceObject(category, id).RawValue;
 	}
 
+	public bool TryGetCategory(string category, out Dictionary<string, ResourceBase> x)
+	{
+		if (_resources.TryGetValue(category, out var d))
+		{
+			x = d;
+			return true;
+		}
+
+		x = null;
+		return false;
+	}
+
 	/**********************
 	*  Callback methods  *
 	**********************/
