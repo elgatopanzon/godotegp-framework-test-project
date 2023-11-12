@@ -28,6 +28,7 @@ public partial class Main : Node
 		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance);
 
 		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ConfigManager_Ready).Filters(new OwnerObjectType(typeof(ConfigManager)));
+		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ResourceManager_Ready).Filters(new OwnerObjectType(typeof(ResourceManager)));
 
 		// trigger lazy load ConfigManager to trigger initial load
 		ServiceRegistry.Get<DataService>();
@@ -43,5 +44,16 @@ public partial class Main : Node
 		ServiceRegistry.Get<NodeManager>();
 
 		ServiceRegistry.Get<ResourceManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>());
+
+
+	}
+
+	public void _On_ResourceManager_Ready(IEvent e)
+	{
+		// set scene definitions from loaded resources
+		if (ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>().Resources.TryGetValue("Scenes", out var sceneDefinitions))
+		{
+			ServiceRegistry.Get<SceneManager>().SetConfig(sceneDefinitions);
+		}
 	}
 }
