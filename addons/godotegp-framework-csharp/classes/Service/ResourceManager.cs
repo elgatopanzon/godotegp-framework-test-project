@@ -148,6 +148,12 @@ public partial class ResourceManager : Service
 			{
 				// set each resource
 				SetResourceObject(resource.Category, resource.Id, resource.ResourceObject);
+
+				// store the object by path for quick access
+				if (resource.ResourceDefinition.Path != null)
+				{
+					SetResourceObject(resource.Category, resource.ResourceDefinition.Path, resource.ResourceObject);
+				}
 			}
 			
 			this.Emit<ResourceLoaderCompleted>();
