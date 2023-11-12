@@ -107,7 +107,7 @@ public partial class EventManager : Service
 	public override void _Process(double delta)
 	{
 		// process events for each subscription type
-		Queue<IEvent> eventQueue = GetQueue<EventQueueDeferred>().Fetch();
+		Queue<IEvent> eventQueue = GetQueue<EventQueueDeferred>().Fetch(null, 0);
 
 		while (eventQueue.TryPeek(out IEvent eventObj))
 		{

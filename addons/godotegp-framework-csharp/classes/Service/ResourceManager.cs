@@ -106,7 +106,7 @@ public partial class ResourceManager : Service
 	public void SetResourceObject(string category, string id, ResourceBase resource)
 	{
 		// LoggerManager.LogDebug($"Setting resource object {id}", "", "resource", resource);
-		LoggerManager.LogDebug($"Setting resource object {id}");
+		// LoggerManager.LogDebug($"Setting resource object {id}");
 
 		if (!_resources.TryGetValue(category, out var d))
 		{

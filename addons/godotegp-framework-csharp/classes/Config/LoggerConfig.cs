@@ -35,6 +35,7 @@ public partial class LoggerConfig : VObject
             .Default(new Dictionary<string, Logging.Message.LogLevel>() {
 					{"EventManager", Logging.Message.LogLevel.Info},
     				{"EventFilter", Logging.Message.LogLevel.Info},
+    				{"EventQueue", Logging.Message.LogLevel.Info},
     				{"VValue", Logging.Message.LogLevel.Info},
     				{"VObject", Logging.Message.LogLevel.Info},
     				{"VNative", Logging.Message.LogLevel.Info},

@@ -41,15 +41,17 @@ public partial class Main : Node
 
 	public void _On_ConfigManager_Ready(IEvent e)
 	{
+		LoggerManager.LogDebug("ConfigManager service ready");
+
 		ServiceRegistry.Get<NodeManager>();
 
 		ServiceRegistry.Get<ResourceManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>());
-
-
 	}
 
 	public void _On_ResourceManager_Ready(IEvent e)
 	{
+		LoggerManager.LogDebug("ResourceManager service ready");
+
 		// set scene definitions from loaded resources
 		if (ServiceRegistry.Get<ResourceManager>().TryGetCategory("Scenes", out var sceneResources))
 		{
