@@ -85,6 +85,32 @@ public partial class SceneManager : Service
 	// Called when service is considered ready
 	public override void _OnServiceReady()
 	{
+		// check for any loaded scenes such as the main scene, and if they match
+		// any scene resources set the current scene ID
+		foreach (Node node in ServiceRegistry.Get<NodeManager>().GetSceneTreeNodes())
+		{
+			if (node.SceneFilePath.Length > 0 && IsValidScene(node.SceneFilePath))
+			{
+				// find the scene resource with matching ID to the one with the
+				// current path, so we can find the short ID of it
+				// TODO: improve this code somehow
+				foreach (var sceneD in _sceneDefinitions)
+				{
+					if (sceneD.Key == node.SceneFilePath)
+					{
+						foreach (var sceneDD in _sceneDefinitions)
+						{
+							if (sceneDD.Value == sceneD.Value && sceneDD.Key != node.SceneFilePath)
+							{
+								_currentSceneId = sceneDD.Key;
+							}
+						}
+					}
+				}
+
+				_currentSceneInstance = node;
+			}
+		}
 	}
 
 	/******************************
