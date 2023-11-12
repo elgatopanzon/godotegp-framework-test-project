@@ -9,7 +9,7 @@ using GodotEGP.Objects.Extensions;
 
 public partial class BackgroundJob
 {
-	protected BackgroundWorker worker = new BackgroundWorker();
+	protected BackgroundWorker worker;
 	public Action<DoWorkEventArgs> OnWorking;
 	public Action<ProgressChangedEventArgs> OnProgress;
 	public Action<RunWorkerCompletedEventArgs> OnComplete;
@@ -29,6 +29,7 @@ public partial class BackgroundJob
 
 	public void _setup()
 	{
+		worker = new BackgroundWorker();
 		worker.DoWork += new DoWorkEventHandler(_On_DoWork);
 		worker.ProgressChanged += new ProgressChangedEventHandler(_On_ProgressChanged);
 		worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(_On_RunWorkerCompleted);
