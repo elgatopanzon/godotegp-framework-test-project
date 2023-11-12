@@ -201,17 +201,34 @@ public partial class NodeManager : Service
 	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
 	{
 		// converts params to object
-		DeferredSignalSubscription deferredSignalSubscription = new DeferredSignalSubscription(nodeId, signalName, hasParams, callbackMethod, isHighPriority, oneshot, eventFilters);
+		DeferredSignalSubscription sub = new DeferredSignalSubscription(nodeId, signalName, hasParams, callbackMethod, isHighPriority, oneshot, eventFilters);
 
 		// add the object to a list, creating if needed
 		if (!_deferredSignalSubscriptions.TryGetValue(nodeId, out List<DeferredSignalSubscription> subs))
 		{
 			subs = new List<DeferredSignalSubscription>();
+
 			_deferredSignalSubscriptions.Add(nodeId, subs);
 		}
 
-		// add the deferred signal subscription
-		_deferredSignalSubscriptions[nodeId].Add(deferredSignalSubscription);
+		// add the subscription if there's no existing ones
+		bool subscriptionExists = false;
+		foreach (var foundSub in subs)
+		{
+			if (foundSub.CallbackMethod.Method.ToString() == callbackMethod.Method.ToString() && foundSub.SignalName == signalName)
+			{
+				subscriptionExists = true;
+				break;
+			}
+		}
+		if (!subscriptionExists)
+		{
+			// add the deferred signal subscription
+			LoggerManager.LogDebug("Registering deferred subscription", "", "subscribe", $"{nodeId}: {sub.SignalName} {sub.GetHashCode()}");
+
+			subs.Add(sub);
+		}
+
 
 		// process existing nodes to make the signal subscription
 		ProcessDeferredSignalSubscriptions(nodeId);
@@ -230,7 +247,7 @@ public partial class NodeManager : Service
 					{
 						if (!sub.ConnectedTo.Contains(node))
 						{
-							LoggerManager.LogDebug("Subscribing deferred to node signal", "", "subscribe", $"{nodeId}: {node} {sub.SignalName}");
+							LoggerManager.LogDebug("Subscribing deferred to node signal", "", "subscribe", $"{nodeId}: {node} {sub.SignalName} {sub.GetHashCode()}");
 
 							sub.ConnectedTo.Add(node);
 
