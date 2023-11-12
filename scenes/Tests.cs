@@ -30,6 +30,10 @@ public partial class Tests : Node2D
 
 		"UITests.Save.ListSlots".Connect("pressed", false, _On_SaveTest_ListSlots_pressed, isHighPriority: true);
 		"UITests.Save.TimedAutosave".Connect("pressed", false, _On_SaveTest_TimedAutosave_pressed, isHighPriority: true);
+
+		"UITests.Scene.Load".Connect("pressed", false, _On_SceneTest_Load_pressed, isHighPriority: true);
+		"UITests.Scene.Reload".Connect("pressed", false, _On_SceneTest_Reload_pressed, isHighPriority: true);
+		"UITests.Scene.Unload".Connect("pressed", false, _On_SceneTest_Unload_pressed, isHighPriority: true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -199,5 +203,24 @@ public partial class Tests : Node2D
 		{
 			LoggerManager.LogDebug("List of save slots", "", "saveSlots", ServiceRegistry.Get<SaveDataManager>().GetSlotSaves(10));
 		}
+	}
+
+	public void _On_SceneTest_Load_pressed(IEvent e)
+	{
+		string loadScene = "UITests.Scene.Name".Node<TextEdit>().Text;
+
+		LoggerManager.LogDebug("Scene load pressed", "", "scene", loadScene);
+
+		ServiceRegistry.Get<SceneManager>().LoadScene(loadScene);
+	}
+	public void _On_SceneTest_Reload_pressed(IEvent e)
+	{
+		LoggerManager.LogDebug("Scene reload pressed");
+	}
+	public void _On_SceneTest_Unload_pressed(IEvent e)
+	{
+		LoggerManager.LogDebug("Scene unload pressed");
+
+		ServiceRegistry.Get<SceneManager>().UnloadManagedScenes();
 	}
 }

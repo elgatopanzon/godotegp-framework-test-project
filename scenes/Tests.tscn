@@ -101,3 +101,38 @@ layout_mode = 2
 layout_mode = 2
 text = "ListSlots"
 metadata/id = "UITests.Save.ListSlots"
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3"]
+layout_mode = 2
+text = "Scene manager test"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3"]
+layout_mode = 2
+
+[node name="TextEdit" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+placeholder_text = "Scene name"
+metadata/id = "UITests.Scene.Name"
+
+[node name="Load" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer"]
+layout_mode = 2
+text = "Load"
+metadata/id = "UITests.Scene.Load"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3"]
+layout_mode = 2
+
+[node name="Reload" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer2"]
+layout_mode = 2
+text = "Reload
+"
+metadata/id = "UITests.Scene.Reload"
+
+[node name="Unload" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer2"]
+layout_mode = 2
+text = "Unload"
+metadata/id = "UITests.Scene.Unload"

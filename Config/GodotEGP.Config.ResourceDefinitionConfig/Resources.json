@@ -19,6 +19,10 @@
       }
     },
     "Scenes": {
+      "main": {
+        "Path": "res://scenes/Main.tscn",
+        "Class": "Godot.PackedScene"
+      },
       "tests": {
         "Path": "res://scenes/Tests.tscn",
         "Class": "Godot.PackedScene"

@@ -51,9 +51,9 @@ public partial class Main : Node
 	public void _On_ResourceManager_Ready(IEvent e)
 	{
 		// set scene definitions from loaded resources
-		if (ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>().Resources.TryGetValue("Scenes", out var sceneDefinitions))
+		if (ServiceRegistry.Get<ResourceManager>().TryGetCategory("Scenes", out var sceneResources))
 		{
-			ServiceRegistry.Get<SceneManager>().SetConfig(sceneDefinitions);
+			ServiceRegistry.Get<SceneManager>().SetConfig(sceneResources);
 		}
 	}
 }
