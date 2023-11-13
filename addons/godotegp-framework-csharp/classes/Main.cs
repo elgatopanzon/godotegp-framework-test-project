@@ -45,7 +45,9 @@ public partial class Main : Node
 
 		ServiceRegistry.Get<NodeManager>();
 
+		ServiceRegistry.Get<SaveDataManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().SaveDataManager);
 		ServiceRegistry.Get<ResourceManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>());
+		ServiceRegistry.Get<SceneTransitionManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().SceneTransitionManager);
 	}
 
 	public void _On_ResourceManager_Ready(IEvent e)
