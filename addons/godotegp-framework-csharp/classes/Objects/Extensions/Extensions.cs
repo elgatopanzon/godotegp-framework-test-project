@@ -166,6 +166,11 @@ public static partial class NodeManagerObjectExtension
 	{
 		ServiceRegistry.Get<NodeManager>().SubscribeSignal(obj, signalName, hasParams, callbackMethod, isHighPriority, oneshot, eventFilters);
 	}
+
+	public static void Bind(this string obj, Func<object> bindAction)
+	{
+		ServiceRegistry.Get<NodeManager>().DataBind(obj, bindAction);
+	}
 }
 
 
