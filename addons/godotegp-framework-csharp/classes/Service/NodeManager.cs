@@ -15,8 +15,6 @@ public partial class NodeManager : Service
 
 	private Dictionary<string, List<DeferredSignalSubscription>> _deferredSignalSubscriptions = new Dictionary<string, List<DeferredSignalSubscription>>();
 
-	private List<Dictionary<string, Func<object>>> _dataBindings = new List<Dictionary<string, Func<object>>>();
-
 	public override void _Ready()
 	{
 		if (!GetReady())
@@ -259,28 +257,6 @@ public partial class NodeManager : Service
 				}
 			}
 			
-		}
-	}
-
-	public void DataBind(string nodeId, Func<object> bindAction)
-	{
-		_dataBindings.Add(new Dictionary<string, Func<object>> {{nodeId, bindAction}});
-	}
-
-	public override void _Process(double delta)
-	{
-		foreach (var db in _dataBindings)
-		{
-			foreach (var entry in db)
-			{
-				if (TryGetNode(entry.Key, out Node n))
-				{
-					if (n is Label label)
-					{
-						label.Text = entry.Value().ToString();
-					}
-				}
-			}
 		}
 	}
 

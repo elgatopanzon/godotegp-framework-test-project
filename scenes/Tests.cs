@@ -39,8 +39,6 @@ public partial class Tests : Node2D
 		"UITests.Transition.Start".Connect("pressed", false, _On_TransitionTest_Start_pressed, isHighPriority: true);
 		"UITests.STransition.Transition".Connect("pressed", false, _On_SceneTransitionTest_Transition_pressed, isHighPriority: true);
 		"UITests.STransition.Chain".Connect("pressed", false, _On_SceneTransitionTest_Chain_pressed, isHighPriority: true);
-
-		"UITests.DataBinding.Label".Bind(() => ServiceRegistry.Get<SaveDataManager>().GetSaves().Count);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
