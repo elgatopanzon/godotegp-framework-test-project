@@ -54,5 +54,11 @@ public partial class Main : Node
 
 		// set scene definitions from loaded resources
 		ServiceRegistry.Get<SceneManager>().SetConfig(ServiceRegistry.Get<ResourceManager>().GetResources<PackedScene>());
+
+		// set scene definitions for ScreenTransitionService using TryGetCategory
+		if (ServiceRegistry.Get<ResourceManager>().TryGetCategory("TransitionScenes", out var sceneResources))
+		{
+			ServiceRegistry.Get<ScreenTransitionManager>().SetConfig(sceneResources);
+		}
 	}
 }

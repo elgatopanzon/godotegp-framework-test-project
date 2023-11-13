@@ -35,6 +35,8 @@ public partial class Tests : Node2D
 		"UITests.Scene.Reload".Connect("pressed", false, _On_SceneTest_Reload_pressed, isHighPriority: true);
 		"UITests.Scene.Unload".Connect("pressed", false, _On_SceneTest_Unload_pressed, isHighPriority: true);
 		"UITests.Scene.LoadPrev".Connect("pressed", false, _On_SceneTest_LoadPrev_pressed, isHighPriority: true);
+
+		"UITests.Transition.Start".Connect("pressed", false, _On_TransitionTest_Start_pressed, isHighPriority: true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -231,5 +233,25 @@ public partial class Tests : Node2D
 		LoggerManager.LogDebug("Scene load prev pressed");
 
 		ServiceRegistry.Get<SceneManager>().LoadPreviousScene();
+	}
+
+
+	public void _On_TransitionTest_Start_pressed(IEvent e)
+	{
+		string transition = "UITests.Transition.Name".Node<TextEdit>().Text;
+
+		LoggerManager.LogDebug("Screen transition start pressed", "", "scene", transition);
+
+		ServiceRegistry.Get<ScreenTransitionManager>().StartTransition(transition);
+
+		ServiceRegistry.Get<ScreenTransitionManager>().SubscribeOwner<ScreenTransitionShown>((e) => {
+			LoggerManager.LogDebug("Do stuff while screen transition is shown");
+
+			ServiceRegistry.Get<ScreenTransitionManager>().ContinueTransition();
+			}, oneshot: true);
+
+		ServiceRegistry.Get<ScreenTransitionManager>().SubscribeOwner<ScreenTransitionFinished>((e) => {
+			LoggerManager.LogDebug("Screen transition completed!");
+			}, oneshot: true);
 	}
 }
