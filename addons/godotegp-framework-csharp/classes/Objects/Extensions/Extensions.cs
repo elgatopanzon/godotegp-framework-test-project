@@ -128,6 +128,14 @@ public static partial class EventManagerObjectExtensions
 
 		return e;
 	}
+
+	public static Event Emit(this object obj, IEvent e)
+	{
+		(e as Event).SetOwner(obj);
+		(e as Event).Invoke();
+
+		return (Event) e;
+	}
 }
 
 public static partial class ObjectPoolServiceObjectExtensions
