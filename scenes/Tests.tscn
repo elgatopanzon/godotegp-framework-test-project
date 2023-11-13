@@ -200,3 +200,27 @@ layout_mode = 2
 layout_mode = 2
 text = "Start Transition Chain"
 metadata/id = "UITests.STransition.Chain"
+
+[node name="VBoxContainer7" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7"]
+layout_mode = 2
+text = "Data binding test"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7"]
+layout_mode = 2
+
+[node name="TextEdit" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+placeholder_text = "Data"
+metadata/id = "UITests.DataBinding.Data"
+
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
+layout_mode = 2
+text = "Data:"
+metadata/id = "UITests.DataBinding.Label"
+
+[node name="Label2" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
+layout_mode = 2
