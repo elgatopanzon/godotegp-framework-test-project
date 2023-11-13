@@ -110,10 +110,10 @@ public partial class ScreenTransitionManager : Service
 		{
 			_currentTransitionId = transitionId;
 			// subscribe to oneshot events to track the stages of the transition
-			_transitionSceneInstances[transitionId].SubscribeOwner<ScreenTransitionShowing>(_On_ScreenTransitionShowing, oneshot: true);
-			_transitionSceneInstances[transitionId].SubscribeOwner<ScreenTransitionShown>(_On_ScreenTransitionShown, oneshot: true);
-			_transitionSceneInstances[transitionId].SubscribeOwner<ScreenTransitionHiding>(_On_ScreenTransitionHiding, oneshot: true);
-			_transitionSceneInstances[transitionId].SubscribeOwner<ScreenTransitionHidden>(_On_ScreenTransitionHidden, oneshot: true);
+			_transitionSceneInstances[transitionId].SubscribeOwner<ScreenTransitionShowing>(_On_ScreenTransitionShowing, oneshot: true, isHighPriority: true);
+			_transitionSceneInstances[transitionId].SubscribeOwner<ScreenTransitionShown>(_On_ScreenTransitionShown, oneshot: true, isHighPriority: true);
+			_transitionSceneInstances[transitionId].SubscribeOwner<ScreenTransitionHiding>(_On_ScreenTransitionHiding, oneshot: true, isHighPriority: true);
+			_transitionSceneInstances[transitionId].SubscribeOwner<ScreenTransitionHidden>(_On_ScreenTransitionHidden, oneshot: true, isHighPriority: true);
 
 			this.Emit<ScreenTransitionStarting>();
 

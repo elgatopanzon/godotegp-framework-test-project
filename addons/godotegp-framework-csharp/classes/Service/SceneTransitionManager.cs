@@ -81,11 +81,14 @@ public partial class SceneTransitionManager : Service
 				this.Emit(e);
 				_sceneManager.LoadScene(sceneId);
 
-				if (autoContinue)
-				{
-					_transitionManager.ContinueTransition();
-				}
-				}, oneshot: true);
+				_sceneManager.SubscribeOwner<SceneLoaded>((e) => {
+						if (autoContinue)
+						{
+							_transitionManager.ContinueTransition();
+						}
+						}, oneshot: true);
+					});
+
 
 			_transitionManager.SubscribeOwner<ScreenTransitionFinished>((e) => {
 					this.Emit(e);

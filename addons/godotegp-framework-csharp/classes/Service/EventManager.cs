@@ -182,7 +182,7 @@ public partial class EventManager : Service
 	public void SubscribeSignal(GodotObject connectObject, string signalName, bool hasParams, IEventSubscription<Event> eventSubscription)
 	{
 		Action callback = () => __On_Signal(connectObject, signalName);
-		Action<Variant[]> callbackParams = (p) => __On_Signal(connectObject, signalName, p);
+		Action<Variant> callbackParams = (p) => __On_Signal(connectObject, signalName, p);
 
 		Callable cb;
 
@@ -215,9 +215,13 @@ public partial class EventManager : Service
 		Subscribe(eventSubscription);
 	}
 
-	public void __On_Signal(GodotObject connectObject, string signalName, Variant[] signalParams = null)
+	public void __On_Signal(GodotObject connectObject, string signalName, params Variant[] signalParams)
 	{
 		connectObject.Emit<GodotSignal>((e) => e.SetSignalName(signalName).SetSignalParams(signalParams));
+	}
+	public void __On_Signal(GodotObject connectObject, string signalName, Variant signalParam)
+	{
+		connectObject.Emit<GodotSignal>((e) => e.SetSignalName(signalName).SetSignalParams(new Variant[] {signalParam}));
 	}
 }
 

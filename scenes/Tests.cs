@@ -267,10 +267,10 @@ public partial class Tests : Node2D
 
 		ServiceRegistry.Get<SceneTransitionManager>().SubscribeOwner<ScreenTransitionShown>((e) => {
 			LoggerManager.LogDebug("Do stuff while scene transition is shown");
-			}, oneshot: true);
+			}, oneshot: true, isHighPriority: true);
 
 		ServiceRegistry.Get<SceneTransitionManager>().SubscribeOwner<ScreenTransitionFinished>((e) => {
 			LoggerManager.LogDebug("Scene transition completed!");
-			}, oneshot: true);
+			}, oneshot: true, isHighPriority: true);
 	}
 }

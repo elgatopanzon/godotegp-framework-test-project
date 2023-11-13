@@ -124,7 +124,8 @@ public partial class SceneManager : Service
 			LoggerManager.LogDebug("Loading scene", "", "sceneId", sceneId);
 
 
-			UnloadManagedScenes();
+			// UnloadManagedScenes();
+			_currentSceneInstance.QueueFree();
 			this.Emit<SceneUnloaded>((e) => e.SetSceneId(_currentSceneId));
 
 			_currentSceneId = sceneId;

@@ -32,6 +32,10 @@
       "base": {
         "Path": "res://addons/godotegp-framework-csharp/scenes/ScreenTransition.tscn",
         "Class": "Godot.PackedScene"
+      },
+      "fadeinoutwhite": {
+        "Path": "res://addons/godotegp-framework-csharp/scenes/FadeInOutWhite.tscn",
+        "Class": "Godot.PackedScene"
       }
     }
   }

@@ -69,7 +69,7 @@ static class SignalExtensionMethods
 		o.SignalName = signalName;
         return o;
     }
-	static public T SetSignalParams<T>(this T o, Variant[] signalParams) where T : GodotSignal
+	static public T SetSignalParams<T>(this T o, params Variant[] signalParams) where T : GodotSignal
     {
 		o.SignalParams = signalParams;
         return o;
