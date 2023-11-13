@@ -122,16 +122,15 @@ public partial class SceneManager : Service
 		if (IsValidScene(sceneId))
 		{
 			LoggerManager.LogDebug("Loading scene", "", "sceneId", sceneId);
-
+			LoggerManager.LogDebug("Current scene type", "", "sceneType", _currentSceneInstance.GetType().Name);
 
 			// UnloadManagedScenes();
+			_currentSceneInstance.SubscribeSignal("tree_exited", false, _On_NodeRemoved, oneshot: true);
 			_currentSceneInstance.QueueFree();
 			this.Emit<SceneUnloaded>((e) => e.SetSceneId(_currentSceneId));
 
 			_currentSceneId = sceneId;
 			_currentSceneInstance = GetSceneInstance(sceneId);
-
-			this.Subscribe<NodeRemoved>(_On_NodeRemoved, oneshot: true, isHighPriority: true).Filters(new OwnerObjectType(_currentSceneInstance.GetType()));
 		}
 		else
 		{
