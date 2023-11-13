@@ -20,6 +20,15 @@ public partial class EngineConfig : VConfig
 		set { _saveDataManagerConfig.Value = value; }
 	}
 
+	internal readonly VNative<SceneTransitionManagerConfig> _sceneTransitionManager;
+
+	public SceneTransitionManagerConfig SceneTransitionManager
+	{
+		get { return _sceneTransitionManager.Value; }
+		set { _sceneTransitionManager.Value = value; }
+	}
+
+
 	public EngineConfig()
 	{
         _loggerManagerConfig = AddValidatedNative<LoggerConfig>(this)
@@ -28,6 +37,10 @@ public partial class EngineConfig : VConfig
 
 		_saveDataManagerConfig = AddValidatedNative<SaveDataManagerConfig>(this)
 		    .Default(new SaveDataManagerConfig())
+		    .ChangeEventsEnabled();
+
+		_sceneTransitionManager = AddValidatedNative<SceneTransitionManagerConfig>(this)
+		    .Default(new SceneTransitionManagerConfig())
 		    .ChangeEventsEnabled();
 	}
 }

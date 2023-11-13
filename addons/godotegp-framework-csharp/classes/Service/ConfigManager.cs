@@ -137,7 +137,7 @@ public partial class ConfigManager : Service
 
         	if (GetConfigObjectInstance(type).RawValue is VObject vo)
         	{
-        		LoggerManager.LogDebug("Merging config object", "", "objType", type);
+        		LoggerManager.LogDebug("Merging config object", "", "objEndpoint", obj.DataEndpoint);
         		vo.MergeFrom(obj.RawValue as VObject);
         		// LoggerManager.LogDebug("Merged config object", "", "obj", vo);
         	}

@@ -180,3 +180,7 @@ public partial class ScreenTransitionManager : Service
 	}
 }
 
+public partial class SceneTransitionChainItem {
+	public string Scene;
+	public string Transition;
+}

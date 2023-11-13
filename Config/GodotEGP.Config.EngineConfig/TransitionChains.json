@@ -1,0 +1,20 @@
+{
+  "SceneTransitionManager": {
+    "TransitionChains": {
+      "testchain": [
+        {
+          "Scene": "tests",
+          "Transition": "fadeinoutwhite"
+        },
+        {
+          "Scene": "main",
+          "Transition": "fadeinoutwhite"
+        },
+        {
+          "Scene": "tests",
+          "Transition": "fadeinoutwhite"
+        }
+      ]
+    }
+  }
+}

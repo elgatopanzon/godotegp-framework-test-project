@@ -338,3 +338,16 @@ public partial class ScreenTransitionHidden : ScreenTransitionEvent
 public partial class ScreenTransitionFinished : ScreenTransitionEvent
 {
 }
+
+public partial class SceneTransitionChainEvent : Event
+{
+}
+public partial class SceneTransitionChainStarted : SceneTransitionChainEvent
+{
+}
+public partial class SceneTransitionChainContinued : SceneTransitionChainEvent
+{
+}
+public partial class SceneTransitionChainFinished : SceneTransitionChainEvent
+{
+}

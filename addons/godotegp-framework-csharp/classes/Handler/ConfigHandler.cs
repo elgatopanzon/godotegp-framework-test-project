@@ -22,6 +22,7 @@ public partial class ConfigHandler : Handler
 				// set configs
 				LoggerManager.Instance.SetConfig(ec.LoggerManager);
 				ServiceRegistry.Get<SaveDataManager>().SetConfig(ec.SaveDataManager);
+				ServiceRegistry.Get<SceneTransitionManager>().SetConfig(ec.SceneTransitionManager);
 			}
 		}
 	}

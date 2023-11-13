@@ -38,6 +38,7 @@ public partial class Tests : Node2D
 
 		"UITests.Transition.Start".Connect("pressed", false, _On_TransitionTest_Start_pressed, isHighPriority: true);
 		"UITests.STransition.Transition".Connect("pressed", false, _On_SceneTransitionTest_Transition_pressed, isHighPriority: true);
+		"UITests.STransition.Chain".Connect("pressed", false, _On_SceneTransitionTest_Chain_pressed, isHighPriority: true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -272,5 +273,15 @@ public partial class Tests : Node2D
 		ServiceRegistry.Get<SceneTransitionManager>().SubscribeOwner<ScreenTransitionFinished>((e) => {
 			LoggerManager.LogDebug("Scene transition completed!");
 			}, oneshot: true, isHighPriority: true);
+	}
+
+	public void _On_SceneTransitionTest_Chain_pressed(IEvent e)
+	{
+		ServiceRegistry.Get<SceneTransitionManager>().SubscribeOwner<SceneTransitionChainContinued>((e) => {
+				LoggerManager.LogDebug("Continuing transition chain");
+			ServiceRegistry.Get<SceneTransitionManager>().ContinueChain();
+			});
+
+		ServiceRegistry.Get<SceneTransitionManager>().StartChain("testchain");
 	}
 }

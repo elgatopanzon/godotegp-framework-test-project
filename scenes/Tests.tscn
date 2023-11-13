@@ -189,3 +189,14 @@ metadata/id = "UITests.STransition.TName"
 layout_mode = 2
 text = "Transition"
 metadata/id = "UITests.STransition.Transition"
+
+[node name="VBoxContainer6" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer6"]
+layout_mode = 2
+
+[node name="ChainTest" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer6/HBoxContainer"]
+layout_mode = 2
+text = "Start Transition Chain"
+metadata/id = "UITests.STransition.Chain"
