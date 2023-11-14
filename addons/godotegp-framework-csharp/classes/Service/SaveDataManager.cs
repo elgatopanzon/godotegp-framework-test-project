@@ -62,7 +62,7 @@ public partial class SaveDataManager : Service
 	// Called when service is registered in manager
 	public override void _OnServiceRegistered()
 	{
-		LoadSaveData();
+		// LoadSaveData();
 
 		// create the timer required for timed autosaves
 		SetupTimedAutosave();
@@ -89,6 +89,8 @@ public partial class SaveDataManager : Service
 		LoggerManager.LogDebug("Setting config");
 
 		_config = config;
+
+		LoadSaveData();
 	}
 
 	public void LoadSaveData()

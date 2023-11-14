@@ -15,6 +15,7 @@ using GodotEGP.Event;
 using GodotEGP.Event.Events;
 using GodotEGP.Event.Filter;
 using GodotEGP.Config;
+using GodotEGP.Handler;
 using GodotEGP.Data.Operation;
 
 public partial class Main : Node
@@ -27,13 +28,14 @@ public partial class Main : Node
 		// register LoggerManager singleton as service to trigger ready state
 		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance);
 
-		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ConfigManager_Ready).Filters(new OwnerObjectType(typeof(ConfigManager)));
-		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ResourceManager_Ready).Filters(new OwnerObjectType(typeof(ResourceManager)));
+		// create instance of ConfigHandler to handle setting configs
+		AddChild(new ConfigHandler());
 
 		// trigger lazy load ConfigManager to trigger initial load
 		ServiceRegistry.Get<DataService>();
 		ServiceRegistry.Get<ConfigManager>();
 	}
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -43,24 +45,5 @@ public partial class Main : Node
 	{
 		LoggerManager.LogDebug("ConfigManager service ready");
 
-		ServiceRegistry.Get<NodeManager>();
-
-		ServiceRegistry.Get<SaveDataManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().SaveDataManager);
-		ServiceRegistry.Get<ResourceManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>());
-		ServiceRegistry.Get<SceneTransitionManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<EngineConfig>().SceneTransitionManager);
-	}
-
-	public void _On_ResourceManager_Ready(IEvent e)
-	{
-		LoggerManager.LogDebug("ResourceManager service ready");
-
-		// set scene definitions from loaded resources
-		ServiceRegistry.Get<SceneManager>().SetConfig(ServiceRegistry.Get<ResourceManager>().GetResources<PackedScene>());
-
-		// set scene definitions for ScreenTransitionService using TryGetCategory
-		if (ServiceRegistry.Get<ResourceManager>().TryGetCategory("TransitionScenes", out var sceneResources))
-		{
-			ServiceRegistry.Get<ScreenTransitionManager>().SetConfig(sceneResources);
-		}
 	}
 }

@@ -10,7 +10,6 @@ using GodotEGP.Config;
 using GodotEGP.Service;
 using GodotEGP.Logging;
 using GodotEGP.Logging.Destination;
-using GodotEGP.Handler;
 using GodotEGP.Event.Events;
 
 /// <summary>
@@ -78,9 +77,6 @@ public partial class LoggerManager : Service
 	public override void _OnServiceRegistered()
 	{
 		Instance._loggerConfig = new LoggerConfig();
-
-		// create instance of 
-		AddChild(new ConfigHandler());
 	}
 
 	// Dictionary of Logger instances
