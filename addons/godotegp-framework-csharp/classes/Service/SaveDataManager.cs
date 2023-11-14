@@ -170,6 +170,8 @@ public partial class SaveDataManager : Service
 		{
 			LoggerManager.LogDebug("Registering new save data instance", "", "save", saveName);
 
+			this.Changed();
+
 			return true;
 		}
 		else
@@ -332,6 +334,8 @@ public partial class SaveDataManager : Service
 				Save(saveName);
 			}
 
+			this.Changed();
+
 			return save;
 		}
 		else
@@ -438,6 +442,8 @@ public partial class SaveDataManager : Service
 					ee.SetName(objNew.Name);
 					ee.SetSaveData(Get(toName));
 				});
+
+			this.Changed();
 		}
 	}
 
@@ -534,6 +540,8 @@ public partial class SaveDataManager : Service
 				this.Emit<SaveDataRemoveComplete>((e) => {
 					e.SetName(saveName);
 					});
+
+					this.Changed();
 			}
 		}
 		catch (System.Exception ex)

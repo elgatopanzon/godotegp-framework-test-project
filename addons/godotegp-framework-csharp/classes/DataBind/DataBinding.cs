@@ -21,14 +21,14 @@ public partial class DataBinding<T> : Node
 	Action<T> _setterFirstCb;
 	Func<T> _getterFirstCb;
 
-	EventSubscription<ObjectChanged> _eventSub;
+	EventSubscription<ValidatedValueChanged> _eventSub;
 
 	public DataBinding(object objectFirst, Func<T> getterFirstCb, Action<T> setterFirstCb)
 	{
 		_setterFirstCb = setterFirstCb;
 		_getterFirstCb = getterFirstCb;
 
-		_eventSub = objectFirst.SubscribeOwner<ObjectChanged>(_On_ObjectFirst_Changed, isHighPriority: true);
+		_eventSub = objectFirst.SubscribeOwner<ValidatedValueChanged>(_On_ObjectFirst_Changed, isHighPriority: true);
 
 		// trigger initial binding
 		_On_ObjectFirst_Changed(null);

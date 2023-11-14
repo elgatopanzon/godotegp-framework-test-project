@@ -55,4 +55,9 @@ public partial class Service : Godot.Node
 		if (readyState)
 			this.Emit<ServiceReady>();
 	}
+
+	public virtual void Changed()
+	{
+		this.Emit<ValidatedValueChanged>();
+	}
 }
