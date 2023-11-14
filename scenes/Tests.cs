@@ -15,6 +15,8 @@ using GodotEGP.Config;
 using GodotEGP.Data.Operation;
 using GodotEGP.DataBind;
 
+using GodotEGP.Scripting;
+
 public partial class Tests : Node2D
 {
 	private string _scriptingTestScript = "";
@@ -328,5 +330,7 @@ public partial class Tests : Node2D
 	{
 		LoggerManager.LogDebug("Scripting test run pressed");
 		LoggerManager.LogDebug("Script content", "", "script", _scriptingTestScript);
+
+		ScriptingTest s = new ScriptingTest(_scriptingTestScript);
 	}
 }
