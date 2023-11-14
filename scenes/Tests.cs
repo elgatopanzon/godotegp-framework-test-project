@@ -54,26 +54,29 @@ public partial class Tests : Node2D
 		// AddChild(db);
 
 		var sdm = ServiceRegistry.Get<SaveDataManager>();
-		ServiceRegistry.Get<DataBindManager>().Bind<Dictionary<string, GodotEGP.Config.Object>>(sdm, 
-				sdm.GetSaves,
+		sdm.Bind<Dictionary<string, GodotEGP.Config.Object>>(sdm.GetSaves,
 				(v) => "UITests.DataBinding.Label".Node<Label>().Text = v.Count.ToString()
 			);
 
-		ServiceRegistry.Get<DataBindManager>().BindSignal<TextEdit, string>("UITests.DataBinding.Data", "text_changed", false,  
+		"UITests.DataBinding.Data".BindSignal<TextEdit, string>("text_changed", false,  
 				(n) => n.Text,
 				(v) => "UITests.DataBinding.Label".Node<Label>().Text = v
 			);
 
 		// scripting tests
-		ServiceRegistry.Get<DataBindManager>().BindSignal<Button, string>("UITests.Scripting.Clear", "pressed", false,  
+		// bind to pressed signal of clear button to clear script input field
+		"UITests.Scripting.Clear".BindSignal<Button, string>("pressed", false,  
 				(n) => null,
 				(v) => "UITests.Scripting.Script".Node<TextEdit>().Text = ""
 			);
-		ServiceRegistry.Get<DataBindManager>().BindSignal<TextEdit, string>("UITests.Scripting.Script", "text_changed", false,  
+		// bind to text_changed signal of input field to set script content
+		// variable
+		"UITests.Scripting.Script".BindSignal<TextEdit, string>("text_changed", false,  
 				(n) => n.Text,
 				(v) => _scriptingTestScript = v
 			);
 
+		// connect to pressed signal and wire up to Run callback
 		"UITests.Scripting.Run".Connect("pressed", false, _On_ScriptingTest_Run_pressed, isHighPriority: true);
 	}
 
