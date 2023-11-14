@@ -64,6 +64,27 @@ public partial class EventManager : Service
 		return false;
 	}
 
+	public void Unsubscribe(object eventSubscriptionOwner)
+	{
+		List<IEventSubscription<Event>> unsubs = new List<IEventSubscription<Event>>();
+
+		foreach (var subList in _eventSubscriptions)
+		{
+			foreach (var sub in subList.Value)
+			{
+				if (sub.Subscriber.Equals(eventSubscriptionOwner))
+				{
+					unsubs.Add(sub);
+				}
+			}
+		}
+
+		foreach (var unsub in unsubs)
+		{
+			Unsubscribe(unsub);
+		}
+	}
+
 	public T GetQueue<T>() where T : EventQueue, new()
 	{
 		if (!_eventQueues.TryGetValue(typeof(T), out EventQueue eventQueue))

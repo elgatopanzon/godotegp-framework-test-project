@@ -16,28 +16,56 @@ using GodotEGP.Event.Events;
 using GodotEGP.Event;
 using GodotEGP.Config;
 
-public partial class DataBinding<T> : Node
+public abstract partial class DataBinding : Node
+{
+
+}
+
+public partial class DataBinding<T, TEvent> : DataBinding where TEvent : Event
 {
 	Action<T> _setterFirstCb;
 	Func<T> _getterFirstCb;
 
-	EventSubscription<ValidatedValueChanged> _eventSub;
+	object _objectFirst;
 
-	public DataBinding(object objectFirst, Func<T> getterFirstCb, Action<T> setterFirstCb)
+	EventSubscription<TEvent> _eventSub;
+
+	public EventSubscription<TEvent> EventSubscription {
+		get {
+			return _eventSub;
+		}
+		set {
+			_eventSub = value;
+		}
+	}
+
+	public object ObjectFirst {
+		get {
+			return _objectFirst;
+		}
+	}
+
+
+	public DataBinding(object objectFirst, Func<T> getterFirstCb, Action<T> setterFirstCb, bool initialSet = true)
 	{
+		_objectFirst = objectFirst;
+		
 		_setterFirstCb = setterFirstCb;
 		_getterFirstCb = getterFirstCb;
 
-		_eventSub = objectFirst.SubscribeOwner<ValidatedValueChanged>(_On_ObjectFirst_Changed, isHighPriority: true);
+		_eventSub = objectFirst.SubscribeOwner<TEvent>(_On_ObjectFirst_Changed, isHighPriority: true);
 
 		// trigger initial binding
-		_On_ObjectFirst_Changed(null);
+		if (initialSet)
+		{
+			_On_ObjectFirst_Changed(null);
+		}
 	}
 
-	~DataBinding()
+	public void Destroy()
 	{
-		// unsubscribe from the changed event to prevent ghost bindings
-		ServiceRegistry.Get<EventManager>().Unsubscribe(_eventSub);
+		ServiceRegistry.Get<EventManager>().Unsubscribe(_objectFirst);
+		this.QueueFree();
 	}
 
 	public override void _Ready()
@@ -47,8 +75,20 @@ public partial class DataBinding<T> : Node
 
 	public void _On_ObjectFirst_Changed(IEvent e)
 	{
-		LoggerManager.LogDebug("Object first changed");
+		try
+		{
+			var v = _getterFirstCb();
 
-		_setterFirstCb(_getterFirstCb());	
+			LoggerManager.LogDebug("Object first changed", "", "val", v);
+
+			_setterFirstCb(v);	
+		}
+		catch (ObjectDisposedException)
+		{
+			if (!IsQueuedForDeletion())
+			{
+				Destroy();
+			}
+		}
 	}
 }

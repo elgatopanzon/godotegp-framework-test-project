@@ -105,9 +105,12 @@ public static partial class EventManagerObjectExtensions
 	}
 
 
-	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
+	public static EventSubscription<GodotSignal> SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
 	{
-		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, new EventSubscription<GodotSignal>(obj, callbackMethod, isHighPriority, oneshot, eventFilters));
+		var sub = new EventSubscription<GodotSignal>(obj, callbackMethod, isHighPriority, oneshot, eventFilters);
+		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, sub);
+
+		return sub;
 	}
 
 	public static void SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, IEventSubscription<Event> eventSubscription)

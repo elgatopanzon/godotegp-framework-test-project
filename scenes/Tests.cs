@@ -44,12 +44,23 @@ public partial class Tests : Node2D
 
 		"UITests.DataBinding.Label".Node<Label>();
 
+		// var sdm = ServiceRegistry.Get<SaveDataManager>();
+		// var db = new DataBinding<Dictionary<string, GodotEGP.Config.Object>>(sdm, 
+		// 		sdm.GetSaves,
+		// 		(v) => "UITests.DataBinding.Label".Node<Label>().Text = v.Count.ToString()
+		// 	);
+		// AddChild(db);
+
 		var sdm = ServiceRegistry.Get<SaveDataManager>();
-		var db = new DataBinding<Dictionary<string, GodotEGP.Config.Object>>(sdm, 
+		ServiceRegistry.Get<DataBindManager>().Bind<Dictionary<string, GodotEGP.Config.Object>>(sdm, 
 				sdm.GetSaves,
 				(v) => "UITests.DataBinding.Label".Node<Label>().Text = v.Count.ToString()
 			);
-		AddChild(db);
+
+		ServiceRegistry.Get<DataBindManager>().BindSignal<TextEdit, string>("UITests.DataBinding.Data", "text_changed", false,  
+				(n) => n.Text,
+				(v) => "UITests.DataBinding.Label".Node<Label>().Text = v
+			);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
