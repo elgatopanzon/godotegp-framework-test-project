@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
@@ -12,6 +13,7 @@ using GodotEGP.SaveData;
 
 using GodotEGP.Config;
 using GodotEGP.Data.Operation;
+using GodotEGP.DataBind;
 
 public partial class Tests : Node2D
 {
@@ -39,6 +41,15 @@ public partial class Tests : Node2D
 		"UITests.Transition.Start".Connect("pressed", false, _On_TransitionTest_Start_pressed, isHighPriority: true);
 		"UITests.STransition.Transition".Connect("pressed", false, _On_SceneTransitionTest_Transition_pressed, isHighPriority: true);
 		"UITests.STransition.Chain".Connect("pressed", false, _On_SceneTransitionTest_Chain_pressed, isHighPriority: true);
+
+		"UITests.DataBinding.Label".Node<Label>();
+
+		var sdm = ServiceRegistry.Get<SaveDataManager>();
+		var db = new DataBinding<Dictionary<string, GodotEGP.Config.Object>>(sdm, 
+				sdm.GetSaves,
+				(v) => "UITests.DataBinding.Label".Node<Label>().Text = v.Count.ToString()
+			);
+		AddChild(db);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

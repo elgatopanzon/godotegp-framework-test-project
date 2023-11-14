@@ -22,6 +22,10 @@ public partial class Event : IEvent
 	}
 }
 
+public class ObjectChanged : Event
+{
+}
+
 static class EventExtensionMethods
 {
 	static public T SetOwner<T>(this T o, object owner) where T : Event
