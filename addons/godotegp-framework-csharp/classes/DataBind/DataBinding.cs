@@ -18,20 +18,26 @@ using GodotEGP.Config;
 
 public partial class DataBinding<T> : Node
 {
-	Action<T> _bindToMethod;
-	Func<T> _bindFromMethod;
+	Action<T> _setterFirstCb;
+	Func<T> _getterFirstCb;
 
 	EventSubscription<ObjectChanged> _eventSub;
 
-	public DataBinding(object fromObject, Func<T> bindFromMethod, Action<T> bindToMethod)
+	public DataBinding(object objectFirst, Func<T> getterFirstCb, Action<T> setterFirstCb)
 	{
-		_bindToMethod = bindToMethod;
-		_bindFromMethod = bindFromMethod;
+		_setterFirstCb = setterFirstCb;
+		_getterFirstCb = getterFirstCb;
 
-		_eventSub = fromObject.SubscribeOwner<ObjectChanged>(_On_FromObject_Changed, isHighPriority: true);
+		_eventSub = objectFirst.SubscribeOwner<ObjectChanged>(_On_ObjectFirst_Changed, isHighPriority: true);
 
 		// trigger initial binding
-		_On_FromObject_Changed(null);
+		_On_ObjectFirst_Changed(null);
+	}
+
+	~DataBinding()
+	{
+		// unsubscribe from the changed event to prevent ghost bindings
+		ServiceRegistry.Get<EventManager>().Unsubscribe(_eventSub);
 	}
 
 	public override void _Ready()
@@ -39,10 +45,10 @@ public partial class DataBinding<T> : Node
 		// AddChild(_bindTimer);
 	}
 
-	public void _On_FromObject_Changed(IEvent e)
+	public void _On_ObjectFirst_Changed(IEvent e)
 	{
-		LoggerManager.LogDebug("Data binding setting value");
+		LoggerManager.LogDebug("Object first changed");
 
-		_bindToMethod(_bindFromMethod());	
+		_setterFirstCb(_getterFirstCb());	
 	}
 }
