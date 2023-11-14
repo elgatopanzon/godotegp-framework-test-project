@@ -17,6 +17,8 @@ using GodotEGP.DataBind;
 
 public partial class Tests : Node2D
 {
+	private string _scriptingTestScript = "";
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -61,6 +63,18 @@ public partial class Tests : Node2D
 				(n) => n.Text,
 				(v) => "UITests.DataBinding.Label".Node<Label>().Text = v
 			);
+
+		// scripting tests
+		ServiceRegistry.Get<DataBindManager>().BindSignal<Button, string>("UITests.Scripting.Clear", "pressed", false,  
+				(n) => null,
+				(v) => "UITests.Scripting.Script".Node<TextEdit>().Text = ""
+			);
+		ServiceRegistry.Get<DataBindManager>().BindSignal<TextEdit, string>("UITests.Scripting.Script", "text_changed", false,  
+				(n) => n.Text,
+				(v) => _scriptingTestScript = v
+			);
+
+		"UITests.Scripting.Run".Connect("pressed", false, _On_ScriptingTest_Run_pressed, isHighPriority: true);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -305,5 +319,11 @@ public partial class Tests : Node2D
 			});
 
 		ServiceRegistry.Get<SceneTransitionManager>().StartChain("testchain");
+	}
+
+	public void _On_ScriptingTest_Run_pressed(IEvent e)
+	{
+		LoggerManager.LogDebug("Scripting test run pressed");
+		LoggerManager.LogDebug("Script content", "", "script", _scriptingTestScript);
 	}
 }

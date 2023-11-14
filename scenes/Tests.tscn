@@ -14,213 +14,245 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer2"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer2"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer2/HBoxContainer"]
+[node name="Button" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer"]
 layout_mode = 2
 text = "Test"
 metadata/id = "UITests.Test"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 text = "Save game test"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="SaveName" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="SaveName" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 placeholder_text = "Save name"
 metadata/id = "UITests.Save.Name"
 
-[node name="Create" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="Create" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Create"
 metadata/id = "UITests.Save.Create"
 
-[node name="Save" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="Save" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Save"
 metadata/id = "UITests.Save.Save"
 
-[node name="Load" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="Load" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Load"
 metadata/id = "UITests.Save.Load"
 
-[node name="Delete" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="Delete" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Delete"
 metadata/id = "UITests.Save.Delete"
 
-[node name="TimedAutosave" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="TimedAutosave" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Timed Autosave"
 metadata/id = "UITests.Save.TimedAutosave"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="TextEdit" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="TextEdit" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 placeholder_text = "From"
 metadata/id = "UITests.Save.CopyFrom"
 
-[node name="TextEdit2" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="TextEdit2" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 placeholder_text = "To"
 metadata/id = "UITests.Save.CopyTo"
 
-[node name="Button" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="Button" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
 text = "Copy"
 metadata/id = "UITests.Save.Copy"
 
-[node name="Button2" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="Button2" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
 text = "Move"
 metadata/id = "UITests.Save.Move"
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer"]
+[node name="HBoxContainer3" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer3"]
+[node name="Button" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3"]
 layout_mode = 2
 text = "ListSlots"
 metadata/id = "UITests.Save.ListSlots"
 
-[node name="VBoxContainer3" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="VBoxContainer3" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3"]
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer3"]
 layout_mode = 2
 text = "Scene manager test"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer3"]
 layout_mode = 2
 
-[node name="TextEdit" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer"]
+[node name="TextEdit" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer3/HBoxContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 placeholder_text = "Scene name"
 metadata/id = "UITests.Scene.Name"
 
-[node name="Load" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer"]
+[node name="Load" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer3/HBoxContainer"]
 layout_mode = 2
 text = "Load"
 metadata/id = "UITests.Scene.Load"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer3"]
 layout_mode = 2
 
-[node name="Reload" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer2"]
+[node name="Reload" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer3/HBoxContainer2"]
 layout_mode = 2
 text = "Reload
 "
 metadata/id = "UITests.Scene.Reload"
 
-[node name="Unload" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer2"]
+[node name="Unload" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer3/HBoxContainer2"]
 layout_mode = 2
 text = "Unload"
 metadata/id = "UITests.Scene.Unload"
 
-[node name="LodPrev" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer2"]
+[node name="LodPrev" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer3/HBoxContainer2"]
 layout_mode = 2
 text = "Load Prev"
 metadata/id = "UITests.Scene.LoadPrev"
 
-[node name="VBoxContainer4" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="VBoxContainer4" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer4"]
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer4"]
 layout_mode = 2
 text = "Screen transition test"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer4"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer4"]
 layout_mode = 2
 
-[node name="Transition" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer4/HBoxContainer"]
+[node name="Transition" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer4/HBoxContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 placeholder_text = "Transition name"
 metadata/id = "UITests.Transition.Name"
 
-[node name="Start" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer4/HBoxContainer"]
+[node name="Start" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer4/HBoxContainer"]
 layout_mode = 2
 text = "Start"
 metadata/id = "UITests.Transition.Start"
 
-[node name="VBoxContainer5" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="VBoxContainer5" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer5"]
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer5"]
 layout_mode = 2
 text = "Scene transition test"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer5"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer5"]
 layout_mode = 2
 
-[node name="Scene" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer5/HBoxContainer"]
+[node name="Scene" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer5/HBoxContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 placeholder_text = "Scene"
 metadata/id = "UITests.STransition.SName"
 
-[node name="Transition2" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer5/HBoxContainer"]
+[node name="Transition2" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer5/HBoxContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 placeholder_text = "Transition"
 metadata/id = "UITests.STransition.TName"
 
-[node name="Transition" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer5/HBoxContainer"]
+[node name="Transition" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer5/HBoxContainer"]
 layout_mode = 2
 text = "Transition"
 metadata/id = "UITests.STransition.Transition"
 
-[node name="VBoxContainer6" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="VBoxContainer6" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer6"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer6"]
 layout_mode = 2
 
-[node name="ChainTest" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer6/HBoxContainer"]
+[node name="ChainTest" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer6/HBoxContainer"]
 layout_mode = 2
 text = "Start Transition Chain"
 metadata/id = "UITests.STransition.Chain"
 
-[node name="VBoxContainer7" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="VBoxContainer7" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7"]
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer7"]
 layout_mode = 2
 text = "Data binding test"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer7"]
 layout_mode = 2
 
-[node name="TextEdit" type="TextEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
+[node name="TextEdit" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 placeholder_text = "Data"
 metadata/id = "UITests.DataBinding.Data"
 
-[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
 layout_mode = 2
 text = "Data:"
 metadata/id = "UITests.DataBinding.Label"
 
-[node name="Label2" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
+[node name="Label2" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer/VBoxContainer7/HBoxContainer"]
 layout_mode = 2
+
+[node name="VBoxContainer8" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]
+layout_mode = 2
+text = "Scripting test"
+
+[node name="Script" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]
+custom_minimum_size = Vector2(100, 150)
+layout_direction = 2
+layout_mode = 2
+metadata/id = "UITests.Scripting.Script"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]
+layout_mode = 2
+
+[node name="Run" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
+layout_mode = 2
+text = "Run"
+metadata/id = "UITests.Scripting.Run"
+
+[node name="Clear" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
+layout_mode = 2
+text = "Clear"
+metadata/id = "UITests.Scripting.Clear"
