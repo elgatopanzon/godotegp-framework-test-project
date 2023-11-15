@@ -58,48 +58,48 @@ public partial class ScriptingTest
 			// if statements
 			_script += @"if [ 1 -gt 100]\n";
 			_script += @"then\n";
-			_script += @"echo omg such a large number\n";
+			_script += @"  echo omg such a large number\n";
 			_script += @"fi\n";
 
 			_script += @"if [ 1 -gt 100] || [ 1 -le 100]\n";
 			_script += @"then\n";
-			_script += @"echo uh ok\n";
+			_script += @"  echo uh ok\n";
 			_script += @"fi\n";
 
 			_script += @"if [ ""2"" == ""2"" ]\n";
 			_script += @"then\n";
-			_script += @"echo omg such a large number\n";
+			_script += @"  echo omg such a large number\n";
 			_script += @"fi\n";
 
 			_script += @"if [ ""$SOMEVARVAL"" = ""1"" ]\n";
 			_script += @"then\n";
-			_script += @"echo It's equal to 1 yay\n";
+			_script += @"  echo It's equal to 1 yay\n";
 			_script += @"elif [ ""$SOMEVARVAL"" = ""$(somefunccall random_param_1 another_param)"" ]\n";
 			_script += @"then\n";
-			_script += @"echo did you know? $(echo this is nested!)\n";
+			_script += @"  echo did you know? $(echo this is nested!)\n";
 			_script += @"else\n";
-			_script += @"echo eh it's actually ""$SOMEVARVAL""\n";
+			_script += @"  echo eh it's actually ""$SOMEVARVAL""\n";
 			_script += @"fi\n";
             //
 			// // while loops
 			_script += @"counter=1\n";
 			_script += @"while [ $counter -le 10 ]\n";
 			_script += @"do\n";
-			_script += @"echo count: $counter\n";
-			_script += @"((counter++))\n";
+			_script += @"  echo count: $counter\n";
+			_script += @"  ((counter++))\n";
 			_script += @"done\n";
             //
 			// // for loops
 			_script += @"names=""name1 name2 name3""\n";
 			_script += @"for name in $names\n";
 			_script += @"do\n";
-			_script += @"echo name: $name\n";
+			_script += @"  echo name: $name\n";
 			_script += @"done\n";
             //
 			// // for loops range
 			_script += @"for val in {1..5}\n";
 			_script += @"do\n";
-			_script += @"echo val: $val\n";
+			_script += @"  echo val: $val\n";
 			_script += @"done\n";
             //
 			// // multiline with commas
@@ -109,14 +109,14 @@ public partial class ScriptingTest
 			// nested if else else
 			_script += @"if [ ""2"" = ""2"" ]\n";
 			_script += @"then\n";
-			_script += @"if [ ""a"" = ""a"" ]\n";
-			_script += @"then\n";
-			_script += @"echo omg such a large number\n";
+			_script += @"  if [ ""a"" = ""a"" ]\n";
+			_script += @"  then\n";
+			_script += @"    echo omg such a large number\n";
+			_script += @"  else\n";
+			_script += @"    echo not a large number...\n";
+			_script += @"  fi\n";
 			_script += @"else\n";
-			_script += @"echo not a large number...\n";
-			_script += @"fi\n";
-			_script += @"else\n";
-			_script += @"echo it's an else\n";
+			_script += @"  echo it's an else\n";
 			_script += @"fi\n";
 
 			// some var setting tests
@@ -180,7 +180,8 @@ public partial class ScriptingTest
 
 			while (true)
 			{
-				string forwardScriptLine = scriptLines[_scriptLineCounter];
+				string forwardScriptLineRaw = scriptLines[_scriptLineCounter];
+				string forwardScriptLine = forwardScriptLineRaw.Trim();
 
 				var forwardLineConditions = ParseProcessBlockConditions(forwardScriptLine);
 
@@ -198,7 +199,7 @@ public partial class ScriptingTest
 					continue;
 				}
 
-				fullScriptLine += forwardScriptLine+"\n";
+				fullScriptLine += forwardScriptLineRaw+"\n";
 
 				// if we have conditional matches, it's an elif or a nested if
 				if (forwardLineConditions.Count > 0)
