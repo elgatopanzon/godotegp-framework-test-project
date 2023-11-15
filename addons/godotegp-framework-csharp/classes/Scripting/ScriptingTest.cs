@@ -72,12 +72,12 @@ public partial class ScriptingTest
 			// _script += @"then\n";
 			// _script += @"  echo uh ok\n";
 			// _script += @"fi\n";
-            //
+
 			// _script += @"if [ ""2"" == ""2"" ]\n";
 			// _script += @"then\n";
 			// _script += @"  echo omg such a large number\n";
 			// _script += @"fi\n";
-            //
+
 			// _script += @"if [ ""$SOMEVARVAL"" = ""1"" ]\n";
 			// _script += @"then\n";
 			// _script += @"  echo It's equal to 1 yay\n";
@@ -87,31 +87,31 @@ public partial class ScriptingTest
 			// _script += @"else\n";
 			// _script += @"  echo eh it's actually ""$SOMEVARVAL""\n";
 			// _script += @"fi\n";
-            //
-			// // while loops
+
+			// while loops
 			// _script += @"counter=1\n";
 			// _script += @"while [ $counter -le 10 ]\n";
 			// _script += @"do\n";
 			// _script += @"  echo count: $counter\n";
 			// _script += @"  ((counter++))\n";
 			// _script += @"done\n";
-            //
-			// // for loops
+
+			// for loops
 			// _script += @"names=""name1 name2 name3""\n";
 			// _script += @"for name in $names\n";
 			// _script += @"do\n";
 			// _script += @"  echo name: $name\n";
 			// _script += @"done\n";
-            //
-			// // for loops range
+
+			// for loops range
 			// _script += @"for val in {1..5}\n";
 			// _script += @"do\n";
 			// _script += @"  echo val: $val\n";
 			// _script += @"done\n";
-            //
-			// // multiline with commas
-			// _script += @"echo one; echo two; echo three\n";
-			// _script += @"echo one; echo ""$(echo a; echo b)""; echo three\n";
+
+			// multiline with commas
+			_script += @"echo one; echo two; echo three\n";
+			_script += @"echo one; echo ""$(echo a; echo b)""; echo three\n";
 
 			// nested if else else
 			// _script += @"if [ ""2"" = ""2"" ]\n";
