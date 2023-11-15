@@ -332,5 +332,6 @@ public partial class Tests : Node2D
 		LoggerManager.LogDebug("Script content", "", "script", _scriptingTestScript);
 
 		ScriptingTest s = new ScriptingTest(_scriptingTestScript);
+		AddChild(s);
 	}
 }

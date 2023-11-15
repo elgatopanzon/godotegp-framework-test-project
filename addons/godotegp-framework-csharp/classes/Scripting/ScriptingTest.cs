@@ -18,17 +18,22 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
-public partial class ScriptingTest
+public partial class ScriptingTest : Node
 {
 	private string _script;
 	private string[] _currentScriptLinesSplit;
 
 	private int _scriptLineCounter = 0;
 
+	private int _processState = 0;
+
 	private Dictionary<string, Func<int, string>> _functionDefinitions = new Dictionary<string, Func<int, string>>();
 
 	// holds session variables used by the script
 	Dictionary<string, object> _scriptVars = new Dictionary<string, object>();
+
+	private List<ScriptProcessResult> _scriptLineResults = new List<ScriptProcessResult>();
+	private ScriptProcessResult _scriptLineResult;
 
 	public ScriptingTest(string script)
 	{
@@ -132,85 +137,112 @@ public partial class ScriptingTest
 		}
 		LoggerManager.LogDebug(_script);
 
-		// creates a list of lines, each with a list of processes for each line
-		var interprettedLines = InterpretLines(_script);
+		_currentScriptLinesSplit = _script.Split(new string[] {"\\n"}, StringSplitOptions.None);
 
-		foreach (var line in interprettedLines)
-		{
-			LoggerManager.LogDebug("Interpretted line", "", "line", line.Result);
-		}
+		// creates a list of lines, each with a list of processes for each line
+		// var interprettedLines = InterpretLines(_script);
+
+		// foreach (var line in interprettedLines)
+		// {
+		// 	LoggerManager.LogDebug("Interpretted line", "", "line", line.Result);
+		// }
 
 		// ProcessInterprettedLines(interprettedLines);
 	}
 
-	public void ProcessInterprettedLines(List<List<ScriptProcessOperation>> interprettedLines)
+	public override void _Process(double delta)
 	{
-		// list structure:
-		// list of lines
-			// list of line processes
-		for (int i = 0; i < interprettedLines.Count; i++)
+		if (_scriptLineCounter >= _currentScriptLinesSplit.Count())
 		{
-			List<ScriptProcessOperation> lineProcesses = interprettedLines[i];
+			_processState = -1; // end of the script
+		}
 
-			ProcessInterprettedLine(interprettedLines[i]);
+
+		// regular process state, let's process line by line!
+		if (_processState == 0)
+		{
+			string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
+
+			if (linestr.Length > 0)
+			{
+				_scriptLineResult = InterpretLine(linestr);
+				_scriptLineResults.Add(_scriptLineResult);
+
+				LoggerManager.LogDebug($"Line {_scriptLineCounter}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+			}
+
+			_scriptLineCounter++;
 		}
 	}
 
-	public ScriptProcessResult ProcessInterprettedLine(List<ScriptProcessOperation> interprettedLine)
-	{
-		ScriptProcessResult lineResult = null;
-
-		for (int ii = 0; ii < interprettedLine.Count; ii++)
-		{
-			ScriptProcessOperation currentProcess = interprettedLine[ii];
-
-			if (lineResult == null)
-			{
-				lineResult = new ScriptProcessResult(0, "", "");
-				lineResult.Stdout = currentProcess.ScriptLine;
-			}
-
-			if (ii == 0)
-			{
-				LoggerManager.LogDebug($"Line {ii}", "Process", "line", interprettedLine[ii].ScriptLine);
-			}
-
-			LoggerManager.LogDebug($"Line {ii} process {ii} {interprettedLine[ii].GetType().Name}", "Process", "process", interprettedLine[ii]);
-
-			// process function call
-			if (currentProcess is ScriptProcessFunctionCall functionCall)
-			{
-				lineResult = ExecuteFunctionCall(functionCall.Function, functionCall.Params.ToArray());
-				LoggerManager.LogDebug("Function call result", "Process", "res", lineResult);
-			}
-			else if (currentProcess is ScriptProcessVarAssignment varAssignment)
-			{
-				lineResult = ExecuteVariableAssignment(varAssignment.Name, varAssignment.Value);
-				LoggerManager.LogDebug("Var assignment result", "Process", "res", lineResult);
-			}
-			else if (currentProcess is ScriptProcessVarSubstitution varSubstitution)
-			{
-				lineResult = ExecuteVariableSubstitution(varSubstitution.Name, lineResult);
-				LoggerManager.LogDebug("Var substitution result", "Process", "res", lineResult);
-			}
-
-			// last just check if it's basic operation and write script line
-			// as-is
-			else if (currentProcess is ScriptProcessOperation operation && operation.ScriptLine.Length > 0)
-			{
-				lineResult = new ScriptProcessResult(0, operation.ScriptLine);
-			}
-		}
-
-		if (lineResult == null)
-		{
-			lineResult = new ScriptProcessResult(127, "", "unprocessed script line");
-		}
-
-		LoggerManager.LogDebug($"Line final result", "Process", "res", lineResult);
-
-		return lineResult;
-	}
+	// public void ProcessInterprettedLines(List<List<ScriptProcessOperation>> interprettedLines)
+	// {
+	// 	// list structure:
+	// 	// list of lines
+	// 		// list of line processes
+	// 	for (int i = 0; i < interprettedLines.Count; i++)
+	// 	{
+	// 		List<ScriptProcessOperation> lineProcesses = interprettedLines[i];
+    //
+	// 		ProcessInterprettedLine(interprettedLines[i]);
+	// 	}
+	// }
+    //
+	// public ScriptProcessResult ProcessInterprettedLine(List<ScriptProcessOperation> interprettedLine)
+	// {
+	// 	ScriptProcessResult lineResult = null;
+    //
+	// 	for (int ii = 0; ii < interprettedLine.Count; ii++)
+	// 	{
+	// 		ScriptProcessOperation currentProcess = interprettedLine[ii];
+    //
+	// 		if (lineResult == null)
+	// 		{
+	// 			lineResult = new ScriptProcessResult(0, "", "");
+	// 			lineResult.Stdout = currentProcess.ScriptLine;
+	// 		}
+    //
+	// 		if (ii == 0)
+	// 		{
+	// 			LoggerManager.LogDebug($"Line {ii}", "Process", "line", interprettedLine[ii].ScriptLine);
+	// 		}
+    //
+	// 		LoggerManager.LogDebug($"Line {ii} process {ii} {interprettedLine[ii].GetType().Name}", "Process", "process", interprettedLine[ii]);
+    //
+	// 		// process function call
+	// 		if (currentProcess is ScriptProcessFunctionCall functionCall)
+	// 		{
+	// 			lineResult = ExecuteFunctionCall(functionCall.Function, functionCall.Params.ToArray());
+	// 			LoggerManager.LogDebug("Function call result", "Process", "res", lineResult);
+	// 		}
+	// 		else if (currentProcess is ScriptProcessVarAssignment varAssignment)
+	// 		{
+	// 			lineResult = ExecuteVariableAssignment(varAssignment.Name, varAssignment.Value);
+	// 			LoggerManager.LogDebug("Var assignment result", "Process", "res", lineResult);
+	// 		}
+	// 		else if (currentProcess is ScriptProcessVarSubstitution varSubstitution)
+	// 		{
+	// 			lineResult = ExecuteVariableSubstitution(varSubstitution.Name, lineResult);
+	// 			LoggerManager.LogDebug("Var substitution result", "Process", "res", lineResult);
+	// 		}
+    //
+	// 		// last just check if it's basic operation and write script line
+	// 		// as-is
+	// 		else if (currentProcess is ScriptProcessOperation operation && operation.ScriptLine.Length > 0)
+	// 		{
+	// 			lineResult = new ScriptProcessResult(0, operation.ScriptLine);
+	// 		}
+	// 	}
+    //
+	// 	if (lineResult == null)
+	// 	{
+	// 		lineResult = new ScriptProcessResult(127, "", "unprocessed script line");
+	// 	}
+    //
+	// 	LoggerManager.LogDebug($"Line final result", "Process", "res", lineResult);
+    //
+	// 	return lineResult;
+	// }
 
 	// main script process execution functions
 	public ScriptProcessResult ExecuteFunctionCall(string func, params string[] funcParams)
@@ -470,6 +502,10 @@ public partial class ScriptingTest
 
 		// third thing, parse nested script lines and replace values
 		lineResult = ParseNestedLines(lineResult.Result);
+		if (lineResult.ReturnCode != 0)
+		{
+			return lineResult;
+		}
 		// foreach (ScriptProcessNestedProcess lineProcess in ParseNestdLines(lineResult.Stdout))
 		// {
 		// 	// TODO: process nested lines
@@ -484,6 +520,10 @@ public partial class ScriptingTest
 		foreach (ScriptProcessVarAssignment lineProcess in varAssignmentProcesses)
 		{
 			lineResult = ExecuteVariableAssignment(lineProcess.Name, lineProcess.Value);
+		}
+		if (lineResult.ReturnCode != 0)
+		{
+			return lineResult;
 		}
 
 		var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
@@ -513,7 +553,7 @@ public partial class ScriptingTest
 		// 	processes.Add(new ScriptProcessOperation(line));
 		// }
 		
-		LoggerManager.LogDebug("Line result", "", "res", lineResult);
+		// LoggerManager.LogDebug("Line result", "", "res", lineResult);
 
 		return lineResult;
 	}
