@@ -67,6 +67,12 @@ public partial class ScriptingTest : Node
 			_script += @"echo ""testing: accessing dictionary elements""\n";
 			_script += @"echo ""array key 'key':$VARARRAY['key']""\n";
 
+			// async wait function call process mode
+			_script += @"echo ""testing: async wait""\n";
+			_script += @"waittest\n";
+			_script += @"echo ""this shouldn't be shown until processing is resumed""\n";
+
+
 			// if statements
 			// _script += @"if [ 1 -gt 100]\n";
 			// _script += @"then\n";
@@ -169,6 +175,12 @@ public partial class ScriptingTest : Node
 				_scriptLineResults.Add(_scriptLineResult);
 
 				LoggerManager.LogDebug($"Line {_scriptLineCounter}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+
+				if (_scriptLineResult.ResultProcessMode == ResultProcessMode.ASYNC)
+				{
+					// we are waiting for something, so switch processing mode
+					_processState = 1;
+				}
 			}
 
 			_scriptLineCounter++;
@@ -254,6 +266,11 @@ public partial class ScriptingTest : Node
 		if (func == "err")
 		{
 			return new ScriptProcessResult(0, func+" "+funcParams.Join(" "));
+		}
+		if (func == "waittest")
+		{
+			LoggerManager.LogDebug("Waittest called");
+			return new ScriptProcessResult(0, resultProcessMode: ResultProcessMode.ASYNC);
 		}
 
 		return new ScriptProcessResult(127, "", $"command not found: {func}");
@@ -859,6 +876,11 @@ public class ScriptProcessBlockProcess : ScriptProcessOperation
 	}
 }
 
+public enum ResultProcessMode
+{
+	NORMAL,
+	ASYNC
+}
 
 public class ScriptProcessResult
 {
@@ -888,11 +910,19 @@ public class ScriptProcessResult
 		get { return GetResult(); }
 	}
 
-	public ScriptProcessResult(int returnCode, string stdout = "", string stderr = "")
+	private ResultProcessMode _resultProcessMode;
+	public ResultProcessMode ResultProcessMode
+	{
+		get { return _resultProcessMode; }
+		set { _resultProcessMode = value; }
+	}
+
+	public ScriptProcessResult(int returnCode, string stdout = "", string stderr = "", ResultProcessMode resultProcessMode = ResultProcessMode.NORMAL)
 	{
 		_returnCode = returnCode;
 		_stdout = stdout;
 		_stderr = stderr;
+		_resultProcessMode = resultProcessMode;
 	}
 
 	public string GetResult()
