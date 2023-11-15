@@ -370,7 +370,8 @@ public partial class ScriptingTest
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
 		// string patternNestedLine = @"((?<=\$\()[^""\n]*(?=\)))";
-		string patternNestedLine = @"((?<=\$\()[^""\n](?=\)))|((?<=\$\()[^""\n]*(?=\)))";
+		// string patternNestedLine = @"((?<=\$\()[^""\n](?=\)))|((?<=\$\()[^""\n]*(?=\)))";
+		string patternNestedLine = @"((?<=\$\()[^""\n](?=\)))|((?<=\$\()[^""\n\)\(]*(?=\)))";
 
 		MatchCollection nl = Regex.Matches(line, patternNestedLine, RegexOptions.Multiline);
 		foreach (Match match in nl)
