@@ -22,6 +22,8 @@ public partial class ScriptingTest
 {
 	private string _script;
 
+	private int _scriptLineCounter = 0;
+
 	private Dictionary<string, Func<int, string>> _functionDefinitions = new Dictionary<string, Func<int, string>>();
 
 	public ScriptingTest(string script)
@@ -52,34 +54,52 @@ public partial class ScriptingTest
 			_script += @"echo ""testing: accessing dictionary elements""\n";
 			_script += @"echo ""$VARARRAY['key']""\n";
 
-			// // if statements
-			// _script += @"if [ 1 -gt 100]; then\n";
-			// _script += @"echo omg such a large number\n";
-			// _script += @"fi\n";
-			// _script += @"if [ 1 -gt 100] || [ 1 -le 100]; then\n";
-			// _script += @"echo uh ok\n";
-			// _script += @"fi\n";
-			// _script += @"if [ ""2"" == ""2"" ]; then\n";
-			// _script += @"echo omg such a large number\n";
-			// _script += @"fi\n";
+			// if statements
+			_script += @"if [ 1 -gt 100]\n";
+			_script += @"then\n";
+			_script += @"echo omg such a large number\n";
+			_script += @"fi\n";
+
+			_script += @"if [ 1 -gt 100] || [ 1 -le 100]\n";
+			_script += @"then\n";
+			_script += @"echo uh ok\n";
+			_script += @"fi\n";
+
+			_script += @"if [ ""2"" == ""2"" ]\n";
+			_script += @"then\n";
+			_script += @"echo omg such a large number\n";
+			_script += @"fi\n";
+
+			_script += @"if [ ""$SOMEVARVAL"" = ""1"" ]\n";
+			_script += @"then\n";
+			_script += @"echo It's equal to 1 yay\n";
+			_script += @"elif [ ""$SOMEVARVAL"" = ""$(somefunccall random_param_1 another_param)"" ]\n";
+			_script += @"then\n";
+			_script += @"echo omg it's 2\n";
+			_script += @"else\n";
+			_script += @"echo eh it's actually ""$SOMEVARVAL""\n";
+			_script += @"fi\n";
             //
 			// // while loops
-			// _script += @"counter=1\n";
-			// _script += @"while [ $counter -le 10 ]; do\n";
-			// _script += @"echo count: $counter\n";
-			// _script += @"((counter++))\n";
-			// _script += @"done\n";
+			_script += @"counter=1\n";
+			_script += @"while [ $counter -le 10 ]\n";
+			_script += @"do\n";
+			_script += @"echo count: $counter\n";
+			_script += @"((counter++))\n";
+			_script += @"done\n";
             //
 			// // for loops
-			// _script += @"names=""name1 name2 name3""\n";
-			// _script += @"for name in $names; do\n";
-			// _script += @"echo name: $name\n";
-			// _script += @"done\n";
+			_script += @"names=""name1 name2 name3""\n";
+			_script += @"for name in $names\n";
+			_script += @"do\n";
+			_script += @"echo name: $name\n";
+			_script += @"done\n";
             //
 			// // for loops range
-			// _script += @"for val in {1..5}; do\n";
-			// _script += @"echo val: $val\n";
-			// _script += @"done\n";
+			_script += @"for val in {1..5}\n";
+			_script += @"do\n";
+			_script += @"echo val: $val\n";
+			_script += @"done\n";
             //
 			// // multiline with commas
 			// _script += @"echo one; echo two; echo three\n";
@@ -107,12 +127,175 @@ public partial class ScriptingTest
 	{
 		List<List<ScriptProcessOperation>> processes = new List<List<ScriptProcessOperation>>();
 
-		foreach (string line in scriptLines.Split(new string[] {"\\n"}, StringSplitOptions.None))
+		string[] linesSplit = scriptLines.Split(new string[] {"\\n"}, StringSplitOptions.None);
+
+		while (_scriptLineCounter < linesSplit.Count())
 		{
-			processes.Add(InterpretLine(line.Trim()));
+			string linestr = linesSplit[_scriptLineCounter].Trim();
+
+			LoggerManager.LogDebug(_scriptLineCounter);
+
+			// first try to process the line as a block
+			var blockProcess = ParseBlockProcessLine(linestr, linesSplit);
+
+			if (blockProcess == null)
+			{
+				processes.Add(InterpretLine(linestr));
+			}
+			else
+			{
+				processes.Add(new List<ScriptProcessOperation> {blockProcess});
+			}
+
+			_scriptLineCounter++;
 		}
 
 		return processes;
+	}
+
+	public ScriptProcessOperation ParseBlockProcessLine(string line, string[] scriptLines)
+	{
+		string patternBlockProcess = @"^(if|while|for)\[?(.+)*\]*";
+		Match isBlockProcess = Regex.Match(line, patternBlockProcess, RegexOptions.Multiline);
+
+		string fullScriptLine = "";
+
+		if (isBlockProcess.Groups.Count >= 3)
+		{
+			string blockProcessType = isBlockProcess.Groups[1].Value;
+			string blockProcessCondition = isBlockProcess.Groups[2].Value.Trim();
+
+			List<(List<(string, string)>, List<List<ScriptProcessOperation>>)> blockConditions = new List<(List<(string, string)>, List<List<ScriptProcessOperation>>)>();
+			// List<List<ScriptProcessOperation>> conditionsProcessList = new List<List<ScriptProcessOperation>>();
+
+			// List<(string, string)> conditionsList = ParseProcessBlockConditions(blockProcessCondition);
+            //
+			// LoggerManager.LogDebug("Process block start found", "", "info", $"type: {blockProcessType}, conditionStr: {blockProcessCondition}");
+			// LoggerManager.LogDebug("Process block conditions", "", "conditions", conditionsList);
+			// LoggerManager.LogDebug("Process block line", "", "line", line);
+
+			// look over the next lines and build up the process block
+			List<List<ScriptProcessOperation>> currentBlockProcesses = new List<List<ScriptProcessOperation>>();
+			List<(string, string)> currentBlockCondition = null;
+			List<(string, string)> prevBlockCondition = null;
+
+			// skip re-evaluating the found block conditions of the start line
+			// _scriptLineCounter++;
+
+			while (true)
+			{
+				string forwardScriptLine = scriptLines[_scriptLineCounter];
+
+				fullScriptLine += forwardScriptLine+"\n";
+
+				var forwardLineConditions = ParseProcessBlockConditions(forwardScriptLine);
+
+				_scriptLineCounter++;
+
+				// if we have conditional matches, it's an elif or a nested if
+				if (forwardLineConditions.Count > 0)
+				{
+					LoggerManager.LogDebug("Block conditions found in line", "", "line", forwardScriptLine);
+
+					// var nestedIfProcess = ParseBlockProcessLine(forwardScriptLine, scriptLines);
+
+					// if (nestedIfProcess != null)
+					// {
+					// 	LoggerManager.LogDebug("Nested if process!", "", "nestedIf", nestedIfProcess);
+					// }
+					// if it's not nested if, then it's an elif
+
+					// set current condition to the one we just found
+					if (currentBlockProcesses.Count > 0)
+					{
+						blockConditions.Add((currentBlockCondition, currentBlockProcesses));
+					}
+
+					currentBlockProcesses = new List<List<ScriptProcessOperation>>();
+					currentBlockCondition = forwardLineConditions;
+				}
+
+				// expected when we have entered a conditional statement block
+				else if (forwardScriptLine == "else")
+				{
+					LoggerManager.LogDebug("else line");
+
+
+					// reset current processes list to account for the next
+					// upcoming lines
+					blockConditions.Add((currentBlockCondition, currentBlockProcesses));
+					currentBlockProcesses = new List<List<ScriptProcessOperation>>();
+					currentBlockCondition = null;
+
+					continue;
+				}
+
+				// expected when we have entered a conditional statement block
+				else if (forwardScriptLine == "then" || forwardScriptLine == "do")
+				{
+					LoggerManager.LogDebug("then/do line", "", "conditions", currentBlockCondition);
+
+
+					// reset current processes list to account for the next
+					// upcoming lines
+					currentBlockProcesses = new List<List<ScriptProcessOperation>>();
+
+					continue;
+				}
+
+				// end of the current block, let's exit the loop
+				else if (forwardScriptLine == "fi" || forwardScriptLine == "done")
+				{
+					LoggerManager.LogDebug("fi/done line, reached end of block");
+
+					// // add previous condition processes if there are any
+					if (currentBlockProcesses.Count > 0)
+					{
+						blockConditions.Add((currentBlockCondition, currentBlockProcesses));
+					}
+
+					_scriptLineCounter--;
+
+					LoggerManager.LogDebug("Block conditions list", "", "blockConditions", blockConditions);
+					return new ScriptProcessBlockProcess(fullScriptLine, blockProcessType, blockConditions);
+				}
+
+				// we should be capturing lines as processes here
+				else
+				{
+					currentBlockProcesses.Add(InterpretLine(forwardScriptLine));
+				}
+
+
+			}
+
+		}
+
+		return null;
+	}
+
+	public List<(string, string)> ParseProcessBlockConditions(string scriptLine)
+	{
+		string patternBlockProcessCondition = @"\[(.*?)\] ?(\|?\|?)";
+
+		MatchCollection blockProcessConditionMatches = Regex.Matches(scriptLine, patternBlockProcessCondition, RegexOptions.Multiline);
+		
+		List<(string, string)> conditionsList = new List<(string, string)>();
+
+		if (scriptLine.StartsWith("for "))
+		{
+			conditionsList.Add((scriptLine.Replace("for ", ""), ""));
+		}
+
+		foreach (Match match in blockProcessConditionMatches)
+		{
+			string blockConditionInside = match.Groups[1].Value;
+			string blockConditionCompareType = match.Groups[2].Value;
+
+			conditionsList.Add((blockConditionInside.Trim(), blockConditionCompareType.Trim()));
+		}
+
+		return conditionsList;
 	}
 
 	public List<ScriptProcessOperation> InterpretLine(string line)
@@ -400,5 +583,28 @@ public class ScriptProcessFunctionCall : ScriptProcessOperation
 	{
 		_funcName = funcName;
 		_funcParams = funcParams;
+	}
+}
+
+public class ScriptProcessBlockProcess : ScriptProcessOperation
+{
+	private string _blockType;
+	public string Type
+	{
+		get { return _blockType; }
+		set { _blockType = value; }
+	}
+
+	private List<(List<(string Condition, string AndOr)> Conditions, List<List<ScriptProcessOperation>> BlockProcesses)> _blockProcesses;
+	public List<(List<(string, string)>, List<List<ScriptProcessOperation>>)> Processes
+	{
+		get { return _blockProcesses; }
+		set { _blockProcesses = value; }
+	}
+
+	public ScriptProcessBlockProcess(string scriptLine, string blockType, List<(List<(string, string)>, List<List<ScriptProcessOperation>>)> blockProcesses) : base(scriptLine)
+	{
+		_blockType = blockType;
+		_blockProcesses = blockProcesses;
 	}
 }
