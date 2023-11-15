@@ -27,6 +27,9 @@ public partial class ScriptingTest
 
 	private Dictionary<string, Func<int, string>> _functionDefinitions = new Dictionary<string, Func<int, string>>();
 
+	// holds session variables used by the script
+	Dictionary<string, object> _scriptVars = new Dictionary<string, object>();
+
 	public ScriptingTest(string script)
 	{
 		_script = script;
@@ -37,108 +40,216 @@ public partial class ScriptingTest
 			_script += @"echo ""testing: setting variables content""\n";
 			_script += @"VARNAME=""some string value""\n";
 			_script += @"echo ""testing: echoing variables: $VARNAME""\n";
-			_script += @"echo ""testing: setting variables to content with variables inside""\n";
-			_script += @"VARNAME=""home: $HOME""\n";
-			_script += @"logdebug ""logging to debug log""\n";
-			_script += @"echo ""testing"" ""multiple"" ""echo"" ""params""\n";
-			_script += @"echo echo without quotes\n";
-			_script += @"echo 1 2 3\n";
-			_script += @"echo ""testing: setting variables to number types""\n";
-			_script += @"VARINT=1\n";
-			_script += @"VARFLOAT=1.1\n";
-			_script += @"echo ""testing: enclosed script lines content""\n";
-			_script += @"echo ""$(echo this should return this string)""\n";
-			_script += @"echo ""$(echo this is part)"" ""$(echo of multiple)"" ""$(echo nested lines)""\n";
-			_script += @"echo ""testing: accessing array elements""\n";
-			_script += @"echo ""$VARARRAY[0]""\n";
-			_script += @"echo ""$VARARRAY[1]""\n";
-			_script += @"echo ""testing: accessing dictionary elements""\n";
-			_script += @"echo ""$VARARRAY['key']""\n";
+			// _script += @"echo ""testing: setting variables to content with variables inside""\n";
+			// _script += @"VARNAME=""home: $HOME""\n";
+			// _script += @"logdebug ""logging to debug log""\n";
+			// _script += @"echo ""testing"" ""multiple"" ""echo"" ""params""\n";
+			// _script += @"echo echo without quotes\n";
+			// _script += @"echo 1 2 3\n";
+			// _script += @"echo ""testing: setting variables to number types""\n";
+			// _script += @"VARINT=1\n";
+			// _script += @"VARFLOAT=1.1\n";
+			// _script += @"echo ""testing: enclosed script lines content""\n";
+			// _script += @"echo ""$(echo this should return this string)""\n";
+			// _script += @"echo ""$(echo this is part)"" ""$(echo of multiple)"" ""$(echo nested lines)""\n";
+			// _script += @"echo ""testing: accessing array elements""\n";
+			// _script += @"echo ""$VARARRAY[0]""\n";
+			// _script += @"echo ""$VARARRAY[1]""\n";
+			// _script += @"echo ""testing: accessing dictionary elements""\n";
+			// _script += @"echo ""$VARARRAY['key']""\n";
 
 			// if statements
-			_script += @"if [ 1 -gt 100]\n";
-			_script += @"then\n";
-			_script += @"  echo omg such a large number\n";
-			_script += @"fi\n";
-
-			_script += @"if [ 1 -gt 100] || [ 1 -le 100]\n";
-			_script += @"then\n";
-			_script += @"  echo uh ok\n";
-			_script += @"fi\n";
-
-			_script += @"if [ ""2"" == ""2"" ]\n";
-			_script += @"then\n";
-			_script += @"  echo omg such a large number\n";
-			_script += @"fi\n";
-
-			_script += @"if [ ""$SOMEVARVAL"" = ""1"" ]\n";
-			_script += @"then\n";
-			_script += @"  echo It's equal to 1 yay\n";
-			_script += @"elif [ ""$SOMEVARVAL"" = ""$(somefunccall random_param_1 another_param)"" ]\n";
-			_script += @"then\n";
-			_script += @"  echo did you know? $(echo this is nested!)\n";
-			_script += @"else\n";
-			_script += @"  echo eh it's actually ""$SOMEVARVAL""\n";
-			_script += @"fi\n";
+			// _script += @"if [ 1 -gt 100]\n";
+			// _script += @"then\n";
+			// _script += @"  echo omg such a large number\n";
+			// _script += @"fi\n";
+            //
+			// _script += @"if [ 1 -gt 100] || [ 1 -le 100]\n";
+			// _script += @"then\n";
+			// _script += @"  echo uh ok\n";
+			// _script += @"fi\n";
+            //
+			// _script += @"if [ ""2"" == ""2"" ]\n";
+			// _script += @"then\n";
+			// _script += @"  echo omg such a large number\n";
+			// _script += @"fi\n";
+            //
+			// _script += @"if [ ""$SOMEVARVAL"" = ""1"" ]\n";
+			// _script += @"then\n";
+			// _script += @"  echo It's equal to 1 yay\n";
+			// _script += @"elif [ ""$SOMEVARVAL"" = ""$(somefunccall random_param_1 another_param)"" ]\n";
+			// _script += @"then\n";
+			// _script += @"  echo did you know? $(echo this is nested!)\n";
+			// _script += @"else\n";
+			// _script += @"  echo eh it's actually ""$SOMEVARVAL""\n";
+			// _script += @"fi\n";
             //
 			// // while loops
-			_script += @"counter=1\n";
-			_script += @"while [ $counter -le 10 ]\n";
-			_script += @"do\n";
-			_script += @"  echo count: $counter\n";
-			_script += @"  ((counter++))\n";
-			_script += @"done\n";
+			// _script += @"counter=1\n";
+			// _script += @"while [ $counter -le 10 ]\n";
+			// _script += @"do\n";
+			// _script += @"  echo count: $counter\n";
+			// _script += @"  ((counter++))\n";
+			// _script += @"done\n";
             //
 			// // for loops
-			_script += @"names=""name1 name2 name3""\n";
-			_script += @"for name in $names\n";
-			_script += @"do\n";
-			_script += @"  echo name: $name\n";
-			_script += @"done\n";
+			// _script += @"names=""name1 name2 name3""\n";
+			// _script += @"for name in $names\n";
+			// _script += @"do\n";
+			// _script += @"  echo name: $name\n";
+			// _script += @"done\n";
             //
 			// // for loops range
-			_script += @"for val in {1..5}\n";
-			_script += @"do\n";
-			_script += @"  echo val: $val\n";
-			_script += @"done\n";
+			// _script += @"for val in {1..5}\n";
+			// _script += @"do\n";
+			// _script += @"  echo val: $val\n";
+			// _script += @"done\n";
             //
 			// // multiline with commas
 			// _script += @"echo one; echo two; echo three\n";
 			// _script += @"echo one; echo ""$(echo a; echo b)""; echo three\n";
 
 			// nested if else else
-			_script += @"if [ ""2"" = ""2"" ]\n";
-			_script += @"then\n";
-			_script += @"  if [ ""a"" = ""a"" ]\n";
-			_script += @"  then\n";
-			_script += @"    echo omg such a large number\n";
-			_script += @"  else\n";
-			_script += @"    echo not a large number...\n";
-			_script += @"  fi\n";
-			_script += @"else\n";
-			_script += @"  echo it's an else\n";
-			_script += @"fi\n";
+			// _script += @"if [ ""2"" = ""2"" ]\n";
+			// _script += @"then\n";
+			// _script += @"  if [ ""a"" = ""a"" ]\n";
+			// _script += @"  then\n";
+			// _script += @"    echo omg such a large number\n";
+			// _script += @"  else\n";
+			// _script += @"    echo not a large number...\n";
+			// _script += @"  fi\n";
+			// _script += @"else\n";
+			// _script += @"  echo it's an else\n";
+			// _script += @"fi\n";
 
 			// some var setting tests
-			_script += @"c=""$(a)$(b)""\n";
-			_script += @"c=$( ((a + b)) )\n";
+			// _script += @"c=""$(a)$(b)""\n";
+			// _script += @"c=$( ((a + b)) )\n";
 		}
 		LoggerManager.LogDebug(_script);
 
 		// creates a list of lines, each with a list of processes for each line
 		var interprettedLines = InterpretLines(_script);
 
+
+		ProcessInterprettedLines(interprettedLines);
+	}
+
+	public void ProcessInterprettedLines(List<List<ScriptProcessOperation>> interprettedLines)
+	{
+		// list structure:
+		// list of lines
+			// list of line processes
 		for (int i = 0; i < interprettedLines.Count; i++)
 		{
-			for (int ii = 0; ii < interprettedLines[i].Count; ii++)
+			List<ScriptProcessOperation> lineProcesses = interprettedLines[i];
+
+			ProcessInterprettedLine(interprettedLines[i]);
+		}
+	}
+
+	public void ProcessInterprettedLine(List<ScriptProcessOperation> interprettedLine)
+	{
+
+		ScriptProcessResult lineResult = null;
+
+		for (int ii = 0; ii < interprettedLine.Count; ii++)
+		{
+			ScriptProcessOperation currentProcess = interprettedLine[ii];
+
+			if (lineResult == null)
 			{
-				if (ii == 0)
-				{
-					LoggerManager.LogDebug($"Line {i}", "", "line", interprettedLines[i][ii].ScriptLine);
-				}
-				LoggerManager.LogDebug($"Line {i} process {ii} {interprettedLines[i][ii].GetType().Name}", "", "process", interprettedLines[i][ii]);
+				lineResult = new ScriptProcessResult(0, "", "");
+				lineResult.Stdout = currentProcess.ScriptLine;
+			}
+
+			if (ii == 0)
+			{
+				LoggerManager.LogDebug($"Line {ii}", "Process", "line", interprettedLine[ii].ScriptLine);
+			}
+
+			LoggerManager.LogDebug($"Line {ii} process {ii} {interprettedLine[ii].GetType().Name}", "Process", "process", interprettedLine[ii]);
+
+			// process function call
+			if (currentProcess is ScriptProcessFunctionCall functionCall)
+			{
+				lineResult = ExecuteFunctionCall(functionCall.Function, functionCall.Params.ToArray());
+				LoggerManager.LogDebug("Function call result", "Process", "res", lineResult);
+			}
+			else if (currentProcess is ScriptProcessVarAssignment varAssignment)
+			{
+				lineResult = ExecuteVariableAssignment(varAssignment.Name, varAssignment.Value);
+				LoggerManager.LogDebug("Var assignment result", "Process", "res", lineResult);
+			}
+			else if (currentProcess is ScriptProcessVarSubstitution varSubstitution)
+			{
+				lineResult = ExecuteVariableSubstitution(varSubstitution.Name, lineResult);
+				LoggerManager.LogDebug("Var substitution result", "Process", "res", lineResult);
+			}
+
+			// last just check if it's basic operation and write script line
+			// as-is
+			else if (currentProcess is ScriptProcessOperation operation && operation.ScriptLine.Length > 0)
+			{
+				lineResult = new ScriptProcessResult(0, operation.ScriptLine);
 			}
 		}
+
+		if (lineResult == null)
+		{
+			lineResult = new ScriptProcessResult(127, "", "unprocessed script line");
+		}
+
+		LoggerManager.LogDebug($"Line final result", "Process", "res", lineResult);
+	}
+
+	// main script process execution functions
+	public ScriptProcessResult ExecuteFunctionCall(string func, params string[] funcParams)
+	{
+		if (func == "echo")
+		{
+			return new ScriptProcessResult(0, funcParams.Join(" "));
+		}
+
+		return new ScriptProcessResult(127, "", $"command not found: {func}");
+	}
+
+	public ScriptProcessResult ExecuteVariableAssignment(string varName, string varValue)
+	{
+		// parse variable name and keys
+		string varnamePattern = @"\[([^\\]]*)\]";
+		MatchCollection matches = Regex.Matches(varName, varnamePattern, RegexOptions.Multiline);
+
+		// TODO: implement nested variable access by parsing key names
+		if (matches.Count > 0)
+		{
+			LoggerManager.LogDebug("TODO: implement nested variable access", "", "varname", varName);
+
+			return new ScriptProcessResult(127, "", "variable key access not implemented");
+		}
+		else
+		{
+			AssignVariableValue(varName, varValue);
+			return new ScriptProcessResult(0);
+		}
+	}
+
+	public void AssignVariableValue(string varName, string varValue)
+	{
+		LoggerManager.LogDebug("Setting variable value", "", "var", $"{varName} = {varValue}");
+
+		_scriptVars[varName] = varValue;
+	}
+
+	public ScriptProcessResult ExecuteVariableSubstitution(string varName, ScriptProcessResult res)
+	{
+		if (!_scriptVars.TryGetValue(varName, out object obj))
+		{
+			// set empty string for non-existent vars
+			obj = (string) "";
+		}
+
+		return new ScriptProcessResult(0, res.Stdout.Replace("$"+varName, obj.ToString()));
 	}
 
 	// accepts a pure string containing the script content to process for
@@ -153,7 +264,10 @@ public partial class ScriptingTest
 		{
 			string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
 
-			processes.Add(InterpretLine(linestr));
+			if (linestr.Length > 0)
+			{
+				processes.Add(InterpretLine(linestr));
+			}
 
 			_scriptLineCounter++;
 		}
@@ -643,5 +757,37 @@ public class ScriptProcessBlockProcess : ScriptProcessOperation
 	{
 		_blockType = blockType;
 		_blockProcesses = blockProcesses;
+	}
+}
+
+
+public class ScriptProcessResult
+{
+	private int _returnCode;
+	public int ReturnCode
+	{
+		get { return _returnCode; }
+		set { _returnCode = value; }
+	}
+
+	private string _stdout;
+	public string Stdout
+	{
+		get { return _stdout; }
+		set { _stdout = value; }
+	}
+
+	private string _stderr;
+	public string Stderr
+	{
+		get { return _stderr; }
+		set { _stderr = value; }
+	}
+
+	public ScriptProcessResult(int returnCode, string stdout = "", string stderr = "")
+	{
+		_returnCode = returnCode;
+		_stdout = stdout;
+		_stderr = stderr;
 	}
 }
