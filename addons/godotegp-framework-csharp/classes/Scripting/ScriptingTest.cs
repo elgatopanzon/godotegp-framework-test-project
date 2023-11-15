@@ -40,23 +40,27 @@ public partial class ScriptingTest
 			_script += @"echo ""testing: setting variables content""\n";
 			_script += @"VARNAME=""some string value""\n";
 			_script += @"echo ""testing: echoing variables: $VARNAME""\n";
-			// _script += @"echo ""testing: setting variables to content with variables inside""\n";
-			// _script += @"VARNAME=""home: $HOME""\n";
-			// _script += @"logdebug ""logging to debug log""\n";
-			// _script += @"echo ""testing"" ""multiple"" ""echo"" ""params""\n";
-			// _script += @"echo echo without quotes\n";
-			// _script += @"echo 1 2 3\n";
-			// _script += @"echo ""testing: setting variables to number types""\n";
-			// _script += @"VARINT=1\n";
-			// _script += @"VARFLOAT=1.1\n";
-			// _script += @"echo ""testing: enclosed script lines content""\n";
-			// _script += @"echo ""$(echo this should return this string)""\n";
-			// _script += @"echo ""$(echo this is part)"" ""$(echo of multiple)"" ""$(echo nested lines)""\n";
-			// _script += @"echo ""testing: accessing array elements""\n";
-			// _script += @"echo ""$VARARRAY[0]""\n";
-			// _script += @"echo ""$VARARRAY[1]""\n";
-			// _script += @"echo ""testing: accessing dictionary elements""\n";
-			// _script += @"echo ""$VARARRAY['key']""\n";
+			_script += @"echo ""testing: setting variables to content with variables inside""\n";
+			_script += @"HOME=""where the heart is""\n";
+			_script += @"VARNAME=""home is $HOME""\n";
+			_script += @"echo ""did you know? $VARNAME""\n";
+			_script += @"VARNAME=""$(echo I don't really like soup...)""\n";
+			_script += @"echo ""but did you know? $VARNAME""\n";
+			_script += @"logdebug ""logging to debug log""\n";
+			_script += @"echo ""testing"" ""multiple"" ""echo"" ""params""\n";
+			_script += @"echo echo without quotes\n";
+			_script += @"echo 1 2 3\n";
+			_script += @"echo ""testing: setting variables to number types""\n";
+			_script += @"VARINT=1\n";
+			_script += @"VARFLOAT=1.1\n";
+			_script += @"echo ""testing: enclosed script lines content""\n";
+			_script += @"echo ""$(echo this should return this string)""\n";
+			_script += @"echo ""$(echo this is part)"" ""$(echo of multiple)"" ""$(echo nested lines)""\n";
+			_script += @"echo ""testing: accessing array elements""\n";
+			_script += @"echo ""array key 0: $VARARRAY[0]""\n";
+			_script += @"echo ""array key 1: $VARARRAY[1]""\n";
+			_script += @"echo ""testing: accessing dictionary elements""\n";
+			_script += @"echo ""array key 'key':$VARARRAY['key']""\n";
 
 			// if statements
 			// _script += @"if [ 1 -gt 100]\n";
@@ -123,16 +127,20 @@ public partial class ScriptingTest
 			// _script += @"fi\n";
 
 			// some var setting tests
-			// _script += @"c=""$(a)$(b)""\n";
-			// _script += @"c=$( ((a + b)) )\n";
+			_script += @"c=""$(a)$(b)""\n";
+			_script += @"c=""$( ((a + b)) )""\n";
 		}
 		LoggerManager.LogDebug(_script);
 
 		// creates a list of lines, each with a list of processes for each line
 		var interprettedLines = InterpretLines(_script);
 
+		foreach (var line in interprettedLines)
+		{
+			LoggerManager.LogDebug("Interpretted line", "", "line", line.Result);
+		}
 
-		ProcessInterprettedLines(interprettedLines);
+		// ProcessInterprettedLines(interprettedLines);
 	}
 
 	public void ProcessInterprettedLines(List<List<ScriptProcessOperation>> interprettedLines)
@@ -148,9 +156,8 @@ public partial class ScriptingTest
 		}
 	}
 
-	public void ProcessInterprettedLine(List<ScriptProcessOperation> interprettedLine)
+	public ScriptProcessResult ProcessInterprettedLine(List<ScriptProcessOperation> interprettedLine)
 	{
-
 		ScriptProcessResult lineResult = null;
 
 		for (int ii = 0; ii < interprettedLine.Count; ii++)
@@ -201,6 +208,8 @@ public partial class ScriptingTest
 		}
 
 		LoggerManager.LogDebug($"Line final result", "Process", "res", lineResult);
+
+		return lineResult;
 	}
 
 	// main script process execution functions
@@ -249,14 +258,14 @@ public partial class ScriptingTest
 			obj = (string) "";
 		}
 
-		return new ScriptProcessResult(0, res.Stdout.Replace("$"+varName, obj.ToString()));
+		return new ScriptProcessResult(0, res.Result.Replace("$"+varName, obj.ToString()));
 	}
 
 	// accepts a pure string containing the script content to process for
 	// interpretation
-	public List<List<ScriptProcessOperation>> InterpretLines(string scriptLines)
+	public List<ScriptProcessResult> InterpretLines(string scriptLines)
 	{
-		List<List<ScriptProcessOperation>> processes = new List<List<ScriptProcessOperation>>();
+		List<ScriptProcessResult> processes = new List<ScriptProcessResult>();
 
 		_currentScriptLinesSplit = scriptLines.Split(new string[] {"\\n"}, StringSplitOptions.None);
 
@@ -382,7 +391,7 @@ public partial class ScriptingTest
 				// we should be capturing lines as processes here
 				else
 				{
-					currentBlockProcesses.Add(InterpretLine(forwardScriptLine));
+					currentBlockProcesses.Add(new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(forwardScriptLine).Result)});
 				}
 
 
@@ -404,7 +413,7 @@ public partial class ScriptingTest
 
 		if (scriptLine.StartsWith("for "))
 		{
-			conditionsList.Add((InterpretLine(scriptLine.Replace("for ", "")), ""));
+			conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(scriptLine.Replace("for ", "")).Result)}, ""));
 		}
 
 		foreach (Match match in blockProcessConditionMatches)
@@ -414,7 +423,7 @@ public partial class ScriptingTest
 
 			var interpretted = InterpretLine(blockConditionInside.Trim());
 
-			conditionsList.Add((interpretted, blockConditionCompareType.Trim()));
+			conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(blockConditionInside.Trim()).Result)}, blockConditionCompareType.Trim()));
 		}
 
 		return conditionsList;
@@ -422,7 +431,7 @@ public partial class ScriptingTest
 
 	// accepts a single script line and generates a list of process objects to
 	// achieve the final rendered result for each line
-	public List<ScriptProcessOperation> InterpretLine(string line)
+	public ScriptProcessResult InterpretLine(string line)
 	{
 		// TODO: split and process lines with ; and pipes
 
@@ -435,22 +444,43 @@ public partial class ScriptingTest
 		// 4. parse function calls
 		// 5. parse if/while/for calls
 
+		ScriptProcessResult lineResult = new ScriptProcessResult(0, line);
+
 		// list of process operations to do to this script line
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
 		// first thing, parse and replace variable names with values
-		processes.AddRange(ParseVarSubstitutions(line));
+		foreach (ScriptProcessVarSubstitution lineProcess in ParseVarSubstitutions(lineResult.Result))
+		{
+			lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
+		}
+		// processes.AddRange(ParseVarSubstitutions(line));
 
 		// second thing, parse and replace expressions with values
-		processes.AddRange(ParseExpressions(line));
+		foreach (ScriptProcessExpression lineProcess in ParseExpressions(lineResult.Result))
+		{
+			// TODO: implement expression processing
+			// lineResult = ExecuteExpression(lineProcess.Expression, lineResult);
+		}
+		// processes.AddRange(ParseExpressions(line));
 
 		// third thing, parse nested script lines and replace values
-		processes.AddRange(ParseNestdLines(line));
+		lineResult = ParseNestedLines(lineResult.Result);
+		// foreach (ScriptProcessNestedProcess lineProcess in ParseNestdLines(lineResult.Stdout))
+		// {
+		// 	// TODO: process nested lines
+		// 	// lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
+		// }
+		// processes.AddRange(ParseNestdLines(line));
 
 
 		// parse variable assignments
-		var varAssignmentProcesses = ParseVarAssignments(line);
-		processes.AddRange(varAssignmentProcesses);
+		var varAssignmentProcesses = ParseVarAssignments(lineResult.Result);
+		// processes.AddRange(varAssignmentProcesses);
+		foreach (ScriptProcessVarAssignment lineProcess in varAssignmentProcesses)
+		{
+			lineResult = ExecuteVariableAssignment(lineProcess.Name, lineProcess.Value);
+		}
 
 		var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
 		if (blockProcess != null)
@@ -464,28 +494,36 @@ public partial class ScriptingTest
 			// case AND function calls
 			if (varAssignmentProcesses.Count == 0)
 			{
-				processes.AddRange(ParseFunctionCalls(line));
+				foreach (ScriptProcessFunctionCall lineProcess in ParseFunctionCalls(lineResult.Result))
+				{
+					lineResult = ExecuteFunctionCall(lineProcess.Function, lineProcess.Params.ToArray());
+				}
+				// processes.AddRange(ParseFunctionCalls(line));
 			}
 		}
 
 		// if there's no processes until now, just return the plain object with
 		// no processing attached
-		if (processes.Count == 0)
-		{
-			processes.Add(new ScriptProcessOperation(line));
-		}
+		// if (processes.Count == 0)
+		// {
+		// 	processes.Add(new ScriptProcessOperation(line));
+		// }
+		
+		LoggerManager.LogDebug("Line result", "", "res", lineResult);
 
-		return processes;
+		return lineResult;
 	}
 
 	// return script processed lines from nested $(...) lines in a script line
-	public List<ScriptProcessOperation> ParseNestdLines(string line)
+	public ScriptProcessResult ParseNestedLines(string line)
 	{
-		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
+		List<(string, ScriptProcessResult)> processes = new List<(string, ScriptProcessResult)>();
 
 		// string patternNestedLine = @"((?<=\$\()[^""\n]*(?=\)))";
 		// string patternNestedLine = @"((?<=\$\()[^""\n](?=\)))|((?<=\$\()[^""\n]*(?=\)))";
 		string patternNestedLine = @"((?<=\$\()[^""\n](?=\)))|((?<=\$\()[^""\n\)\(]*(?=\)))";
+
+		ScriptProcessResult lineResult = new ScriptProcessResult(0, line);
 
 		MatchCollection nl = Regex.Matches(line, patternNestedLine, RegexOptions.Multiline);
 		foreach (Match match in nl)
@@ -498,11 +536,30 @@ public partial class ScriptingTest
 
 				// LoggerManager.LogDebug("Nested line matche", "", "nestedLine", $"{nestedLine}");
 
-				processes.Add(new ScriptProcessNestedProcess(line, InterpretLine(nestedLine)));
+				processes.Add((nestedLine, InterpretLine(nestedLine)));
+				// lineResult = InterpretLine(nestedLine);
 			}
 		}
 
-		return processes;
+		if (processes.Count > 0)
+		{
+			foreach ((string, ScriptProcessResult) nestedRes in processes)
+			{
+				lineResult.Stdout = lineResult.Result.Replace($"$({nestedRes.Item1})", nestedRes.Item2.Result);
+				lineResult.Stderr = nestedRes.Item2.Stderr;
+				lineResult.ReturnCode = nestedRes.Item2.ReturnCode;
+
+				// overrite stdout with stderr because we don't support
+				// redirection
+				if (lineResult.Stderr.Length > 0)
+				{
+					lineResult.Stdout = lineResult.Result.Replace($"$({nestedRes.Item1})", nestedRes.Item2.Stderr);
+				}
+			}
+			LoggerManager.LogDebug("Nested lines result", "", "res", lineResult);
+		}
+
+		return lineResult;
 	}
 
 	// parse list of required variable substitutions in a script line
@@ -784,10 +841,27 @@ public class ScriptProcessResult
 		set { _stderr = value; }
 	}
 
+	public string Result
+	{
+		get { return GetResult(); }
+	}
+
 	public ScriptProcessResult(int returnCode, string stdout = "", string stderr = "")
 	{
 		_returnCode = returnCode;
 		_stdout = stdout;
 		_stderr = stderr;
+	}
+
+	public string GetResult()
+	{
+		if (_returnCode == 0)
+		{
+			return _stdout;
+		}
+		else
+		{
+			return $"err {_returnCode}: {_stderr}";
+		}
 	}
 }
