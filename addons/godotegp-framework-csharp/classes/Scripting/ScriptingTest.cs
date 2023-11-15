@@ -172,10 +172,10 @@ public partial class ScriptingTest
 			string blockProcessType = isBlockProcess.Groups[1].Value;
 			string blockProcessCondition = isBlockProcess.Groups[2].Value.Trim();
 
-			List<(List<(string, string)>, List<List<ScriptProcessOperation>>)> blockConditions = new List<(List<(string, string)>, List<List<ScriptProcessOperation>>)>();
+			List<(List<(List<ScriptProcessOperation>, string)>, List<List<ScriptProcessOperation>>)> blockConditions = new List<(List<(List<ScriptProcessOperation>, string)>, List<List<ScriptProcessOperation>>)>();
 			// List<List<ScriptProcessOperation>> conditionsProcessList = new List<List<ScriptProcessOperation>>();
 
-			// List<(string, string)> conditionsList = ParseProcessBlockConditions(blockProcessCondition);
+			// List<(List<ScriptProcessOperation>, string)> conditionsList = ParseProcessBlockConditions(blockProcessCondition);
             //
 			// LoggerManager.LogDebug("Process block start found", "", "info", $"type: {blockProcessType}, conditionStr: {blockProcessCondition}");
 			// LoggerManager.LogDebug("Process block conditions", "", "conditions", conditionsList);
@@ -183,8 +183,8 @@ public partial class ScriptingTest
 
 			// look over the next lines and build up the process block
 			List<List<ScriptProcessOperation>> currentBlockProcesses = new List<List<ScriptProcessOperation>>();
-			List<(string, string)> currentBlockCondition = null;
-			List<(string, string)> prevBlockCondition = null;
+			List<(List<ScriptProcessOperation>, string)> currentBlockCondition = null;
+			List<(List<ScriptProcessOperation>, string)> prevBlockCondition = null;
 
 			// skip re-evaluating the found block conditions of the start line
 			// _scriptLineCounter++;
@@ -281,17 +281,17 @@ public partial class ScriptingTest
 		return null;
 	}
 
-	public List<(string, string)> ParseProcessBlockConditions(string scriptLine)
+	public List<(List<ScriptProcessOperation>, string)> ParseProcessBlockConditions(string scriptLine)
 	{
 		string patternBlockProcessCondition = @"\[(.*?)\] ?(\|?\|?)";
 
 		MatchCollection blockProcessConditionMatches = Regex.Matches(scriptLine, patternBlockProcessCondition, RegexOptions.Multiline);
 
-		List<(string, string)> conditionsList = new List<(string, string)>();
+		List<(List<ScriptProcessOperation>, string)> conditionsList = new List<(List<ScriptProcessOperation>, string)>();
 
 		if (scriptLine.StartsWith("for "))
 		{
-			conditionsList.Add((scriptLine.Replace("for ", ""), ""));
+			conditionsList.Add((InterpretLine(scriptLine.Replace("for ", "")), ""));
 		}
 
 		foreach (Match match in blockProcessConditionMatches)
@@ -299,7 +299,7 @@ public partial class ScriptingTest
 			string blockConditionInside = match.Groups[1].Value;
 			string blockConditionCompareType = match.Groups[2].Value;
 
-			conditionsList.Add((blockConditionInside.Trim(), blockConditionCompareType.Trim()));
+			conditionsList.Add((InterpretLine(blockConditionInside.Trim()), blockConditionCompareType.Trim()));
 		}
 
 		return conditionsList;
@@ -506,9 +506,17 @@ public class ScriptProcessOperation
 		set { _scriptLine = value; }
 	}
 
+	private string _type;
+	public string ProcessType
+	{
+		get { return _type; }
+		set { _type = value; }
+	}
+
 	public ScriptProcessOperation(string scriptLine)
 	{
 		_scriptLine = scriptLine;
+		_type = this.GetType().Name;
 	}
 }
 
@@ -612,14 +620,14 @@ public class ScriptProcessBlockProcess : ScriptProcessOperation
 		set { _blockType = value; }
 	}
 
-	private List<(List<(string Condition, string AndOr)> Conditions, List<List<ScriptProcessOperation>> BlockProcesses)> _blockProcesses;
-	public List<(List<(string, string)>, List<List<ScriptProcessOperation>>)> Processes
+	private List<(List<(List<ScriptProcessOperation>, string)>, List<List<ScriptProcessOperation>> BlockProcesses)> _blockProcesses;
+	public List<(List<(List<ScriptProcessOperation>, string)>, List<List<ScriptProcessOperation>>)> Processes
 	{
 		get { return _blockProcesses; }
 		set { _blockProcesses = value; }
 	}
 
-	public ScriptProcessBlockProcess(string scriptLine, string blockType, List<(List<(string, string)>, List<List<ScriptProcessOperation>>)> blockProcesses) : base(scriptLine)
+	public ScriptProcessBlockProcess(string scriptLine, string blockType, List<(List<(List<ScriptProcessOperation>, string)>, List<List<ScriptProcessOperation>>)> blockProcesses) : base(scriptLine)
 	{
 		_blockType = blockType;
 		_blockProcesses = blockProcesses;
