@@ -106,6 +106,19 @@ public partial class ScriptingTest
 			// _script += @"echo one; echo two; echo three\n";
 			// _script += @"echo one; echo ""$(echo a; echo b)""; echo three\n";
 
+			// nested if else else
+			_script += @"if [ ""2"" = ""2"" ]\n";
+			_script += @"then\n";
+			_script += @"if [ ""a"" = ""a"" ]\n";
+			_script += @"then\n";
+			_script += @"echo omg such a large number\n";
+			_script += @"else\n";
+			_script += @"echo not a large number...\n";
+			_script += @"fi\n";
+			_script += @"else\n";
+			_script += @"echo it's an else\n";
+			_script += @"fi\n";
+
 			// some var setting tests
 			_script += @"c=""$(a)$(b)""\n";
 			_script += @"c=$( ((a + b)) )\n";
@@ -138,21 +151,7 @@ public partial class ScriptingTest
 		{
 			string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
 
-			LoggerManager.LogDebug(_scriptLineCounter);
-
-			// first try to process the line as a block
-			// var blockProcess = ParseBlockProcessLine(linestr, _currentScriptLinesSplit);
-
 			processes.Add(InterpretLine(linestr));
-
-			// if (blockProcess == null)
-			// {
-			// 	processes.Add(InterpretLine(linestr));
-			// }
-			// else
-			// {
-			// 	processes.Add(new List<ScriptProcessOperation> {blockProcess});
-			// }
 
 			_scriptLineCounter++;
 		}
@@ -173,45 +172,49 @@ public partial class ScriptingTest
 			string blockProcessCondition = isBlockProcess.Groups[2].Value.Trim();
 
 			List<(List<(List<ScriptProcessOperation>, string)>, List<List<ScriptProcessOperation>>)> blockConditions = new List<(List<(List<ScriptProcessOperation>, string)>, List<List<ScriptProcessOperation>>)>();
-			// List<List<ScriptProcessOperation>> conditionsProcessList = new List<List<ScriptProcessOperation>>();
-
-			// List<(List<ScriptProcessOperation>, string)> conditionsList = ParseProcessBlockConditions(blockProcessCondition);
-            //
-			// LoggerManager.LogDebug("Process block start found", "", "info", $"type: {blockProcessType}, conditionStr: {blockProcessCondition}");
-			// LoggerManager.LogDebug("Process block conditions", "", "conditions", conditionsList);
-			// LoggerManager.LogDebug("Process block line", "", "line", line);
 
 			// look over the next lines and build up the process block
 			List<List<ScriptProcessOperation>> currentBlockProcesses = new List<List<ScriptProcessOperation>>();
 			List<(List<ScriptProcessOperation>, string)> currentBlockCondition = null;
 			List<(List<ScriptProcessOperation>, string)> prevBlockCondition = null;
 
-			// skip re-evaluating the found block conditions of the start line
-			// _scriptLineCounter++;
-
 			while (true)
 			{
 				string forwardScriptLine = scriptLines[_scriptLineCounter];
 
-				fullScriptLine += forwardScriptLine+"\n";
-
 				var forwardLineConditions = ParseProcessBlockConditions(forwardScriptLine);
 
 				_scriptLineCounter++;
+
+				if (Regex.Match(forwardScriptLine, patternBlockProcess, RegexOptions.Multiline).Groups.Count >= 3 && forwardScriptLine != line)
+				{
+					LoggerManager.LogDebug("Nested if found!", "", "line", $"{forwardScriptLine} {line}");
+					_scriptLineCounter--;
+					var parsedNestedBlock = ParseBlockProcessLine(forwardScriptLine, scriptLines);
+					currentBlockProcesses.Add(new List<ScriptProcessOperation> {parsedNestedBlock});
+					fullScriptLine += parsedNestedBlock.ScriptLine;
+					_scriptLineCounter++;
+
+					continue;
+				}
+
+				fullScriptLine += forwardScriptLine+"\n";
 
 				// if we have conditional matches, it's an elif or a nested if
 				if (forwardLineConditions.Count > 0)
 				{
 					LoggerManager.LogDebug("Block conditions found in line", "", "line", forwardScriptLine);
 
-					// var nestedIfProcess = ParseBlockProcessLine(forwardScriptLine, scriptLines);
-
-					// if (nestedIfProcess != null)
+					// if (line != forwardScriptLine)
 					// {
-					// 	LoggerManager.LogDebug("Nested if process!", "", "nestedIf", nestedIfProcess);
+					// 	var nestedIfProcess = ParseBlockProcessLine(forwardScriptLine, scriptLines);
+                    //
+					// 	if (nestedIfProcess != null)
+					// 	{
+					// 		LoggerManager.LogDebug("Nested if process!", "", "nestedIf", nestedIfProcess);
+					// 	}
 					// }
-					// if it's not nested if, then it's an elif
-
+                    //
 					// set current condition to the one we just found
 					if (currentBlockProcesses.Count > 0)
 					{
@@ -299,7 +302,9 @@ public partial class ScriptingTest
 			string blockConditionInside = match.Groups[1].Value;
 			string blockConditionCompareType = match.Groups[2].Value;
 
-			conditionsList.Add((InterpretLine(blockConditionInside.Trim()), blockConditionCompareType.Trim()));
+			var interpretted = InterpretLine(blockConditionInside.Trim());
+
+			conditionsList.Add((interpretted, blockConditionCompareType.Trim()));
 		}
 
 		return conditionsList;
@@ -307,8 +312,6 @@ public partial class ScriptingTest
 
 	public List<ScriptProcessOperation> InterpretLine(string line)
 	{
-		LoggerManager.LogDebug("Evaluating script line", "", "line", line);
-
 		// TODO: split and process lines with ; and pipes
 
 		// execution and parse order
@@ -353,6 +356,12 @@ public partial class ScriptingTest
 			}
 		}
 
+		// if there's no processes until now, just return the plain object with
+		// no processing attached
+		if (processes.Count == 0)
+		{
+			processes.Add(new ScriptProcessOperation(line));
+		}
 
 		return processes;
 	}
