@@ -219,6 +219,10 @@ public partial class ScriptingTest
 		{
 			return new ScriptProcessResult(0, funcParams.Join(" "));
 		}
+		if (func == "err")
+		{
+			return new ScriptProcessResult(0, func+" "+funcParams.Join(" "));
+		}
 
 		return new ScriptProcessResult(127, "", $"command not found: {func}");
 	}
@@ -549,11 +553,9 @@ public partial class ScriptingTest
 				lineResult.Stderr = nestedRes.Item2.Stderr;
 				lineResult.ReturnCode = nestedRes.Item2.ReturnCode;
 
-				// overrite stdout with stderr because we don't support
-				// redirection
-				if (lineResult.Stderr.Length > 0)
+				if (lineResult.ReturnCode != 0)
 				{
-					lineResult.Stdout = lineResult.Result.Replace($"$({nestedRes.Item1})", nestedRes.Item2.Stderr);
+					break;
 				}
 			}
 			LoggerManager.LogDebug("Nested lines result", "", "res", lineResult);
