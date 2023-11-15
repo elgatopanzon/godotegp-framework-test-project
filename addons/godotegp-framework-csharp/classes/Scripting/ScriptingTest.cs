@@ -18,14 +18,31 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using GodotEGP.State;
+
 public partial class ScriptingTest : Node
 {
+	// state classes for process state machine
+	public class Process : HStateMachine {}
+	public class Preparing : HStateMachine {}
+	public class Running : HStateMachine {}
+	public class Waiting : HStateMachine {}
+	public class Finished : HStateMachine {}
+
+	private Process _processState = new Process();
+	private Preparing _statePreparing = new Preparing();
+	private Running _stateRunning = new Running();
+	private Waiting _stateWaiting = new Waiting();
+	private Finished _stateFinished = new Finished();
+
+	private const int STATE_RUNNING = 0;
+	private const int STATE_WAITING = 1;
+	private const int STATE_FINISHED = 2;
+
 	private string _script;
 	private string[] _currentScriptLinesSplit;
 
 	private int _scriptLineCounter = 0;
-
-	private int _processState = 0;
 
 	private Dictionary<string, Func<int, string>> _functionDefinitions = new Dictionary<string, Func<int, string>>();
 
@@ -39,6 +56,27 @@ public partial class ScriptingTest : Node
 	{
 		_script = script;
 
+		// setup process sub-states
+		_statePreparing.OnEnter = _State_Preparing_OnEnter;
+		_stateRunning.OnUpdate = _State_Running_OnUpdate;
+		_stateWaiting.OnUpdate = _State_Waiting_OnUpdate;
+
+		_processState.AddState(_statePreparing);	
+		_processState.AddState(_stateRunning);	
+		_processState.AddState(_stateWaiting);	
+
+		// create state transitions
+		_processState.AddTransition(_statePreparing, _stateRunning, STATE_RUNNING);
+		_processState.AddTransition(_stateRunning, _stateWaiting, STATE_WAITING);
+		_processState.AddTransition(_stateWaiting, _stateRunning, STATE_RUNNING);
+		_processState.AddTransition(_stateRunning, _stateFinished, STATE_FINISHED);
+
+		// Start the state machine
+		_processState.Enter();
+	}
+
+	public void _State_Preparing_OnEnter()
+	{
 		if (_script.Length == 0)
 		{
 			_script += @"echo ""this text should act like a simple print statement""\n";
@@ -121,8 +159,8 @@ public partial class ScriptingTest : Node
 			// _script += @"done\n";
 
 			// multiline with commas
-			_script += @"echo one; echo two; echo three\n";
-			_script += @"echo one; echo ""$(echo a; echo b)""; echo three\n";
+			// _script += @"echo one; echo two; echo three\n";
+			// _script += @"echo one; echo ""$(echo a; echo b)""; echo three\n";
 
 			// nested if else else
 			// _script += @"if [ ""2"" = ""2"" ]\n";
@@ -145,46 +183,82 @@ public partial class ScriptingTest : Node
 
 		_currentScriptLinesSplit = _script.Split(new string[] {"\\n"}, StringSplitOptions.None);
 
-		// creates a list of lines, each with a list of processes for each line
-		// var interprettedLines = InterpretLines(_script);
+		_processState.Transition(STATE_RUNNING);
+	}
 
-		// foreach (var line in interprettedLines)
-		// {
-		// 	LoggerManager.LogDebug("Interpretted line", "", "line", line.Result);
-		// }
+	public void _State_Running_OnUpdate()
+	{
+		if (_scriptLineCounter >= _currentScriptLinesSplit.Count())
+		{
+			_processState.Transition(STATE_FINISHED); // end of the script
+			return;
+		}
 
-		// ProcessInterprettedLines(interprettedLines);
+		// retrive the current script line
+		string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
+
+		// process the line if it's not empty
+		// TODO: figure out why/how to remove empty lines, or just let them
+		// happen
+		if (linestr.Length > 0)
+		{
+			_scriptLineResult = InterpretLine(linestr);
+			_scriptLineResults.Add(_scriptLineResult);
+
+			// increase script line after processing
+			_scriptLineCounter++;
+
+			LoggerManager.LogDebug($"Line {_scriptLineCounter}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+
+			if (_scriptLineResult.ResultProcessMode == ResultProcessMode.ASYNC)
+			{
+				// we are waiting for something, so switch processing mode
+				_processState.Transition(STATE_WAITING);
+			}
+			else
+			{
+				// trigger another update to process the next line
+				_processState.Update();
+			}
+		}
+	}
+
+	public void _State_Waiting_OnUpdate()
+	{
+		LoggerManager.LogDebug("Pretend we waited for something long...");
+		_processState.Transition(STATE_RUNNING);
 	}
 
 	public override void _Process(double delta)
 	{
-		if (_scriptLineCounter >= _currentScriptLinesSplit.Count())
-		{
-			_processState = -1; // end of the script
-		}
-
-
-		// regular process state, let's process line by line!
-		if (_processState == 0)
-		{
-			string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
-
-			if (linestr.Length > 0)
-			{
-				_scriptLineResult = InterpretLine(linestr);
-				_scriptLineResults.Add(_scriptLineResult);
-
-				LoggerManager.LogDebug($"Line {_scriptLineCounter}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
-
-				if (_scriptLineResult.ResultProcessMode == ResultProcessMode.ASYNC)
-				{
-					// we are waiting for something, so switch processing mode
-					_processState = 1;
-				}
-			}
-
-			_scriptLineCounter++;
-		}
+		_processState.Update();
+		// if (_scriptLineCounter >= _currentScriptLinesSplit.Count())
+		// {
+		// 	_processState = -1; // end of the script
+		// }
+        //
+        //
+		// // regular process state, let's process line by line!
+		// if (_processState == 0)
+		// {
+		// 	string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
+        //
+		// 	if (linestr.Length > 0)
+		// 	{
+		// 		_scriptLineResult = InterpretLine(linestr);
+		// 		_scriptLineResults.Add(_scriptLineResult);
+        //
+		// 		LoggerManager.LogDebug($"Line {_scriptLineCounter}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+        //
+		// 		if (_scriptLineResult.ResultProcessMode == ResultProcessMode.ASYNC)
+		// 		{
+		// 			// we are waiting for something, so switch processing mode
+		// 			_processState = 1;
+		// 		}
+		// 	}
+        //
+		// 	_scriptLineCounter++;
+		// }
 	}
 
 	// public void ProcessInterprettedLines(List<List<ScriptProcessOperation>> interprettedLines)
