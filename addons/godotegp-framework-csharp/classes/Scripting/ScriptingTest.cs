@@ -21,6 +21,7 @@ using GodotEGP.Config;
 public partial class ScriptingTest
 {
 	private string _script;
+	private string[] _currentScriptLinesSplit;
 
 	private int _scriptLineCounter = 0;
 
@@ -75,7 +76,7 @@ public partial class ScriptingTest
 			_script += @"echo It's equal to 1 yay\n";
 			_script += @"elif [ ""$SOMEVARVAL"" = ""$(somefunccall random_param_1 another_param)"" ]\n";
 			_script += @"then\n";
-			_script += @"echo omg it's 2\n";
+			_script += @"echo did you know? $(echo this is nested!)\n";
 			_script += @"else\n";
 			_script += @"echo eh it's actually ""$SOMEVARVAL""\n";
 			_script += @"fi\n";
@@ -104,6 +105,10 @@ public partial class ScriptingTest
 			// // multiline with commas
 			// _script += @"echo one; echo two; echo three\n";
 			// _script += @"echo one; echo ""$(echo a; echo b)""; echo three\n";
+
+			// some var setting tests
+			_script += @"c=""$(a)$(b)""\n";
+			_script += @"c=$( ((a + b)) )\n";
 		}
 		LoggerManager.LogDebug(_script);
 
@@ -127,25 +132,27 @@ public partial class ScriptingTest
 	{
 		List<List<ScriptProcessOperation>> processes = new List<List<ScriptProcessOperation>>();
 
-		string[] linesSplit = scriptLines.Split(new string[] {"\\n"}, StringSplitOptions.None);
+		_currentScriptLinesSplit = scriptLines.Split(new string[] {"\\n"}, StringSplitOptions.None);
 
-		while (_scriptLineCounter < linesSplit.Count())
+		while (_scriptLineCounter < _currentScriptLinesSplit.Count())
 		{
-			string linestr = linesSplit[_scriptLineCounter].Trim();
+			string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
 
 			LoggerManager.LogDebug(_scriptLineCounter);
 
 			// first try to process the line as a block
-			var blockProcess = ParseBlockProcessLine(linestr, linesSplit);
+			// var blockProcess = ParseBlockProcessLine(linestr, _currentScriptLinesSplit);
 
-			if (blockProcess == null)
-			{
-				processes.Add(InterpretLine(linestr));
-			}
-			else
-			{
-				processes.Add(new List<ScriptProcessOperation> {blockProcess});
-			}
+			processes.Add(InterpretLine(linestr));
+
+			// if (blockProcess == null)
+			// {
+			// 	processes.Add(InterpretLine(linestr));
+			// }
+			// else
+			// {
+			// 	processes.Add(new List<ScriptProcessOperation> {blockProcess});
+			// }
 
 			_scriptLineCounter++;
 		}
@@ -279,7 +286,7 @@ public partial class ScriptingTest
 		string patternBlockProcessCondition = @"\[(.*?)\] ?(\|?\|?)";
 
 		MatchCollection blockProcessConditionMatches = Regex.Matches(scriptLine, patternBlockProcessCondition, RegexOptions.Multiline);
-		
+
 		List<(string, string)> conditionsList = new List<(string, string)>();
 
 		if (scriptLine.StartsWith("for "))
@@ -306,8 +313,8 @@ public partial class ScriptingTest
 
 		// execution and parse order
 		// 1. parse printed vars to real values in unparsed line
-			// parse var names in expressions (( )) and replace with actual
-			// values e.g. number or string
+		// parse var names in expressions (( )) and replace with actual
+		// values e.g. number or string
 		// 2. parse nested lines as a normal line, replacing the executed result
 		// 3. parse variable assignments
 		// 4. parse function calls
@@ -315,7 +322,7 @@ public partial class ScriptingTest
 
 		// list of process operations to do to this script line
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
-		
+
 		// first thing, parse and replace variable names with values
 		processes.AddRange(ParseVarSubstitutions(line));
 
@@ -325,17 +332,27 @@ public partial class ScriptingTest
 		// third thing, parse nested script lines and replace values
 		processes.AddRange(ParseNestdLines(line));
 
+
 		// parse variable assignments
 		var varAssignmentProcesses = ParseVarAssignments(line);
 		processes.AddRange(varAssignmentProcesses);
 
-		// if var assignments are 0, then try to match function calls
-		// NOTE: this is because the regex matches both var assignments in lower
-		// case AND function calls
-		if (varAssignmentProcesses.Count == 0)
+		var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
+		if (blockProcess != null)
 		{
-			processes.AddRange(ParseFunctionCalls(line));
+			processes.AddRange(new List<ScriptProcessOperation>() {blockProcess});
 		}
+		else
+		{
+			// if var assignments are 0, then try to match function calls
+			// NOTE: this is because the regex matches both var assignments in lower
+			// case AND function calls
+			if (varAssignmentProcesses.Count == 0)
+			{
+				processes.AddRange(ParseFunctionCalls(line));
+			}
+		}
+
 
 		return processes;
 	}
@@ -400,7 +417,7 @@ public partial class ScriptingTest
 	public List<ScriptProcessOperation> ParseVarAssignments(string line)
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
-		
+
 		string patternIsVarAssignment = @"^[a-zA-Z0-9_]+=.+";
 		Match isVarAssignment = Regex.Match(line, patternIsVarAssignment);
 
@@ -455,7 +472,7 @@ public partial class ScriptingTest
 				List<string> funcParams = new List<string>();
 
 				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"(?<="")[^""\n]*(?="")|[\w]+"))
-				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w-_]+)"))
+				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w-_']+)"))
 				{
 					Match nm = fmatches;
 
