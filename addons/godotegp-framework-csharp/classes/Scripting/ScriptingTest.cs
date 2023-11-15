@@ -141,6 +141,8 @@ public partial class ScriptingTest
 		}
 	}
 
+	// accepts a pure string containing the script content to process for
+	// interpretation
 	public List<List<ScriptProcessOperation>> InterpretLines(string scriptLines)
 	{
 		List<List<ScriptProcessOperation>> processes = new List<List<ScriptProcessOperation>>();
@@ -159,6 +161,8 @@ public partial class ScriptingTest
 		return processes;
 	}
 
+	// parse a line starting with if/while/for as a block of script to be
+	// treated up the stack as a single process object
 	public ScriptProcessOperation ParseBlockProcessLine(string line, string[] scriptLines)
 	{
 		string patternBlockProcess = @"^(if|while|for)\[?(.+)*\]*";
@@ -206,16 +210,6 @@ public partial class ScriptingTest
 				{
 					LoggerManager.LogDebug("Block conditions found in line", "", "line", forwardScriptLine);
 
-					// if (line != forwardScriptLine)
-					// {
-					// 	var nestedIfProcess = ParseBlockProcessLine(forwardScriptLine, scriptLines);
-                    //
-					// 	if (nestedIfProcess != null)
-					// 	{
-					// 		LoggerManager.LogDebug("Nested if process!", "", "nestedIf", nestedIfProcess);
-					// 	}
-					// }
-                    //
 					// set current condition to the one we just found
 					if (currentBlockProcesses.Count > 0)
 					{
@@ -285,6 +279,7 @@ public partial class ScriptingTest
 		return null;
 	}
 
+	// return the processed conditions from an if/while/for block
 	public List<(List<ScriptProcessOperation>, string)> ParseProcessBlockConditions(string scriptLine)
 	{
 		string patternBlockProcessCondition = @"\[(.*?)\] ?(\|?\|?)";
@@ -311,6 +306,8 @@ public partial class ScriptingTest
 		return conditionsList;
 	}
 
+	// accepts a single script line and generates a list of process objects to
+	// achieve the final rendered result for each line
 	public List<ScriptProcessOperation> InterpretLine(string line)
 	{
 		// TODO: split and process lines with ; and pipes
@@ -367,6 +364,7 @@ public partial class ScriptingTest
 		return processes;
 	}
 
+	// return script processed lines from nested $(...) lines in a script line
 	public List<ScriptProcessOperation> ParseNestdLines(string line)
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
@@ -391,6 +389,7 @@ public partial class ScriptingTest
 		return processes;
 	}
 
+	// parse list of required variable substitutions in a script line
 	public List<ScriptProcessOperation> ParseVarSubstitutions(string line)
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
@@ -409,6 +408,7 @@ public partial class ScriptingTest
 		return processes;
 	}
 
+	// parse expressions in a script line
 	public List<ScriptProcessOperation> ParseExpressions(string line)
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
@@ -424,6 +424,7 @@ public partial class ScriptingTest
 		return processes;
 	}
 
+	// parse variable assignments with names and values in a script line
 	public List<ScriptProcessOperation> ParseVarAssignments(string line)
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
@@ -462,6 +463,7 @@ public partial class ScriptingTest
 		return processes;
 	}
 
+	// parse function calls with params in a script line
 	public List<ScriptProcessOperation> ParseFunctionCalls(string line)
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
@@ -502,8 +504,6 @@ public partial class ScriptingTest
 		return processes;
 	}
 }
-
-
 
 
 
