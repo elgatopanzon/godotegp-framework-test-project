@@ -472,7 +472,7 @@ public partial class ScriptingTest
 				List<string> funcParams = new List<string>();
 
 				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"(?<="")[^""\n]*(?="")|[\w]+"))
-				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w-_']+)"))
+				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w-_'\:]+)"))
 				{
 					Match nm = fmatches;
 
