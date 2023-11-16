@@ -874,7 +874,7 @@ public partial class ScriptInterpretter : Node
 				List<string> funcParams = new List<string>();
 
 				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"(?<="")[^""\n]*(?="")|[\w]+"))
-				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w-_'\:]+)"))
+				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\S]+)"))
 				{
 					Match nm = fmatches;
 
