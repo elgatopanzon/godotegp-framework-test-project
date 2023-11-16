@@ -249,10 +249,21 @@ layout_mode = 2
 
 [node name="Run" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
 layout_mode = 2
-text = "Run"
-metadata/id = "UITests.Scripting.Run"
+text = "Eval"
+metadata/id = "UITests.Scripting.Eval"
 
 [node name="Clear" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
 layout_mode = 2
 text = "Clear"
 metadata/id = "UITests.Scripting.Clear"
+
+[node name="ScriptName" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
+custom_minimum_size = Vector2(112, 0)
+layout_mode = 2
+placeholder_text = "Script name"
+metadata/id = "UITests.Scripting.Name"
+
+[node name="Run Script" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
+layout_mode = 2
+text = "Run Script"
+metadata/id = "UITests.Scripting.Run"

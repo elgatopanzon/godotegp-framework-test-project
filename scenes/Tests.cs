@@ -21,6 +21,7 @@ using GodotEGP.Resource;
 public partial class Tests : Node2D
 {
 	private string _scriptingTestScript = "";
+	private string _scriptingTestName = "";
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -78,8 +79,13 @@ public partial class Tests : Node2D
 				(n) => n.Text,
 				(v) => _scriptingTestScript = v
 			);
+		"UITests.Scripting.Name".BindSignal<TextEdit, string>("text_changed", false,  
+				(n) => n.Text,
+				(v) => _scriptingTestName = v
+			);
 
 		// connect to pressed signal and wire up to Run callback
+		"UITests.Scripting.Eval".Connect("pressed", false, _On_ScriptingTest_Eval_pressed, isHighPriority: true);
 		"UITests.Scripting.Run".Connect("pressed", false, _On_ScriptingTest_Run_pressed, isHighPriority: true);
 	}
 
@@ -327,15 +333,28 @@ public partial class Tests : Node2D
 		ServiceRegistry.Get<SceneTransitionManager>().StartChain("testchain");
 	}
 
-	public void _On_ScriptingTest_Run_pressed(IEvent e)
+	public void _On_ScriptingTest_Eval_pressed(IEvent e)
 	{
-		LoggerManager.LogDebug("Scripting test run pressed");
+		LoggerManager.LogDebug("Scripting test eval pressed");
 		LoggerManager.LogDebug("Script content", "", "script", _scriptingTestScript);
 
 		// ScriptingTest s = new ScriptingTest(_scriptingTestScript);
 		var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
 		ScriptInterpretter si = new ScriptInterpretter(gameScripts);
+
 		AddChild(si);
-		si.RunScript("testscript");
+		si.RunScriptContent(_scriptingTestScript);
+	}
+
+	public void _On_ScriptingTest_Run_pressed(IEvent e)
+	{
+		LoggerManager.LogDebug("Scripting test run pressed");
+		LoggerManager.LogDebug("Script name", "", "scriptName", _scriptingTestName);
+
+		var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
+		ScriptInterpretter si = new ScriptInterpretter(gameScripts);
+
+		AddChild(si);
+		si.RunScript(_scriptingTestName);
 	}
 }

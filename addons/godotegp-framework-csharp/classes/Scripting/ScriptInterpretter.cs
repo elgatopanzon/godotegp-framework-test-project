@@ -134,6 +134,18 @@ public partial class ScriptInterpretter : Node
 		}
 	}
 
+	public void RunScriptContent(string scriptContent)
+	{
+		var scriptResource = new Resource<GameScript>();
+		scriptResource.Value = new GameScript();
+		scriptResource.Value.ScriptContent = scriptContent;
+
+		_gameScripts["eval"] = scriptResource;
+
+		// run the created script resource
+		RunScript("eval");
+	}
+
 	public bool IsValidScriptName(string script)
 	{
 		return _gameScripts.ContainsKey(script);
