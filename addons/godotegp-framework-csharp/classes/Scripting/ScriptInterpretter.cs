@@ -57,6 +57,9 @@ public partial class ScriptInterpretter : Node
 	private ScriptInterpretter _childScript;
 	private bool _childScriptKeepEnv = false;
 
+	private string[] _scriptParams;
+	private string _gameScriptName;
+
 	private bool _processFinished;
 	public bool ProcessFinished
 	{
@@ -83,8 +86,9 @@ public partial class ScriptInterpretter : Node
 		}
 	}
 
-	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts)
+	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts, string[] scriptParams = null)
 	{
+		_scriptParams = scriptParams;
 		_gameScripts = gameScripts;
 
 		// setup process sub-states
@@ -127,6 +131,7 @@ public partial class ScriptInterpretter : Node
 			Reset();
 
 			_gameScript = gs.Value;
+			_gameScriptName = scriptName;
 
 			// Start the state machine
 			if (_processFinished)
@@ -332,7 +337,7 @@ public partial class ScriptInterpretter : Node
 			LoggerManager.LogDebug("Executing script as function", "", "script", func);
 
 			// create a child script interpreter instance to run the script
-			_childScript = new ScriptInterpretter(_gameScripts);
+			_childScript = new ScriptInterpretter(_gameScripts, scriptParams: funcParams);
 			AddChild(_childScript);
 
 			// set child vars to match ours
@@ -379,15 +384,40 @@ public partial class ScriptInterpretter : Node
 
 	public ScriptProcessResult ExecuteVariableSubstitution(string varName, ScriptProcessResult res)
 	{
-		if (!_scriptVars.TryGetValue(varName, out object obj))
-		{
-			// set empty string for non-existent vars
-			obj = (string) "";
-		}
-
-		return new ScriptProcessResult(0, res.Result.Replace("$"+varName, obj.ToString()));
+		return new ScriptProcessResult(0, res.Result.Replace("$"+varName, GetVariableValue(varName).ToString()));
 	}
 
+	public string GetVariableValue(string varName)
+	{
+		string varValue = "";
+
+		// check if we have an assigned var
+		if (_scriptVars.TryGetValue(varName, out object obj))
+		{
+			varValue = (string) obj;
+		}
+
+		// check if it's a special var
+		else
+		{
+			// positional arguments
+			if (int.TryParse(varName, out int i))
+			{
+				if (i == 0)
+				{
+					return _gameScriptName;
+				}
+				else {
+					if (_scriptParams.Length >= i)
+					{
+						return _scriptParams[i-1];
+					}
+				}
+			}
+		}
+
+		return varValue;
+	}
 
 	/************************************
 	*  Line interpertretation methods  *
