@@ -48,12 +48,16 @@ public partial class ThreadedResourceLoader : BackgroundJob
 
 		var resourceObject = (dynamic) ResourceBase.Create(item.ResourceDefinition.ClassType);
 
+		Resource r = (Resource) Activator.CreateInstance(item.ResourceDefinition.ClassType);
+
 		// load the resource using resource loader if it's a res:// path
 		if (item.ResourceDefinition.IsResourcePath())
 		{
-			var r = GD.Load(item.ResourceDefinition.Path);
-
-			if (r == null)
+			if (ResourceLoader.Exists(item.ResourceDefinition.Path))
+			{
+				r = GD.Load(item.ResourceDefinition.Path);
+			}
+			else
 			{
 				// if the resource class type is GameScript, load the content of the
 				// game script file while applying project base res:// directory and
@@ -63,7 +67,6 @@ public partial class ThreadedResourceLoader : BackgroundJob
 				{
 					var file = FileAccess.Open(ProjectSettings.GlobalizePath(item.ResourceDefinition.Path), FileAccess.ModeFlags.Read);
 
-					r = (GameScript) Activator.CreateInstance(item.ResourceDefinition.ClassType);
 
 					if (r is GameScript gs)
 					{
@@ -81,16 +84,9 @@ public partial class ThreadedResourceLoader : BackgroundJob
 			}
 
 			LoggerManager.LogDebug("Loaded resource from path", "", "resource", r.GetType().Name);
-
-			resourceObject.Value = (dynamic) r;
 		}
-		else
-		{
-			var r = Activator.CreateInstance(item.ResourceDefinition.ClassType);
 
-			resourceObject.Value = (dynamic) r;
-
-		}
+		resourceObject.Value = (dynamic) r;
 
 		if (item.ResourceDefinition.Config != null)
 		{
