@@ -110,13 +110,14 @@ public partial class ScriptInterpretter : Node
 		// retrive the current script line
 		string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
 
-		// return empty result for comment line
-		if (linestr.StartsWith("#"))
+		// skip lines
+		if (linestr.StartsWith("#") || linestr.Length == 0)
 		{
-			LoggerManager.LogDebug("Skipping comment line", "", "line", linestr);
-
-			linestr = "";
 			_scriptLineCounter++;
+
+			_processState.Update();
+
+			return;
 		}
 
 		// process the line if it's not empty
@@ -141,6 +142,8 @@ public partial class ScriptInterpretter : Node
 			{
 				// trigger another update to process the next line
 				_processState.Update();
+
+				return;
 			}
 		}
 	}
