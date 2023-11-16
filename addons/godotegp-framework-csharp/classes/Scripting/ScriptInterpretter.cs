@@ -63,6 +63,25 @@ public partial class ScriptInterpretter : Node
 		set { _processFinished = value; }
 	}
 
+	public string Stdout
+	{
+		get { 
+			return string.Join("\n", _scriptLineResults.Select(x => x.Stdout));
+		}
+	}
+	public string Stderr
+	{
+		get { 
+			return string.Join("\n", _scriptLineResults.Select(x => x.Stderr));
+		}
+	}
+	public int ReturnCode
+	{
+		get { 
+			return _scriptLineResult.ReturnCode;
+		}
+	}
+
 	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts)
 	{
 		_gameScripts = gameScripts;
@@ -159,7 +178,6 @@ public partial class ScriptInterpretter : Node
 		if (linestr.Length > 0)
 		{
 			_scriptLineResult = InterpretLine(linestr);
-			_scriptLineResults.Add(_scriptLineResult);
 
 			// increase script line after processing
 			_scriptLineCounter++;
@@ -173,6 +191,9 @@ public partial class ScriptInterpretter : Node
 			}
 			else
 			{
+				// add process result to results list
+				_scriptLineResults.Add(_scriptLineResult);
+
 				// trigger another update to process the next line
 				_processState.Update();
 
@@ -193,7 +214,13 @@ public partial class ScriptInterpretter : Node
 			// check if it's finished
 			if (_childScript.ProcessFinished)
 			{
-				LoggerManager.LogDebug("Child script finished");
+				// forward compiled stdout/stderr and return code
+				_scriptLineResult = new ScriptProcessResult(_childScript.ReturnCode, _childScript.Stdout, _childScript.Stderr);
+				_scriptLineResults.Add(_scriptLineResult);
+
+				LoggerManager.LogDebug("Child script finished", "", "childRes", _scriptLineResult);
+
+				LoggerManager.LogDebug($"Line {_scriptLineCounter} (async)", "", "asyncLine", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
 
 				// clear child script instance since we're done with it
 				_childScript.QueueFree();
