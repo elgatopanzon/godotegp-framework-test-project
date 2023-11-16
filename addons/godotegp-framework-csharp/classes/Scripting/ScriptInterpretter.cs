@@ -55,6 +55,7 @@ public partial class ScriptInterpretter : Node
 	private ScriptProcessResult _scriptLineResult;
 
 	private ScriptInterpretter _childScript;
+	private bool _childScriptKeepEnv = false;
 
 	private bool _processFinished;
 	public bool ProcessFinished
@@ -254,6 +255,7 @@ public partial class ScriptInterpretter : Node
 				// clear child script instance since we're done with it
 				_childScript.QueueFree();
 				_childScript = null;
+				_childScriptKeepEnv = false;
 
 				// resume execution
 				_processState.Transition(STATE_RUNNING);
@@ -288,6 +290,18 @@ public partial class ScriptInterpretter : Node
 			LoggerManager.LogDebug("Waittest called");
 			return new ScriptProcessResult(0, resultProcessMode: ResultProcessMode.ASYNC);
 		}
+		if (func == "source")
+		{
+			LoggerManager.LogDebug("Source called");
+
+			// created a function call as if we are calling this script directly
+			func = funcParams[0];
+			funcParams = funcParams.Skip(1).ToArray();
+
+			_childScriptKeepEnv = true;
+
+			return ExecuteFunctionCall(func, funcParams);
+		}
 
 		// check if the function name is a valid script
 		if (IsValidScriptName(func))
@@ -297,6 +311,13 @@ public partial class ScriptInterpretter : Node
 			// create a child script interpreter instance to run the script
 			_childScript = new ScriptInterpretter(_gameScripts);
 			AddChild(_childScript);
+
+			// set child vars to match ours
+			if (_childScriptKeepEnv)
+			{
+				_childScript._scriptVars = _scriptVars;
+			}
+
 			_childScript.RunScript(func);
 
 			// return a wait mode process

@@ -10,3 +10,7 @@
 
 echo "this script is being executed in another process"
 echo "hopefully it works and the parent will wait for us"
+
+TESTVAR="was set in another script"
+
+echo "do you remember that $VARNAME?"

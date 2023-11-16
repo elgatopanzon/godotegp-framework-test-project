@@ -35,6 +35,9 @@ echo "testing: accessing array elements"
 
 # testing calling other scripts as functions
 testscript2
+echo "is it true: $TESTVAR"
+source testscript2
+echo "is it true: $TESTVAR"
 testscript3 "this is a function param"
 
 # some var setting tests
