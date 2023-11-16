@@ -67,7 +67,7 @@ public partial class ThreadedResourceLoader : BackgroundJob
 
 					if (r is GameScript gs)
 					{
-						gs.ScriptContent = file.GetAsText();
+						gs.ScriptContent = file.GetAsText(true);
 					}
 					
 				}

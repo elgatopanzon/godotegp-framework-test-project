@@ -56,8 +56,6 @@ public partial class ScriptInterpretter : Node
 
 	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts)
 	{
-		LoggerManager.LogDebug("Game scripts", "", "resources", gameScripts);
-
 		_gameScripts = gameScripts;
 
 		// setup process sub-states
@@ -95,111 +93,8 @@ public partial class ScriptInterpretter : Node
 
 	public void _State_Preparing_OnEnter()
 	{
-		if (_gameScript.ScriptContent.Length == 0)
-		{
-			// _script += @"echo ""this text should act like a simple print statement""\n";
-			// _script += @"echo ""testing: setting variables content""\n";
-			// _script += @"VARNAME=""some string value""\n";
-			// _script += @"echo ""testing: echoing variables: $VARNAME""\n";
-			// _script += @"echo ""testing: setting variables to content with variables inside""\n";
-			// _script += @"HOME=""where the heart is""\n";
-			// _script += @"VARNAME=""home is $HOME""\n";
-			// _script += @"echo ""did you know? $VARNAME""\n";
-			// _script += @"VARNAME=""$(echo I don't really like soup...)""\n";
-			// _script += @"echo ""but did you know? $VARNAME""\n";
-			// _script += @"logdebug ""logging to debug log""\n";
-			// _script += @"echo ""testing"" ""multiple"" ""echo"" ""params""\n";
-			// _script += @"echo echo without quotes\n";
-			// _script += @"echo 1 2 3\n";
-			// _script += @"echo ""testing: setting variables to number types""\n";
-			// _script += @"VARINT=1\n";
-			// _script += @"VARFLOAT=1.1\n";
-			// _script += @"echo ""testing: enclosed script lines content""\n";
-			// _script += @"echo ""$(echo this should return this string)""\n";
-			// _script += @"echo ""$(echo this is part)"" ""$(echo of multiple)"" ""$(echo nested lines)""\n";
-			// _script += @"echo ""testing: accessing array elements""\n";
-			// _script += @"echo ""array key 0: $VARARRAY[0]""\n";
-			// _script += @"echo ""array key 1: $VARARRAY[1]""\n";
-			// _script += @"echo ""testing: accessing dictionary elements""\n";
-			// _script += @"echo ""array key 'key':$VARARRAY['key']""\n";
-            //
-			// // async wait function call process mode
-			// _script += @"echo ""testing: async wait""\n";
-			// _script += @"waittest\n";
-			// _script += @"echo ""this shouldn't be shown until processing is resumed""\n";
-            //
-            //
-			// // if statements
-			// // _script += @"if [ 1 -gt 100]\n";
-			// // _script += @"then\n";
-			// // _script += @"  echo omg such a large number\n";
-			// // _script += @"fi\n";
-            // //
-			// // _script += @"if [ 1 -gt 100] || [ 1 -le 100]\n";
-			// // _script += @"then\n";
-			// // _script += @"  echo uh ok\n";
-			// // _script += @"fi\n";
-            //
-			// // _script += @"if [ ""2"" == ""2"" ]\n";
-			// // _script += @"then\n";
-			// // _script += @"  echo omg such a large number\n";
-			// // _script += @"fi\n";
-            //
-			// // _script += @"if [ ""$SOMEVARVAL"" = ""1"" ]\n";
-			// // _script += @"then\n";
-			// // _script += @"  echo It's equal to 1 yay\n";
-			// // _script += @"elif [ ""$SOMEVARVAL"" = ""$(somefunccall random_param_1 another_param)"" ]\n";
-			// // _script += @"then\n";
-			// // _script += @"  echo did you know? $(echo this is nested!)\n";
-			// // _script += @"else\n";
-			// // _script += @"  echo eh it's actually ""$SOMEVARVAL""\n";
-			// // _script += @"fi\n";
-            //
-			// // while loops
-			// // _script += @"counter=1\n";
-			// // _script += @"while [ $counter -le 10 ]\n";
-			// // _script += @"do\n";
-			// // _script += @"  echo count: $counter\n";
-			// // _script += @"  ((counter++))\n";
-			// // _script += @"done\n";
-            //
-			// // for loops
-			// // _script += @"names=""name1 name2 name3""\n";
-			// // _script += @"for name in $names\n";
-			// // _script += @"do\n";
-			// // _script += @"  echo name: $name\n";
-			// // _script += @"done\n";
-            //
-			// // for loops range
-			// // _script += @"for val in {1..5}\n";
-			// // _script += @"do\n";
-			// // _script += @"  echo val: $val\n";
-			// // _script += @"done\n";
-            //
-			// // multiline with commas
-			// // _script += @"echo one; echo two; echo three\n";
-			// // _script += @"echo one; echo ""$(echo a; echo b)""; echo three\n";
-            //
-			// // nested if else else
-			// // _script += @"if [ ""2"" = ""2"" ]\n";
-			// // _script += @"then\n";
-			// // _script += @"  if [ ""a"" = ""a"" ]\n";
-			// // _script += @"  then\n";
-			// // _script += @"    echo omg such a large number\n";
-			// // _script += @"  else\n";
-			// // _script += @"    echo not a large number...\n";
-			// // _script += @"  fi\n";
-			// // _script += @"else\n";
-			// // _script += @"  echo it's an else\n";
-			// // _script += @"fi\n";
-            //
-			// // some var setting tests
-			// _script += @"c=""$(a)$(b)""\n";
-			// _script += @"c=""$( ((a + b)) )""\n";
-		}
-		LoggerManager.LogDebug(_gameScripts);
-
-		_currentScriptLinesSplit = _gameScript.ScriptContent.Split(new string[] {"\\n"}, StringSplitOptions.None);
+		_currentScriptLinesSplit = _gameScript.ScriptContent.Split(new char[] {'\n', '\r'}, StringSplitOptions.None);
+		LoggerManager.LogDebug("Script line count", "", "count", _currentScriptLinesSplit.Count());
 
 		_processState.Transition(STATE_RUNNING);
 	}
@@ -214,6 +109,15 @@ public partial class ScriptInterpretter : Node
 
 		// retrive the current script line
 		string linestr = _currentScriptLinesSplit[_scriptLineCounter].Trim();
+
+		// return empty result for comment line
+		if (linestr.StartsWith("#"))
+		{
+			LoggerManager.LogDebug("Skipping comment line", "", "line", linestr);
+
+			linestr = "";
+			_scriptLineCounter++;
+		}
 
 		// process the line if it's not empty
 		// TODO: figure out why/how to remove empty lines, or just let them
