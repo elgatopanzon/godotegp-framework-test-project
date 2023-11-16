@@ -1143,6 +1143,13 @@ public class ScriptProcessResult
 		get { return GetResult(); }
 	}
 
+	private object _rawResult;
+	public object RawResult
+	{
+		get { return _rawResult; }
+		set { _rawResult = value; }
+	}
+
 	private ResultProcessMode _resultProcessMode;
 	public ResultProcessMode ResultProcessMode
 	{
@@ -1150,7 +1157,7 @@ public class ScriptProcessResult
 		set { _resultProcessMode = value; }
 	}
 
-	public ScriptProcessResult(int returnCode, string stdout = "", string stderr = "", ResultProcessMode resultProcessMode = ResultProcessMode.NORMAL)
+	public ScriptProcessResult(int returnCode, string stdout = "", string stderr = "", object rawResult = null, ResultProcessMode resultProcessMode = ResultProcessMode.NORMAL)
 	{
 		_returnCode = returnCode;
 		_stdout = stdout;
