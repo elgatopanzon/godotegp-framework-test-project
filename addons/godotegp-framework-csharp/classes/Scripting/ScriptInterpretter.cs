@@ -20,6 +20,7 @@ using GodotEGP.Config;
 
 using GodotEGP.State;
 using GodotEGP.Resource;
+using GodotEGP.Scripting.Functions;
 
 public partial class ScriptInterpretter : Node
 {
@@ -40,26 +41,34 @@ public partial class ScriptInterpretter : Node
 	private const int STATE_WAITING = 1;
 	private const int STATE_FINISHED = 2;
 
+	// gamescript related properties
 	private Dictionary<string, Resource<GameScript>> _gameScripts;
 	private GameScript _gameScript;
 	private string[] _currentScriptLinesSplit;
-
 	private int _scriptLineCounter = 0;
-
-	private Dictionary<string, Func<int, string>> _functionDefinitions = new Dictionary<string, Func<int, string>>();
-
-	// holds session variables used by the script
-	Dictionary<string, object> _scriptVars = new Dictionary<string, object>();
 
 	private List<ScriptProcessResult> _scriptLineResults = new List<ScriptProcessResult>();
 	private ScriptProcessResult _scriptLineResult;
 
-	private ScriptInterpretter _childScript;
-	private bool _childScriptKeepEnv = false;
-
 	private string[] _scriptParams;
 	private string _gameScriptName;
 	private List<string> _gameScriptFunctionNames = new();
+
+	// script function properties
+	private Dictionary<string, IScriptFunction> _scriptFunctions = new Dictionary<string, IScriptFunction>();
+
+	// holds session variables used by the script
+	Dictionary<string, object> _scriptVars = new Dictionary<string, object>();
+
+	public Dictionary<string, object> ScriptVars
+	{
+		get { return _scriptVars; }
+		set { _scriptVars = value; }
+	}
+
+	// child script properties
+	private ScriptInterpretter _childScript;
+	private bool _childScriptKeepEnv = false;
 
 	private bool _processFinished;
 	public bool ProcessFinished
@@ -68,6 +77,7 @@ public partial class ScriptInterpretter : Node
 		set { _processFinished = value; }
 	}
 
+	// used by parent to obtain results
 	public string Stdout
 	{
 		get { 
@@ -87,10 +97,11 @@ public partial class ScriptInterpretter : Node
 		}
 	}
 
-	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts, string[] scriptParams = null)
+	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts, Dictionary<string, IScriptFunction> scriptFuncs, string[] scriptParams = null)
 	{
 		_scriptParams = scriptParams;
 		_gameScripts = gameScripts;
+		_scriptFunctions = scriptFuncs;
 
 		// setup process sub-states
 		_statePreparing.OnEnter = _State_Preparing_OnEnter;
@@ -177,9 +188,9 @@ public partial class ScriptInterpretter : Node
 	public bool IsValidFunction(string func)
 	{
 		return (
-			IsValidScriptName(func) ||
-			func == "echo" ||
-			func == "source"
+			IsValidScriptName(func) || // scripts as function name
+			_scriptFunctions.ContainsKey(func) || // function registry
+			func == "source" // built in method source (TODO: re-implement this as _builtinFunctions property)
 			);
 	}
 
@@ -329,12 +340,6 @@ public partial class ScriptInterpretter : Node
 	// main script process execution functions
 	public ScriptProcessResult ExecuteFunctionCall(string func, params string[] funcParams)
 	{
-		// TODO: re-implement function system and allow registration of
-		// functions in ScriptService
-		if (func == "echo")
-		{
-			return new ScriptProcessResult(0, funcParams.Join(" "));
-		}
 		if (func == "source")
 		{
 			LoggerManager.LogDebug("Source called");
@@ -347,14 +352,18 @@ public partial class ScriptInterpretter : Node
 
 			return ExecuteFunctionCall(func, funcParams);
 		}
+		else if (_scriptFunctions.ContainsKey(func))
+		{
+			return _scriptFunctions[func].Call(this, funcParams);
+		}
 
 		// check if the function name is a valid script
-		if (IsValidScriptName(func))
+		else if (IsValidScriptName(func))
 		{
 			LoggerManager.LogDebug("Executing script as function", "", "script", func);
 
 			// create a child script interpreter instance to run the script
-			_childScript = new ScriptInterpretter(_gameScripts, scriptParams: funcParams);
+			_childScript = new ScriptInterpretter(_gameScripts, _scriptFunctions, scriptParams: funcParams);
 			AddChild(_childScript);
 
 			// set child vars to match ours

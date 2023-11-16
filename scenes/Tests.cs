@@ -363,8 +363,10 @@ public partial class Tests : Node2D
 		if (_scriptingTestInterpretter == null)
 		{
 			var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
-			_scriptingTestInterpretter = new ScriptInterpretter(gameScripts);
+			var scriptFuncs = ServiceRegistry.Get<ScriptService>().ScriptFunctions;
+			_scriptingTestInterpretter = new ScriptInterpretter(gameScripts, scriptFuncs);
 			AddChild(_scriptingTestInterpretter);
 		}
+
 	}
 }
