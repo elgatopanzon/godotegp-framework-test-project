@@ -29,9 +29,18 @@ echo "testing: accessing array elements"
 # echo "array key 'key':$VARARRAY['key']"
 
 # async wait function call process mode
-echo "testing: async wait"
-waittest
-echo "this shouldn't be shown until processing is resumed"
+# echo "testing: async wait"
+# waittest
+# echo "this shouldn't be shown until processing is resumed"
+
+# testing calling other scripts as functions
+testscript2
+testscript3 "this is a function param"
+
+# some var setting tests
+c="$(a)$(b)"
+c="$( ((a + b)) )"
+
 #
 #
 # if statements
@@ -98,6 +107,3 @@ echo "this shouldn't be shown until processing is resumed"
 #   echo it's an else
 # fi
 #
-# some var setting tests
-c="$(a)$(b)"
-c="$( ((a + b)) )"

@@ -150,8 +150,9 @@ public partial class ScriptInterpretter : Node
 
 	public void _State_Waiting_OnUpdate()
 	{
-		LoggerManager.LogDebug("Pretend we waited for something long...");
-		_processState.Transition(STATE_RUNNING);
+		// TODO: implement transition back to running state after we waited for
+		// what we want to wait for
+		// _processState.Transition(STATE_RUNNING);
 	}
 
 	public override void _Process(double delta)
@@ -702,7 +703,7 @@ public partial class ScriptInterpretter : Node
 		// string patternFuncCall = @"(^\b[a-z_]+) (""[^""]+"")$"; // matches function calls with single param in quotes but not without
 		// string patternFuncCall = @"(^\b[a-z_]+) ((""[^""]+"")$|(\w.+))"; // matches function calls with single param in quotes, and multiple param without quotes as single string (can be split?)
 		// string patternFuncCall = @"(^\b[a-z_]+) ((""[^""]+"")$|(\w.+)|(([\w.]+)|.+))"; // matches single param
-		string patternFuncCall = @"(^\b[a-z_]+) *((""[^""]+"")*$|(\w.+)|(([\w.]+)|.+))"; // matches single param
+		string patternFuncCall = @"(^\b[a-z0-9_]+) *((""[^""]+"")*$|(\w.+)|(([\w.]+)|.+))"; // matches single param
 
 		MatchCollection fm = Regex.Matches(line, patternFuncCall, RegexOptions.Multiline);
 		foreach (Match match in fm)
