@@ -44,6 +44,15 @@ testscript3 "this is a function param"
 c="$(a)$(b)"
 c="$( ((a + b)) )"
 
+echo "testing functions"
+test_func() {
+	echo "this is inside a test function"
+}
+
+echo "about to jump to test_func"
+test_func
+
+
 #
 #
 # if statements

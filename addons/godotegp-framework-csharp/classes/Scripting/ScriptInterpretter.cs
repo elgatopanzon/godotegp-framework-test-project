@@ -146,14 +146,19 @@ public partial class ScriptInterpretter : Node
 
 	public void RunScriptContent(string scriptContent)
 	{
+		RegisterFunctionFromContent("eval", scriptContent);
+
+		// run the created resource
+		RunScript("eval");
+	}
+
+	public void RegisterFunctionFromContent(string func, string scriptContent)
+	{
 		var scriptResource = new Resource<GameScript>();
 		scriptResource.Value = new GameScript();
 		scriptResource.Value.ScriptContent = scriptContent;
 
-		_gameScripts["eval"] = scriptResource;
-
-		// run the created resource
-		RunScript("eval");
+		_gameScripts[func] = scriptResource;
 	}
 
 	public bool IsValidScriptName(string script)
@@ -175,8 +180,26 @@ public partial class ScriptInterpretter : Node
 
 	public void _State_Preparing_OnEnter()
 	{
-		_currentScriptLinesSplit = _gameScript.ScriptContent.Split(new char[] {'\n', '\r'}, StringSplitOptions.None);
+		// look for funcs in the script
+		string scriptContentWithoutFunctions = _gameScript.ScriptContent;
+
+		var scriptFunctions = ParseScriptLineFunction(scriptContentWithoutFunctions);
+		if (scriptFunctions.Count > 0)
+		{
+			foreach (var func in scriptFunctions)
+			{
+				LoggerManager.LogDebug("Function found in line", "", "func", func);
+				RegisterFunctionFromContent(func.FuncName, func.ScriptContent);
+
+				// remove function content from original string
+				scriptContentWithoutFunctions = scriptContentWithoutFunctions.Replace(func.RawContent, new String('\n', func.LineCount));
+			}
+		}
+
+
+		_currentScriptLinesSplit = scriptContentWithoutFunctions.Split(new char[] {'\n', '\r'}, StringSplitOptions.None);
 		LoggerManager.LogDebug("Script line count", "", "count", _currentScriptLinesSplit.Count());
+
 
 		_processState.Transition(STATE_RUNNING);
 	}
@@ -640,6 +663,29 @@ public partial class ScriptInterpretter : Node
 	/********************************
 	*  Parse script lines methods  *
 	********************************/
+
+	// parse function name and content in script line
+	public List<(string FuncName, string ScriptContent, int LineCount, string RawContent)> ParseScriptLineFunction(string lines)
+	{
+		string patternScriptFunction = @"^([a-zA-Z0-9_]+)\(\) \{\n(^[^{}\r]+$)*\n\}";
+		MatchCollection matches = Regex.Matches(lines, patternScriptFunction, RegexOptions.Multiline);
+
+		List<(string FuncName, string ScriptContent, int LineCount, string RawContent)> funcs = new();
+
+		foreach (Match match in matches)
+		{
+			Match m = match;
+
+			if (match.Groups.Count >= 2)
+			{
+				funcs.Add((match.Groups[1].Value.Trim(), match.Groups[2].Value, 2 + match.Groups[2].Value.Split('\n').Length, match.Groups[0].Value));
+			}
+
+			m = m.NextMatch();
+		}
+
+		return funcs;
+	}
 
 	// return script processed lines from nested $(...) lines in a script line
 	public ScriptProcessResult ParseNestedLines(string line)
