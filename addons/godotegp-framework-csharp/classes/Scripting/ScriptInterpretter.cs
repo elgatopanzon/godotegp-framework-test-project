@@ -405,14 +405,29 @@ public partial class ScriptInterpretter : Node
 			{
 				if (i == 0)
 				{
-					return _gameScriptName;
+					varValue = _gameScriptName;
 				}
 				else {
 					if (_scriptParams.Length >= i)
 					{
-						return _scriptParams[i-1];
+						varValue = _scriptParams[i-1];
 					}
 				}
+			}
+			// arguments as string
+			else if (varName == "*")
+			{
+				varValue = _scriptParams.Join(" ");
+			}
+			// arguments count
+			else if (varName == "#")
+			{
+				varValue = _scriptParams.Count().ToString();
+			}
+			// last return code
+			else if (varName == "?" && _scriptLineResult != null)
+			{
+				varValue = _scriptLineResult.ReturnCode.ToString();
 			}
 		}
 
@@ -769,7 +784,7 @@ public partial class ScriptInterpretter : Node
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
-		string patternVarSubstitution = @"\$([a-zA-Z0-9_\[\]']+)";
+		string patternVarSubstitution = @"\$([a-zA-Z0-9_\[\]'#?@*]+)";
 		MatchCollection varSubstitutionMatches = Regex.Matches(line, patternVarSubstitution);
 
 		foreach (Match match in varSubstitutionMatches)

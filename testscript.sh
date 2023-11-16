@@ -47,8 +47,12 @@ c="$( ((a + b)) )"
 echo "testing functions"
 test_func() {
 	echo "this is inside a test function"
-	echo "params: $1 $2 $3"
 	echo "script name: $0"
+	echo "param count: $#"
+	echo "params: $1 $2 $3"
+	echo "params raw: $*"
+	LASTCODE=$?
+	echo "prev return code: $LASTCODE"
 }
 
 echo "about to jump to test_func"
