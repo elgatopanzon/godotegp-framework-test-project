@@ -571,7 +571,8 @@ public partial class ScriptInterpretter : Node
 
 		// string patternNestedLine = @"((?<=\$\()[^""\n]*(?=\)))";
 		// string patternNestedLine = @"((?<=\$\()[^""\n](?=\)))|((?<=\$\()[^""\n]*(?=\)))";
-		string patternNestedLine = @"((?<=\$\()[^""\n](?=\)))|((?<=\$\()[^""\n\)\(]*(?=\)))";
+		// string patternNestedLine = @"((?<=\$\()[^""\n](?=\)))|((?<=\$\()[^""\n\)\(]*(?=\)))";
+		string patternNestedLine = @"((?<=\$\()[^\n](?=\)))|((?<=\$\()[^\n\)\(]*(?=\)))";
 
 		ScriptProcessResult lineResult = new ScriptProcessResult(0, line);
 
