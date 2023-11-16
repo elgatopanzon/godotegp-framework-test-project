@@ -72,6 +72,23 @@ echo_func() {
 echo_func "$(echo_func "multiple nested")" "$(echo_func "lines as")" "$(echo_func "function params")"
 echo "last statement"
 
+FUNCRES="$(testscript2)"
+echo "$FUNCRES"
+
+# # parsing of conditionals
+# if [ "$(echo_func "123" )" = "123" ]; 
+# then
+# 	echo_func "looks like it works"; 
+# fi
+# if [ "$(echo_func "123" )" = "1233" ] || [ "$(echo_func "123" )" = "1233" ]; 
+# then
+# 	echo_func "or test";
+# fi
+# if (( $(echo_func "123" ) == 123 )); 
+# then
+# 	echo_func "looks like it works";
+# fi
+
 #
 #
 # if statements

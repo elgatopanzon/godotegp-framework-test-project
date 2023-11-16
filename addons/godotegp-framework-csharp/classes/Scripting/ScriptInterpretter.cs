@@ -502,6 +502,7 @@ public partial class ScriptInterpretter : Node
 		foreach (ScriptProcessVarSubstitution lineProcess in ParseVarSubstitutions(lineResult.Result))
 		{
 			lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
+			LoggerManager.LogDebug("Sub res", "", "r", lineResult);
 		}
 		// processes.AddRange(ParseVarSubstitutions(line));
 
@@ -540,14 +541,14 @@ public partial class ScriptInterpretter : Node
 			return lineResult;
 		}
 
-		var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
-		if (blockProcess != null)
-		{
-			// processes.AddRange(new List<ScriptProcessOperation>() {blockProcess});
-			LoggerManager.LogDebug("Evaluating block procress line", "", "line", blockProcess);
-		}
-		else
-		{
+		// var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
+		// if (blockProcess != null)
+		// {
+		// 	// processes.AddRange(new List<ScriptProcessOperation>() {blockProcess});
+		// 	LoggerManager.LogDebug("Evaluating block procress line", "", "line", blockProcess);
+		// }
+		// else
+		// {
 			// if var assignments are 0, then try to match function calls
 			// NOTE: this is because the regex matches both var assignments in lower
 			// case AND function calls
@@ -559,7 +560,7 @@ public partial class ScriptInterpretter : Node
 				}
 				// processes.AddRange(ParseFunctionCalls(line));
 			}
-		}
+		// }
 
 		// if there's no processes until now, just return the plain object with
 		// no processing attached
@@ -846,6 +847,8 @@ public partial class ScriptInterpretter : Node
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
+		line = line.Replace("\n", "##NL##");
+
 		string patternIsVarAssignment = @"^[a-zA-Z0-9_]+=.+";
 		Match isVarAssignment = Regex.Match(line, patternIsVarAssignment);
 
@@ -870,6 +873,8 @@ public partial class ScriptInterpretter : Node
 					{
 						varValue = varValue.Trim('\"');
 					}
+
+					varValue = varValue.Replace("##NL##", "\n");
 
 					processes.Add(new ScriptProcessVarAssignment(line, varName, varValue));
 					// LoggerManager.LogDebug("Variable assignment match", "", "assignment", execLine);
@@ -902,7 +907,7 @@ public partial class ScriptInterpretter : Node
 
 				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"(?<="")[^""\n]*(?="")|[\w]+"))
 				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\S]+)"))
-				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w\d!£\$%\^&*\(\)-=+_'><?/\\;,.]+)"))
+				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w\d!£\$%\^&*\(\)-=+_'><?/\\;,.\n]+)"))
 				{
 					Match nm = fmatches;
 
