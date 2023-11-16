@@ -37,6 +37,12 @@
         "Path": "res://addons/godotegp-framework-csharp/scenes/FadeInOutWhite.tscn",
         "Class": "Godot.PackedScene"
       }
+    },
+    "GameScripts": {
+      "testscript": {
+        "Path": "res://testscript.sh",
+        "Class": "GodotEGP.Resource.GameScript"
+      }
     }
   }
 }

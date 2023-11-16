@@ -48,10 +48,33 @@ public partial class ThreadedResourceLoader : BackgroundJob
 
 		var resourceObject = (dynamic) ResourceBase.Create(item.ResourceDefinition.ClassType);
 
-		if (item.ResourceDefinition.Path != null)
+		// load the resource using resource loader if it's a res:// path
+		if (item.ResourceDefinition.IsResourcePath())
 		{
 			var r = GD.Load(item.ResourceDefinition.Path);
 
+			if (r == null)
+			{
+				// if the resource class type is GameScript, load the content of the
+				// game script file while applying project base res:// directory and
+				// loading content into Config
+				// TODO: make this work better
+				if (item.ResourceDefinition.ClassType.Equals(typeof(GameScript)))
+				{
+					var file = FileAccess.Open(ProjectSettings.GlobalizePath(item.ResourceDefinition.Path), FileAccess.ModeFlags.Read);
+
+					r = (GameScript) Activator.CreateInstance(item.ResourceDefinition.ClassType);
+
+					if (r is GameScript gs)
+					{
+						gs.ScriptContent = file.GetAsText();
+					}
+					
+				}
+
+			}
+			
+			// if it's still null, then it's not found
 			if (r == null)
 			{
 				throw new ResourceNotFoundException($"Resource not found {item.ResourceDefinition.Path}");
@@ -66,6 +89,7 @@ public partial class ThreadedResourceLoader : BackgroundJob
 			var r = Activator.CreateInstance(item.ResourceDefinition.ClassType);
 
 			resourceObject.Value = (dynamic) r;
+
 		}
 
 		if (item.ResourceDefinition.Config != null)

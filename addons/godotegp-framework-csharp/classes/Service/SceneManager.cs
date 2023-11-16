@@ -20,7 +20,7 @@ using GodotEGP.Resource;
 
 public partial class SceneManager : Service
 {
-	private Dictionary<string, ResourceBase> _sceneDefinitions = new Dictionary<string, ResourceBase>();
+	private Dictionary<string, Resource<PackedScene>> _sceneDefinitions = new Dictionary<string, Resource<PackedScene>>();
 
 	private string _currentSceneId {
 		get {
@@ -39,7 +39,7 @@ public partial class SceneManager : Service
 		
 	}
 
-	public void SetConfig(Dictionary<string, ResourceBase> config)
+	public void SetConfig(Dictionary<string, Resource<PackedScene>> config)
 	{
 		// LoggerManager.LogDebug("Setting scene definition config", "", "scenes", config);
 		LoggerManager.LogDebug("Setting scene definition config");

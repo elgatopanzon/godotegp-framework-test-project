@@ -84,5 +84,10 @@ public partial class Definition : VObject
 
         throw new TypeLoadException($"Type {typeString} isn't a valid Type!");
 	}
+
+	public bool IsResourcePath()
+	{
+		return (_path.Value != null && _path.Value.StartsWith("res://"));
+	}
 }
 

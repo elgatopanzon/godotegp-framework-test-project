@@ -147,17 +147,17 @@ public partial class ResourceManager : Service
 		return false;
 	}
 
-	public Dictionary<string, ResourceBase> GetResources<T>() where T : Godot.Resource
+	public Dictionary<string, Resource<T>> GetResources<T>() where T : Godot.Resource
 	{
-		var matchingResources = new Dictionary<string, ResourceBase>();
+		var matchingResources = new Dictionary<string, Resource<T>>();
 
 		foreach (var resourceCat in _resources)
 		{
 			foreach (var resourceObj in resourceCat.Value)
 			{
-				if (resourceObj.Value.RawValue is T)
+				if (resourceObj.Value.RawValue is T && resourceObj.Value is Resource<T> rt)
 				{
-					matchingResources.Add(resourceObj.Key, resourceObj.Value);
+					matchingResources.Add(resourceObj.Key, rt);
 				}
 			}
 		}
