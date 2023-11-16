@@ -702,8 +702,7 @@ public partial class ScriptInterpretter : Node
 			string blockConditionCompareType = match.Groups[2].Value;
 
 			// var interpretted = InterpretLine(blockConditionInside.Trim());
-
-			conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(blockConditionInside.Trim()).Stdout)}, blockConditionCompareType.Trim()));
+			conditionsList.Add((ParseFunctionCalls("evalcondition " + InterpretLine(blockConditionInside.Trim()).Stdout), blockConditionCompareType.Trim()));
 		}
 
 		return conditionsList;
@@ -879,7 +878,8 @@ public partial class ScriptInterpretter : Node
 				List<string> funcParams = new List<string>();
 
 				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"(?<="")[^""\n]*(?="")|[\w]+"))
-				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\S]+)"))
+				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\S]+)"))
+				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w\d!£\$%\^&*\(\)-=+_'><?/\\;,.]+)"))
 				{
 					Match nm = fmatches;
 

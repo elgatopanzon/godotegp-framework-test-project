@@ -56,6 +56,8 @@ test_func() {
 	echo "oh and what about $VARNAME"
 }
 
+test_func "testing with" "multiple values inside" 
+
 echo "about to jump to test_func"
 test_func
 test_func param1 param2 param3
@@ -88,6 +90,7 @@ then
 else
   echo "eh it's actually "$SOMEVARVAL""
 fi
+
 #
 # while loops
 # counter=1
@@ -127,3 +130,4 @@ else
   echo "it's an else"
 fi
 #
+test_func "" = "err 127: command not found: somefunccall"
