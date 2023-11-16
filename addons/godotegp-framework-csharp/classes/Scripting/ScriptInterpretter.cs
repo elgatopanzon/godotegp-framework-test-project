@@ -174,6 +174,15 @@ public partial class ScriptInterpretter : Node
 		return _gameScripts.ContainsKey(script);
 	}
 
+	public bool IsValidFunction(string func)
+	{
+		return (
+			IsValidScriptName(func) ||
+			func == "echo" ||
+			func == "source"
+			);
+	}
+
 	public void Reset()
 	{
 		_scriptLineResult = null;
@@ -200,7 +209,7 @@ public partial class ScriptInterpretter : Node
 				RegisterFunctionFromContent(func.FuncName, func.ScriptContent);
 
 				// remove function content from original string
-				scriptContentWithoutFunctions = scriptContentWithoutFunctions.Replace(func.RawContent, new String('\n', func.LineCount));
+				scriptContentWithoutFunctions = scriptContentWithoutFunctions.Replace(func.RawContent, new String('\n', func.LineCount - 1));
 			}
 		}
 
@@ -240,15 +249,18 @@ public partial class ScriptInterpretter : Node
 		{
 			_scriptLineResult = InterpretLine(linestr);
 
+			LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter +1}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+
 			// increase script line after processing
 			_scriptLineCounter++;
 
-			LoggerManager.LogDebug($"Line {_scriptLineCounter}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
 
 			if (_scriptLineResult.ResultProcessMode == ResultProcessMode.ASYNC)
 			{
 				// we are waiting for something, so switch processing mode
 				_processState.Transition(STATE_WAITING);
+
+				return;
 			}
 			else
 			{
@@ -276,17 +288,28 @@ public partial class ScriptInterpretter : Node
 			if (_childScript.ProcessFinished)
 			{
 				// forward compiled stdout/stderr and return code
-				_scriptLineResult = new ScriptProcessResult(_childScript.ReturnCode, _childScript.Stdout, _childScript.Stderr);
+				AssignVariableValue("func"+_childScript.GetHashCode().ToString(), _childScript.Stdout);
+
+				// _scriptLineResult.Stdout = _childScript.Stdout;
 				_scriptLineResults.Add(_scriptLineResult);
 
 				LoggerManager.LogDebug("Child script finished", "", "childRes", _scriptLineResult);
 
-				LoggerManager.LogDebug($"Line {_scriptLineCounter} (async)", "", "asyncLine", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+				LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter} (async)", "", "asyncLine", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
 
 				// clear child script instance since we're done with it
 				_childScript.QueueFree();
 				_childScript = null;
 				_childScriptKeepEnv = false;
+
+				var resultUnparsedVars = ParseVarSubstitutions(_scriptLineResult.Stdout);
+				if (resultUnparsedVars.Count > 0)
+				{
+					LoggerManager.LogDebug("Async line contains unparsed variables", "", "vars", resultUnparsedVars);
+					_scriptLineCounter--;
+					_currentScriptLinesSplit[_scriptLineCounter] = _scriptLineResult.Stdout;
+					LoggerManager.LogDebug("Async line to reprocess", "", "line", _currentScriptLinesSplit[_scriptLineCounter]);
+				}
 
 				// resume execution
 				_processState.Transition(STATE_RUNNING);
@@ -311,15 +334,6 @@ public partial class ScriptInterpretter : Node
 		if (func == "echo")
 		{
 			return new ScriptProcessResult(0, funcParams.Join(" "));
-		}
-		if (func == "err")
-		{
-			return new ScriptProcessResult(0, func+" "+funcParams.Join(" "));
-		}
-		if (func == "waittest")
-		{
-			LoggerManager.LogDebug("Waittest called");
-			return new ScriptProcessResult(0, resultProcessMode: ResultProcessMode.ASYNC);
 		}
 		if (func == "source")
 		{
@@ -352,7 +366,7 @@ public partial class ScriptInterpretter : Node
 			_childScript.RunScript(func);
 
 			// return a wait mode process
-			return new ScriptProcessResult(0, resultProcessMode: ResultProcessMode.ASYNC);
+			return new ScriptProcessResult(0, "$func"+_childScript.GetHashCode(), resultProcessMode: ResultProcessMode.ASYNC);
 		}
 
 		return new ScriptProcessResult(127, "", $"command not found: {func}");
@@ -501,8 +515,9 @@ public partial class ScriptInterpretter : Node
 
 		// third thing, parse nested script lines and replace values
 		lineResult = ParseNestedLines(lineResult.Result);
-		if (lineResult.ReturnCode != 0)
+		if (lineResult.ReturnCode != 0 || lineResult.ResultProcessMode == ResultProcessMode.ASYNC)
 		{
+			LoggerManager.LogDebug("Nested line process failed or async");
 			return lineResult;
 		}
 		// foreach (ScriptProcessNestedProcess lineProcess in ParseNestdLines(lineResult.Stdout))
@@ -759,8 +774,14 @@ public partial class ScriptInterpretter : Node
 
 				// LoggerManager.LogDebug("Nested line matche", "", "nestedLine", $"{nestedLine}");
 
-				processes.Add((nestedLine, InterpretLine(nestedLine)));
-				// lineResult = InterpretLine(nestedLine);
+				ScriptProcessResult lineResultInner = InterpretLine(nestedLine);
+				processes.Add((nestedLine, lineResultInner));
+
+				// stop processing them so we can process one async call at once
+				if (lineResultInner.ResultProcessMode == ResultProcessMode.ASYNC)
+				{
+					break;
+				}
 			}
 		}
 
@@ -771,12 +792,14 @@ public partial class ScriptInterpretter : Node
 				lineResult.Stdout = lineResult.Result.Replace($"$({nestedRes.Item1})", nestedRes.Item2.Result);
 				lineResult.Stderr = nestedRes.Item2.Stderr;
 				lineResult.ReturnCode = nestedRes.Item2.ReturnCode;
+				lineResult.ResultProcessMode = nestedRes.Item2.ResultProcessMode;
 
-				if (lineResult.ReturnCode != 0)
+				if (lineResult.ReturnCode != 0 || lineResult.ResultProcessMode == ResultProcessMode.ASYNC)
 				{
 					break;
 				}
 			}
+			
 			LoggerManager.LogDebug("Nested lines result", "", "res", lineResult);
 		}
 
@@ -891,8 +914,12 @@ public partial class ScriptInterpretter : Node
 					nm = nm.NextMatch();
 				}
 
-				processes.Add(new ScriptProcessFunctionCall(line, funcName, funcParams));
-				// LoggerManager.LogDebug("Function call match", "", "call", $"func name: {funcName}, params: [{string.Join("|", funcParams.ToArray())}]");
+				if (IsValidFunction(funcName))
+				{
+					processes.Add(new ScriptProcessFunctionCall(line, funcName, funcParams));
+					// LoggerManager.LogDebug("Function call match", "", "call", $"func name: {funcName}, params: [{string.Join("|", funcParams.ToArray())}]");
+				}
+
 			}
 		}
 
