@@ -59,6 +59,7 @@ public partial class ScriptInterpretter : Node
 
 	private string[] _scriptParams;
 	private string _gameScriptName;
+	private List<string> _gameScriptFunctionNames = new();
 
 	private bool _processFinished;
 	public bool ProcessFinished
@@ -164,6 +165,8 @@ public partial class ScriptInterpretter : Node
 		scriptResource.Value.ScriptContent = scriptContent;
 
 		_gameScripts[func] = scriptResource;
+
+		_gameScriptFunctionNames.Add(func);
 	}
 
 	public bool IsValidScriptName(string script)
@@ -341,7 +344,7 @@ public partial class ScriptInterpretter : Node
 			AddChild(_childScript);
 
 			// set child vars to match ours
-			if (_childScriptKeepEnv)
+			if (_childScriptKeepEnv || _gameScriptFunctionNames.Contains(func))
 			{
 				_childScript._scriptVars = _scriptVars;
 			}
@@ -525,7 +528,8 @@ public partial class ScriptInterpretter : Node
 		var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
 		if (blockProcess != null)
 		{
-			processes.AddRange(new List<ScriptProcessOperation>() {blockProcess});
+			// processes.AddRange(new List<ScriptProcessOperation>() {blockProcess});
+			LoggerManager.LogDebug("Evaluating block procress line", "", "line", blockProcess);
 		}
 		else
 		{
@@ -666,7 +670,8 @@ public partial class ScriptInterpretter : Node
 				// we should be capturing lines as processes here
 				else
 				{
-					currentBlockProcesses.Add(new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(forwardScriptLine).Result)});
+					// currentBlockProcesses.Add(new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(forwardScriptLine).Result)});
+					currentBlockProcesses.Add(new List<ScriptProcessOperation> {new ScriptProcessOperation(forwardScriptLine)});
 				}
 
 
@@ -688,7 +693,7 @@ public partial class ScriptInterpretter : Node
 
 		if (scriptLine.StartsWith("for "))
 		{
-			conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(scriptLine.Replace("for ", "")).Result)}, ""));
+			conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(scriptLine.Replace("for ", "")).Stdout)}, ""));
 		}
 
 		foreach (Match match in blockProcessConditionMatches)
@@ -696,9 +701,9 @@ public partial class ScriptInterpretter : Node
 			string blockConditionInside = match.Groups[1].Value;
 			string blockConditionCompareType = match.Groups[2].Value;
 
-			var interpretted = InterpretLine(blockConditionInside.Trim());
+			// var interpretted = InterpretLine(blockConditionInside.Trim());
 
-			conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(blockConditionInside.Trim()).Result)}, blockConditionCompareType.Trim()));
+			conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(blockConditionInside.Trim()).Stdout)}, blockConditionCompareType.Trim()));
 		}
 
 		return conditionsList;

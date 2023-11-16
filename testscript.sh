@@ -53,6 +53,7 @@ test_func() {
 	echo "params raw: $*"
 	LASTCODE=$?
 	echo "prev return code: $LASTCODE"
+	echo "oh and what about $VARNAME"
 }
 
 echo "about to jump to test_func"
@@ -78,15 +79,15 @@ test_func param1 param2 param3
 #   echo omg such a large number
 # fi
 #
-# if [ "$SOMEVARVAL" = "1" ]
-# then
-#   echo It's equal to 1 yay
-# elif [ "$SOMEVARVAL" = "$(somefunccall random_param_1 another_param)" ]
-# then
-#   echo did you know? $(echo this is nested!)
-# else
-#   echo eh it's actually "$SOMEVARVAL"
-# fi
+if [ "$SOMEVARVAL" = "1" ]
+then
+  echo "It's equal to 1 yay"
+elif [ "$SOMEVARVAL" = "$(somefunccall random_param_1 another_param)" ]
+then
+  echo did you know? $(echo this is nested!)
+else
+  echo "eh it's actually "$SOMEVARVAL""
+fi
 #
 # while loops
 # counter=1
@@ -114,15 +115,15 @@ test_func param1 param2 param3
 # echo one; echo "$(echo a; echo b)"; echo three
 #
 # nested if else else
-# if [ "2" = "2" ]
-# then
-#   if [ "a" = "a" ]
-#   then
-#     echo omg such a large number
-#   else
-#     echo not a large number...
-#   fi
-# else
-#   echo it's an else
-# fi
+if [ "2" = "2" ]
+then
+  if [ "a" = "a" ]
+  then
+    echo omg such a large number
+  else
+    echo not a large number...
+  fi
+else
+  echo "it's an else"
+fi
 #
