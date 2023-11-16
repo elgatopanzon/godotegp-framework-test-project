@@ -354,7 +354,18 @@ public partial class ScriptInterpretter : Node
 		}
 		else if (_scriptFunctions.ContainsKey(func))
 		{
-			return _scriptFunctions[func].Call(this, funcParams);
+			ScriptProcessResult res;
+
+			try
+			{
+				res = _scriptFunctions[func].Call(this, funcParams);
+			}
+			catch (System.Exception e)
+			{
+				res = new ScriptProcessResult(127, "", e.Message);
+			}
+
+			return res;
 		}
 
 		// check if the function name is a valid script
