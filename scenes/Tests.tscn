@@ -260,6 +260,7 @@ metadata/id = "UITests.Scripting.Clear"
 [node name="ScriptName" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
 custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
+text = "testscript"
 placeholder_text = "Script name"
 metadata/id = "UITests.Scripting.Name"
 

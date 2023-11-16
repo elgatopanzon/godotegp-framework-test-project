@@ -198,8 +198,8 @@ public static partial class DataBindManagerObjectExtension
 		ServiceRegistry.Get<DataBindManager>().Bind<T>(obj, getterFirstCb, setterFirstCb);
 	}
 
-	public static void BindSignal<TT, T>(this string obj, string signalName, bool hasParams, Func<TT, T> getterFirstCb, Action<T> setterFirstCb) where TT : Node
+	public static void BindSignal<TT, T>(this string obj, string signalName, bool hasParams, Func<TT, T> getterFirstCb, Action<T> setterFirstCb, bool initialSet = false) where TT : Node
 	{
-		ServiceRegistry.Get<DataBindManager>().BindSignal<TT, T>(obj, signalName, hasParams, getterFirstCb, setterFirstCb);
+		ServiceRegistry.Get<DataBindManager>().BindSignal<TT, T>(obj, signalName, hasParams, getterFirstCb, setterFirstCb, initialSet: initialSet);
 	}
 }

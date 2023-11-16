@@ -79,11 +79,14 @@ public partial class Tests : Node2D
 		// variable
 		"UITests.Scripting.Script".BindSignal<TextEdit, string>("text_changed", false,  
 				(n) => n.Text,
-				(v) => _scriptingTestScript = v
+				(v) => _scriptingTestScript = v,
+				initialSet: true // we want to trigger initial script value to be set
 			);
+		// bind script name 
 		"UITests.Scripting.Name".BindSignal<TextEdit, string>("text_changed", false,  
 				(n) => n.Text,
-				(v) => _scriptingTestName = v
+				(v) => _scriptingTestName = v,
+				initialSet: true // we want to trigger initial text value to be set
 			);
 
 		// connect to pressed signal and wire up to Run callback

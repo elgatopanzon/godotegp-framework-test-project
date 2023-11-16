@@ -83,7 +83,7 @@ public partial class DataBindManager : Service
 		AddChild(dataBinding);
 	}
 
-	public void BindSignal<TT, T>(string nodeId, string signalName, bool hasParams, Func<TT, T> getterFirstCb, Action<T> setterFirstCb) where TT : Node
+	public void BindSignal<TT, T>(string nodeId, string signalName, bool hasParams, Func<TT, T> getterFirstCb, Action<T> setterFirstCb, bool initialSet = false) where TT : Node
 	{
 		foreach (var cnode in GetChildren())
 		{
@@ -99,7 +99,7 @@ public partial class DataBindManager : Service
 		var node = nodeId.Node<TT>();
 
 		// create the data binding
-		var dataBinding = new DataBinding<T, GodotSignal>(nodeId, () => getterFirstCb(nodeId.Node<TT>()), setterFirstCb, initialSet: false);
+		var dataBinding = new DataBinding<T, GodotSignal>(nodeId, () => getterFirstCb(nodeId.Node<TT>()), setterFirstCb, initialSet: initialSet);
 
 		// unsubscribe from the event
 		ServiceRegistry.Get<EventManager>().Unsubscribe(dataBinding.EventSubscription);
