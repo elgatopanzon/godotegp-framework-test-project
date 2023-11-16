@@ -102,6 +102,7 @@ public partial class ScriptInterpretter : Node
 		_processState.AddTransition(_stateRunning, _stateWaiting, STATE_WAITING);
 		_processState.AddTransition(_stateWaiting, _stateRunning, STATE_RUNNING);
 		_processState.AddTransition(_stateRunning, _stateFinished, STATE_FINISHED);
+		_processState.AddTransition(_stateFinished, _statePreparing, STATE_RUNNING);
         //
 	}
 
@@ -114,7 +115,6 @@ public partial class ScriptInterpretter : Node
 		_processState.Update();
 	}
 
-
 	/****************************
 	*  Script running methods  *
 	****************************/
@@ -123,10 +123,19 @@ public partial class ScriptInterpretter : Node
 	{
 		if (_gameScripts.TryGetValue(scriptName, out Resource<GameScript> gs))
 		{
+			Reset();
+
 			_gameScript = gs.Value;
 
 			// Start the state machine
-			_processState.Enter();
+			if (_processFinished)
+			{
+				_processFinished = true;
+				_processState.Transition(STATE_RUNNING);
+			}
+			else {
+				_processState.Enter();
+			}
 		}
 		else
 		{
@@ -142,13 +151,21 @@ public partial class ScriptInterpretter : Node
 
 		_gameScripts["eval"] = scriptResource;
 
-		// run the created script resource
+		// run the created resource
 		RunScript("eval");
 	}
 
 	public bool IsValidScriptName(string script)
 	{
 		return _gameScripts.ContainsKey(script);
+	}
+
+	public void Reset()
+	{
+		_scriptLineResult = null;
+		_scriptLineCounter = 0;
+		_scriptLineResults.Clear();
+		_currentScriptLinesSplit = new string[]{};
 	}
 
 	/****************************

@@ -23,6 +23,8 @@ public partial class Tests : Node2D
 	private string _scriptingTestScript = "";
 	private string _scriptingTestName = "";
 
+	private ScriptInterpretter _scriptingTestInterpretter;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -335,26 +337,31 @@ public partial class Tests : Node2D
 
 	public void _On_ScriptingTest_Eval_pressed(IEvent e)
 	{
+		InitScriptInterpretter();
+
 		LoggerManager.LogDebug("Scripting test eval pressed");
 		LoggerManager.LogDebug("Script content", "", "script", _scriptingTestScript);
 
-		// ScriptingTest s = new ScriptingTest(_scriptingTestScript);
-		var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
-		ScriptInterpretter si = new ScriptInterpretter(gameScripts);
-
-		AddChild(si);
-		si.RunScriptContent(_scriptingTestScript);
+		_scriptingTestInterpretter.RunScriptContent(_scriptingTestScript);
 	}
 
 	public void _On_ScriptingTest_Run_pressed(IEvent e)
 	{
+		InitScriptInterpretter();
+
 		LoggerManager.LogDebug("Scripting test run pressed");
 		LoggerManager.LogDebug("Script name", "", "scriptName", _scriptingTestName);
 
-		var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
-		ScriptInterpretter si = new ScriptInterpretter(gameScripts);
+		_scriptingTestInterpretter.RunScript(_scriptingTestName);
+	}
 
-		AddChild(si);
-		si.RunScript(_scriptingTestName);
+	public void InitScriptInterpretter()
+	{
+		if (_scriptingTestInterpretter == null)
+		{
+			var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
+			_scriptingTestInterpretter = new ScriptInterpretter(gameScripts);
+			AddChild(_scriptingTestInterpretter);
+		}
 	}
 }
