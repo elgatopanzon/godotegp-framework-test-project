@@ -335,7 +335,7 @@ public partial class Tests : Node2D
 		// ScriptingTest s = new ScriptingTest(_scriptingTestScript);
 		var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
 		ScriptInterpretter si = new ScriptInterpretter(gameScripts);
-		si.RunScript("testscript");
 		AddChild(si);
+		si.RunScript("testscript");
 	}
 }

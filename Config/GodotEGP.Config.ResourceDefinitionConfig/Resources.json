@@ -42,6 +42,10 @@
       "testscript": {
         "Path": "res://testscript.sh",
         "Class": "GodotEGP.Resource.GameScript"
+      },
+      "testscript2": {
+        "Path": "res://testscript2.sh",
+        "Class": "GodotEGP.Resource.GameScript"
       }
     }
   }

@@ -54,6 +54,15 @@ public partial class ScriptInterpretter : Node
 	private List<ScriptProcessResult> _scriptLineResults = new List<ScriptProcessResult>();
 	private ScriptProcessResult _scriptLineResult;
 
+	private ScriptInterpretter _childScript;
+
+	private bool _processFinished;
+	public bool ProcessFinished
+	{
+		get { return _processFinished; }
+		set { _processFinished = value; }
+	}
+
 	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts)
 	{
 		_gameScripts = gameScripts;
@@ -62,6 +71,7 @@ public partial class ScriptInterpretter : Node
 		_statePreparing.OnEnter = _State_Preparing_OnEnter;
 		_stateRunning.OnUpdate = _State_Running_OnUpdate;
 		_stateWaiting.OnUpdate = _State_Waiting_OnUpdate;
+		_stateFinished.OnEnter = _State_Finished_OnEnter;
 
 		_processState.AddState(_statePreparing);	
 		_processState.AddState(_stateRunning);	
@@ -76,6 +86,20 @@ public partial class ScriptInterpretter : Node
         //
 	}
 
+	/*******************
+	*  Godot methods  *
+	*******************/
+	
+	public override void _Process(double delta)
+	{
+		_processState.Update();
+	}
+
+
+	/****************************
+	*  Script running methods  *
+	****************************/
+	
 	public void RunScript(string scriptName)
 	{
 		if (_gameScripts.TryGetValue(scriptName, out Resource<GameScript> gs))
@@ -90,6 +114,15 @@ public partial class ScriptInterpretter : Node
 			throw new InvalidScriptResourceException($"The game script '{scriptName}' is not a valid GameScript resource!");
 		}
 	}
+
+	public bool IsValidScriptName(string script)
+	{
+		return _gameScripts.ContainsKey(script);
+	}
+
+	/****************************
+	*  State changed callbacks  *
+	****************************/
 
 	public void _State_Preparing_OnEnter()
 	{
@@ -153,17 +186,39 @@ public partial class ScriptInterpretter : Node
 		// TODO: implement transition back to running state after we waited for
 		// what we want to wait for
 		// _processState.Transition(STATE_RUNNING);
+
+		// if we have a child script, then we're waiting for it
+		if (_childScript != null)
+		{
+			// check if it's finished
+			if (_childScript.ProcessFinished)
+			{
+				LoggerManager.LogDebug("Child script finished");
+
+				// clear child script instance since we're done with it
+				_childScript.QueueFree();
+				_childScript = null;
+
+				// resume execution
+				_processState.Transition(STATE_RUNNING);
+			}
+		}
 	}
 
-	public override void _Process(double delta)
+	public void _State_Finished_OnEnter()
 	{
-		_processState.Update();
+		_processFinished = true;
 	}
 
+	/*********************************
+	*  Execute script line methods  *
+	*********************************/
 
 	// main script process execution functions
 	public ScriptProcessResult ExecuteFunctionCall(string func, params string[] funcParams)
 	{
+		// TODO: re-implement function system and allow registration of
+		// functions in ScriptService
 		if (func == "echo")
 		{
 			return new ScriptProcessResult(0, funcParams.Join(" "));
@@ -175,6 +230,20 @@ public partial class ScriptInterpretter : Node
 		if (func == "waittest")
 		{
 			LoggerManager.LogDebug("Waittest called");
+			return new ScriptProcessResult(0, resultProcessMode: ResultProcessMode.ASYNC);
+		}
+
+		// check if the function name is a valid script
+		if (IsValidScriptName(func))
+		{
+			LoggerManager.LogDebug("Executing script as function", "", "script", func);
+
+			// create a child script interpreter instance to run the script
+			_childScript = new ScriptInterpretter(_gameScripts);
+			AddChild(_childScript);
+			_childScript.RunScript(func);
+
+			// return a wait mode process
 			return new ScriptProcessResult(0, resultProcessMode: ResultProcessMode.ASYNC);
 		}
 
@@ -219,6 +288,11 @@ public partial class ScriptInterpretter : Node
 		return new ScriptProcessResult(0, res.Result.Replace("$"+varName, obj.ToString()));
 	}
 
+
+	/************************************
+	*  Line interpertretation methods  *
+	************************************/
+
 	// accepts a pure string containing the script content to process for
 	// interpretation
 	public List<ScriptProcessResult> InterpretLines(string scriptLines)
@@ -241,6 +315,104 @@ public partial class ScriptInterpretter : Node
 
 		return processes;
 	}
+
+	// accepts a single script line and generates a list of process objects to
+	// achieve the final rendered result for each line
+	public ScriptProcessResult InterpretLine(string line)
+	{
+		// TODO: split and process lines with ; and pipes
+
+		// execution and parse order
+		// 1. parse printed vars to real values in unparsed line
+		// parse var names in expressions (( )) and replace with actual
+		// values e.g. number or string
+		// 2. parse nested lines as a normal line, replacing the executed result
+		// 3. parse variable assignments
+		// 4. parse function calls
+		// 5. parse if/while/for calls
+
+		ScriptProcessResult lineResult = new ScriptProcessResult(0, line);
+
+		// list of process operations to do to this script line
+		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
+
+		// first thing, parse and replace variable names with values
+		foreach (ScriptProcessVarSubstitution lineProcess in ParseVarSubstitutions(lineResult.Result))
+		{
+			lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
+		}
+		// processes.AddRange(ParseVarSubstitutions(line));
+
+		// second thing, parse and replace expressions with values
+		foreach (ScriptProcessExpression lineProcess in ParseExpressions(lineResult.Result))
+		{
+			// TODO: implement expression processing
+			// lineResult = ExecuteExpression(lineProcess.Expression, lineResult);
+		}
+		// processes.AddRange(ParseExpressions(line));
+
+		// third thing, parse nested script lines and replace values
+		lineResult = ParseNestedLines(lineResult.Result);
+		if (lineResult.ReturnCode != 0)
+		{
+			return lineResult;
+		}
+		// foreach (ScriptProcessNestedProcess lineProcess in ParseNestdLines(lineResult.Stdout))
+		// {
+		// 	// TODO: process nested lines
+		// 	// lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
+		// }
+		// processes.AddRange(ParseNestdLines(line));
+
+
+		// parse variable assignments
+		var varAssignmentProcesses = ParseVarAssignments(lineResult.Result);
+		// processes.AddRange(varAssignmentProcesses);
+		foreach (ScriptProcessVarAssignment lineProcess in varAssignmentProcesses)
+		{
+			lineResult = ExecuteVariableAssignment(lineProcess.Name, lineProcess.Value);
+		}
+		if (lineResult.ReturnCode != 0)
+		{
+			return lineResult;
+		}
+
+		var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
+		if (blockProcess != null)
+		{
+			processes.AddRange(new List<ScriptProcessOperation>() {blockProcess});
+		}
+		else
+		{
+			// if var assignments are 0, then try to match function calls
+			// NOTE: this is because the regex matches both var assignments in lower
+			// case AND function calls
+			if (varAssignmentProcesses.Count == 0)
+			{
+				foreach (ScriptProcessFunctionCall lineProcess in ParseFunctionCalls(lineResult.Result))
+				{
+					lineResult = ExecuteFunctionCall(lineProcess.Function, lineProcess.Params.ToArray());
+				}
+				// processes.AddRange(ParseFunctionCalls(line));
+			}
+		}
+
+		// if there's no processes until now, just return the plain object with
+		// no processing attached
+		// if (processes.Count == 0)
+		// {
+		// 	processes.Add(new ScriptProcessOperation(line));
+		// }
+		
+		// LoggerManager.LogDebug("Line result", "", "res", lineResult);
+
+		return lineResult;
+	}
+
+
+	/**************************************
+	*  Parse if/while/for block methods  *
+	**************************************/
 
 	// parse a line starting with if/while/for as a block of script to be
 	// treated up the stack as a single process object
@@ -387,98 +559,10 @@ public partial class ScriptInterpretter : Node
 		return conditionsList;
 	}
 
-	// accepts a single script line and generates a list of process objects to
-	// achieve the final rendered result for each line
-	public ScriptProcessResult InterpretLine(string line)
-	{
-		// TODO: split and process lines with ; and pipes
 
-		// execution and parse order
-		// 1. parse printed vars to real values in unparsed line
-		// parse var names in expressions (( )) and replace with actual
-		// values e.g. number or string
-		// 2. parse nested lines as a normal line, replacing the executed result
-		// 3. parse variable assignments
-		// 4. parse function calls
-		// 5. parse if/while/for calls
-
-		ScriptProcessResult lineResult = new ScriptProcessResult(0, line);
-
-		// list of process operations to do to this script line
-		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
-
-		// first thing, parse and replace variable names with values
-		foreach (ScriptProcessVarSubstitution lineProcess in ParseVarSubstitutions(lineResult.Result))
-		{
-			lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
-		}
-		// processes.AddRange(ParseVarSubstitutions(line));
-
-		// second thing, parse and replace expressions with values
-		foreach (ScriptProcessExpression lineProcess in ParseExpressions(lineResult.Result))
-		{
-			// TODO: implement expression processing
-			// lineResult = ExecuteExpression(lineProcess.Expression, lineResult);
-		}
-		// processes.AddRange(ParseExpressions(line));
-
-		// third thing, parse nested script lines and replace values
-		lineResult = ParseNestedLines(lineResult.Result);
-		if (lineResult.ReturnCode != 0)
-		{
-			return lineResult;
-		}
-		// foreach (ScriptProcessNestedProcess lineProcess in ParseNestdLines(lineResult.Stdout))
-		// {
-		// 	// TODO: process nested lines
-		// 	// lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
-		// }
-		// processes.AddRange(ParseNestdLines(line));
-
-
-		// parse variable assignments
-		var varAssignmentProcesses = ParseVarAssignments(lineResult.Result);
-		// processes.AddRange(varAssignmentProcesses);
-		foreach (ScriptProcessVarAssignment lineProcess in varAssignmentProcesses)
-		{
-			lineResult = ExecuteVariableAssignment(lineProcess.Name, lineProcess.Value);
-		}
-		if (lineResult.ReturnCode != 0)
-		{
-			return lineResult;
-		}
-
-		var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
-		if (blockProcess != null)
-		{
-			processes.AddRange(new List<ScriptProcessOperation>() {blockProcess});
-		}
-		else
-		{
-			// if var assignments are 0, then try to match function calls
-			// NOTE: this is because the regex matches both var assignments in lower
-			// case AND function calls
-			if (varAssignmentProcesses.Count == 0)
-			{
-				foreach (ScriptProcessFunctionCall lineProcess in ParseFunctionCalls(lineResult.Result))
-				{
-					lineResult = ExecuteFunctionCall(lineProcess.Function, lineProcess.Params.ToArray());
-				}
-				// processes.AddRange(ParseFunctionCalls(line));
-			}
-		}
-
-		// if there's no processes until now, just return the plain object with
-		// no processing attached
-		// if (processes.Count == 0)
-		// {
-		// 	processes.Add(new ScriptProcessOperation(line));
-		// }
-		
-		// LoggerManager.LogDebug("Line result", "", "res", lineResult);
-
-		return lineResult;
-	}
+	/********************************
+	*  Parse script lines methods  *
+	********************************/
 
 	// return script processed lines from nested $(...) lines in a script line
 	public ScriptProcessResult ParseNestedLines(string line)
@@ -653,7 +737,9 @@ public partial class ScriptInterpretter : Node
 	}
 }
 
-
+/**************************************
+*  Script process operation classes  *
+**************************************/
 
 public class ScriptProcessOperation
 {
@@ -791,6 +877,11 @@ public class ScriptProcessBlockProcess : ScriptProcessOperation
 		_blockProcesses = blockProcesses;
 	}
 }
+
+
+/**********************************
+*  Script process result classes  *
+**********************************/
 
 public enum ResultProcessMode
 {
