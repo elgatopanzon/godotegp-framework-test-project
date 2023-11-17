@@ -47,6 +47,8 @@ public partial class ScriptInterpretter : Node
 	private string[] _currentScriptLinesSplit;
 	private int _scriptLineCounter = 0;
 
+	private string[] _scriptPipeQueue = new string[] {};
+
 	private List<ScriptProcessResult> _scriptLineResults = new List<ScriptProcessResult>();
 	private ScriptProcessResult _scriptLineResult;
 
@@ -89,13 +91,13 @@ public partial class ScriptInterpretter : Node
 	public string Stdout
 	{
 		get { 
-			return string.Join("\n", _scriptLineResults.Select(x => x.Stdout));
+			return string.Join("\n", _scriptLineResults.Where(x => x.Result.Length > 0).Select(x => x.Stdout));
 		}
 	}
 	public string Stderr
 	{
 		get { 
-			return string.Join("\n", _scriptLineResults.Select(x => x.Stderr));
+			return string.Join("\n", _scriptLineResults.Where(x => x.Result.Length > 0).Select(x => x.Stderr));
 		}
 	}
 	public int ReturnCode
@@ -294,7 +296,10 @@ public partial class ScriptInterpretter : Node
 			}
 
 			// increase script line after processing
-			_scriptLineCounter++;
+			if (_scriptPipeQueue.Count() == 0)
+			{
+				_scriptLineCounter++;
+			}
 
 
 			if (_scriptLineResult.ResultProcessMode == ResultProcessMode.ASYNC)
@@ -337,6 +342,11 @@ public partial class ScriptInterpretter : Node
 
 				// perform variable substitution to replace the line with the
 				// child's result
+				if (_childScript.ScriptVars.ContainsKey("STDIN"))
+				{
+					LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter} (async)", "", "stdin", _childScript.ScriptVars["STDIN"]);
+					_scriptVars["STDIN"] = _childScript.ScriptVars["STDIN"];
+				}
 				_scriptLineResult = ExecuteVariableSubstitution("func"+_childScript.GetHashCode(), _scriptLineResult);
 
 				_scriptLineResults.Add(_scriptLineResult);
@@ -344,6 +354,7 @@ public partial class ScriptInterpretter : Node
 				LoggerManager.LogDebug($"Child script processed", "", "lineRes", _scriptLineResult);
 
 				LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter} (async)", "", "asyncLine", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+
 
 				// if there's any unparsed vars, trigger the line for
 				// re-processing
@@ -430,13 +441,16 @@ public partial class ScriptInterpretter : Node
 			// create a child script interpreter instance to run the script
 			_childScript = new ScriptInterpretter(_gameScripts, _scriptFunctions, scriptParams: funcParams);
 			_childScript._parentScript = this;
+			LoggerManager.LogDebug("Creating child script", "", "stdin", GetVariableValue("STDIN"));
 			AddChild(_childScript);
 
 			// set child vars to match ours
-			if (_childScriptKeepEnv || _gameScriptFunctionNames.Contains(func))
-			{
+			// if (_childScriptKeepEnv || _gameScriptFunctionNames.Contains(func))
+			// {
 				_childScript._scriptVars = _scriptVars;
-			}
+			// }
+
+			LoggerManager.LogDebug("Creating child script", "", "stdin", _childScript.GetVariableValue("STDIN"));
 
 			_childScript.RunScript(func);
 
@@ -558,6 +572,40 @@ public partial class ScriptInterpretter : Node
 	public ScriptProcessResult InterpretLine(string line)
 	{
 		// TODO: split and process lines with ; and pipes
+		// var lineSplitPipe = line.Split(new string[] {"|"}, StringSplitOptions.None).Select(x => x.Trim()).ToArray();
+
+		List<string> lineSplitPipe = new();
+		string patternPipeSplit = @"(?=[^|])(?:[^|]*\([^)]+\))*[^|]*";
+		MatchCollection matches = Regex.Matches(line, patternPipeSplit);
+
+		foreach (Match m in matches)
+		{
+			lineSplitPipe.Add(m.Value.Trim());
+		}
+
+		if (lineSplitPipe.Count() > 1)
+		{
+			LoggerManager.LogDebug("Pipe found", "", "lines", lineSplitPipe);
+
+			_scriptPipeQueue = lineSplitPipe.ToArray();
+		}
+		if (_scriptPipeQueue.Count() > 0)
+		{
+			LoggerManager.LogDebug("Pipe queue count", "", "pipeQueue", _scriptPipeQueue);
+			// move previous command output to fake stdin and erase it
+			if (lineSplitPipe.Count() == 1)
+			{
+				ExecuteVariableAssignment("STDIN", _scriptLineResult.Stdout);
+				_scriptLineResult.Stdout = "";
+			}
+
+			// set current line content to queued pipe command
+			line = _scriptPipeQueue[0];
+			_scriptPipeQueue = _scriptPipeQueue.Skip(1).ToArray();
+			_currentScriptLinesSplit[_scriptLineCounter] = line;
+
+			LoggerManager.LogDebug("Overriding line with queued pipe command", "", "pipeLine", line);
+		}
 
 		// execution and parse order
 		// 1. parse printed vars to real values in unparsed line
@@ -840,6 +888,110 @@ public partial class ScriptInterpretter : Node
 					else if (conditionType == "condition")
 					{
 						LoggerManager.LogDebug("Evaluating script condition", "", "condition", conditionParams);
+
+						bool reverseCondition = (conditionParams[0] == "!");
+						if (reverseCondition)
+						{
+							conditionParams = conditionParams.Skip(1).ToList();
+						}
+
+						bool conditionRes = false;
+						conditionParams[1] = (conditionParams[1] as string).Trim();
+
+						// check commands
+						switch (conditionParams[0])
+						{
+							case "-v":
+								LoggerManager.LogDebug("-v", "", "cond", conditionParams[1]);
+								if (_scriptVars.ContainsKey(conditionParams[1]))
+								{
+									conditionRes = true;
+								}
+								break;
+							case "-z":
+								LoggerManager.LogDebug("-z", "", "cond", conditionParams[1]);
+								if ((conditionParams[1] as string).Length == 0)
+								{
+									conditionRes = true;
+								}
+								break;
+							case "-n":
+								LoggerManager.LogDebug("-n", "", "cond", conditionParams[1]);
+								if ((conditionParams[1] as string).Length != 0)
+								{
+									conditionRes = true;
+								}
+								break;
+
+							default:
+								break;
+						}
+
+						// operators
+						if (conditionParams.Count == 3)
+						{
+							switch (conditionParams[1])
+							{
+								case "=":
+									if ((conditionParams[0] as string) == (conditionParams[0] as string))
+									{
+										conditionRes = true;
+									}
+									break;
+								case "!=":
+									if ((conditionParams[0] as string) != (conditionParams[0] as string))
+									{
+										conditionRes = true;
+									}
+									break;
+								case "-eq":
+									if (double.Parse(conditionParams[0]) == double.Parse(conditionParams[2]))
+									{
+										conditionRes = true;
+									}
+									break;
+								case "-ne":
+									if (double.Parse(conditionParams[0]) != double.Parse(conditionParams[2]))
+									{
+										conditionRes = true;
+									}
+									break;
+								case "-lt":
+									if (double.Parse(conditionParams[0]) < double.Parse(conditionParams[2]))
+									{
+										conditionRes = true;
+									}
+									break;
+								case "-gt":
+									if (double.Parse(conditionParams[0]) > double.Parse(conditionParams[2]))
+									{
+										conditionRes = true;
+									}
+									break;
+								case "-le":
+									if (double.Parse(conditionParams[0]) <= double.Parse(conditionParams[2]))
+									{
+										conditionRes = true;
+									}
+									break;
+								case "-ge":
+									if (double.Parse(conditionParams[0]) >= double.Parse(conditionParams[2]))
+									{
+										conditionRes = true;
+									}
+									break;
+
+								default:
+									break;
+							}
+						}
+
+						LoggerManager.LogDebug(conditionRes);
+
+						if ((reverseCondition) ? !conditionRes : conditionRes)
+						{
+							conditionTrueCount++;
+						}
 					}
 				}
 			}
@@ -1075,9 +1227,19 @@ public partial class ScriptInterpretter : Node
 				List<string> nestedLines = new List<string>();
 
 				// LoggerManager.LogDebug("Nested line matche", "", "nestedLine", $"{nestedLine}");
+				string tempFuncName = $"nested_{_scriptLineCounter}_{GetHashCode()}";
+				RegisterFunctionFromContent(tempFuncName, nestedLine);
 
-				ScriptProcessResult lineResultInner = InterpretLine(nestedLine);
-				processes.Add((nestedLine, lineResultInner));
+				LoggerManager.LogDebug("Nested line inner", "", "tempFuncName", tempFuncName);
+				var lineResultInner = ExecuteFunctionCall(tempFuncName);
+				LoggerManager.LogDebug("Nested line inner", "", "funcResult", lineResultInner);
+				lineResult.ResultProcessMode = lineResultInner.ResultProcessMode;
+				// processes.Add((nestedLine, lineResultInner));
+				//
+				lineResult.Stdout = lineResult.Result.Replace($"$({nestedLine})", lineResultInner.Result);
+				LoggerManager.LogDebug("Nested line inner", "", "originalLine", nestedLine);
+				LoggerManager.LogDebug("Nested line inner", "", "finalResult", lineResult);
+				return lineResult;
 
 				// stop processing them so we can process one async call at once
 				if (lineResultInner.ResultProcessMode == ResultProcessMode.ASYNC)

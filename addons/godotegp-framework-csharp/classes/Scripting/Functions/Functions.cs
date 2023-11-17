@@ -23,6 +23,22 @@ public partial class Echo : IScriptFunction
 	}
 }
 
+public partial class Cat : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		string result = "";
+
+		// stdin hack
+		if (p.Length == 0 && i.ScriptVars.ContainsKey("STDIN"))
+		{
+			result = (string) i.ScriptVars["STDIN"];
+		}
+
+		return new ScriptProcessResult(0, result);
+	}
+}
+
 public partial class EvaluateExpression : IScriptFunction
 {
 	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)

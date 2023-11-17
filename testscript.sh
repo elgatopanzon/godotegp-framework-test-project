@@ -1,79 +1,97 @@
 #!/usr/bin/env sh
+#
+for f in one two three
+do
+	echo $f
+done
 
-echo "this text should act like a simple print statement"
-echo "testing: setting variables content"
-VARNAME="some string value"
-echo "testing: echoing variables: $VARNAME"
-echo "testing: setting variables to content with variables inside"
-HOME="where the heart is"
-VARNAME="home is $HOME"
-echo "did you know? $VARNAME"
-VARNAME="$(echo "I don't really like soup...")"
-echo "but did you know? $VARNAME"
-logdebug "logging to debug log"
-echo "testing" "multiple" "echo" "params"
-echo echo without quotes
-echo 1 2 3
-echo "testing: setting variables to number types"
-VARINT=1
-VARFLOAT=1.1
-echo "testing: enclosed script lines content"
-echo "$(echo this should return this string)"
-echo "$(echo this is part)" "$(echo of multiple)" "$(echo nested lines)"
-echo "testing: accessing array elements"
+fake_stdin() {
+	echo "this function says STDIN is equal to: $STDIN"
+}
 
-# TODO: add support for braces in variable expansion
-# echo "array key 0: $VARARRAY[0]"
-# echo "array key 1: $VARARRAY[1]"
-# echo "testing: accessing dictionary elements"
-# echo "array key 'key':$VARARRAY['key']"
-
-# async wait function call process mode
-# echo "testing: async wait"
-# waittest
-# echo "this shouldn't be shown until processing is resumed"
-
-# testing calling other scripts as functions
-testscript2
-echo "is it true: $TESTVAR"
-source testscript2
-echo "is it true: $TESTVAR"
-testscript3 "this is a function param"
-
-# some var setting tests
-c="$(a)$(b)"
-c="$( (($a + $b)) )"
-
-echo "testing functions"
 test_func() {
-	echo "this is inside a test function"
-	echo "script name: $0"
-	echo "param count: $#"
-	echo "params: $1 $2 $3"
-	echo "params raw: $*"
-	LASTCODE=$?
-	echo "prev return code: $LASTCODE"
-	echo "oh and what about $VARNAME"
+	echo "a test function to return a value"
 }
 
-test_func "testing with" "multiple values inside" 
+echo asd | cat
+test_func | fake_stdin
 
-echo "about to jump to test_func"
-test_func
-test_func param1 param2 param3
+$(echo "nested line line" | fake_stdin) | fake_stdin
 
-echo "$(test_func will it work?)"
-echo "last statement"
+# echo "this text should act like a simple print statement"
+# echo "testing: setting variables content"
+# VARNAME="some string value"
+# echo "testing: echoing variables: $VARNAME"
+# echo "testing: setting variables to content with variables inside"
+# HOME="where the heart is"
+# VARNAME="home is $HOME"
+# echo "did you know? $VARNAME"
+# VARNAME="$(echo "I don't really like soup...")"
+# echo "but did you know? $VARNAME"
+# logdebug "logging to debug log"
+# echo "testing" "multiple" "echo" "params"
+# echo echo without quotes
+# echo 1 2 3
+# echo "testing: setting variables to number types"
+# VARINT=1
+# VARFLOAT=1.1
+# echo "testing: enclosed script lines content"
+# echo "$(echo this should return this string)"
+# echo "$(echo this is part)" "$(echo of multiple)" "$(echo nested lines)"
+# echo "testing: accessing array elements"
+#
+# # TODO: add support for braces in variable expansion
+# # echo "array key 0: $VARARRAY[0]"
+# # echo "array key 1: $VARARRAY[1]"
+# # echo "testing: accessing dictionary elements"
+# # echo "array key 'key':$VARARRAY['key']"
+#
+# # async wait function call process mode
+# # echo "testing: async wait"
+# # waittest
+# # echo "this shouldn't be shown until processing is resumed"
+#
+# # testing calling other scripts as functions
+# testscript2
+# echo "is it true: $TESTVAR"
+# source testscript2
+# echo "is it true: $TESTVAR"
+# testscript3 "this is a function param"
+#
+# # some var setting tests
+# c="$(a)$(b)"
+# c="$( (($a + $b)) )"
+#
+# echo "testing functions"
+# test_func() {
+# 	echo "this is inside a test function"
+# 	echo "script name: $0"
+# 	echo "param count: $#"
+# 	echo "params: $1 $2 $3"
+# 	echo "params raw: $*"
+# 	LASTCODE=$?
+# 	echo "prev return code: $LASTCODE"
+# 	echo "oh and what about $VARNAME"
+# }
+#
+# test_func "testing with" "multiple values inside" 
+#
+# echo "about to jump to test_func"
+# test_func
+# test_func param1 param2 param3
+#
+# echo "$(test_func will it work?)"
+# echo "last statement"
+#
+# echo_func() {
+# 	echo $*
+# }
 
-echo_func() {
-	echo $*
-}
-
-echo_func "$(echo_func "multiple nested")" "$(echo_func "lines as")" "$(echo_func "function params")"
-echo "last statement"
-
-FUNCRES="$(testscript2)"
-echo "$FUNCRES"
+# echo_func "$(echo_func "multiple nested")" "$(echo_func "lines as")" "$(echo_func "function params")"
+# echo "last statement"
+#
+# FUNCRES="$(testscript2)"
+# echo "$FUNCRES"
 
 # evaluateexpression "1 = 1"
 # evaluateexpression ""123" = "123""
@@ -81,80 +99,78 @@ echo "$FUNCRES"
 # evaluateexpression "true"
 # evaluateexpression "(2 * 5) + 12 / 6"
 
-if (( 1 = 1 ))
-then 
-	echo "condition 1 passed"
-else
-	echo "condition 1 failed"
-fi
-if (( 1 = 2 ))
-then 
-	echo "condition 2 passed"
-else
-	echo "condition 2 failed"
-fi
-if (( 1 = 2 ))
-then 
-	echo "condition 2 passed"
-fi
-
-for f in one two three
-do
-	echo $f
-done
+# if (( 1 = 1 ))
+# then 
+# 	echo "condition 1 passed"
+# else
+# 	echo "condition 1 failed"
+# fi
+# if (( 1 = 2 ))
+# then 
+# 	echo "condition 2 passed"
+# else
+# 	echo "condition 2 failed"
+# fi
+# if (( 1 = 2 ))
+# then 
+# 	echo "condition 2 passed"
+# fi
 
 # test if var name has been set
-if [ -v FAKEVAR ]
-then
-	echo "it's not set so we'll never see this"
-fi
-if [ ! -v FAKEVAR ]
-then
-	echo "reverse, so we WILL see this"
-fi
-if [ -z "$FAKEVAR" ]
-then
-	echo "string var is empty"
-fi
-if [ -n "$VARNAME" ]
-then
-	echo "string $VARNAME length is not 0"
-fi
-
-if [ "$VARNAME" = "$VARNAME" ]
-then
-	echo "both strings match!"
-fi
-if [ "$VARNAME" != "$VARNAME skjsdkj" ]
-then
-	echo "both strings don't match!"
-fi
+# if [ -v FAKEVAR ]
+# then
+# 	echo "it's not set so we'll never see this"
+# fi
+# if [ ! -v FAKEVAR ]
+# then
+# 	echo "reverse, so we WILL see this"
+# fi
+# if [ -z "$FAKEVAR" ]
+# then
+# 	echo "string var is empty"
+# fi
+# if [ -n "$VARNAME" ]
+# then
+# 	echo "string $VARNAME length is not 0"
+# fi
+#
+# if [ "$VARNAME" = "$VARNAME" ]
+# then
+# 	echo "both strings match!"
+# fi
+# if [ "$VARNAME" != "$VARNAME skjsdkj" ]
+# then
+# 	echo "both strings don't match!"
+# fi
 
 # testing number operations
-VAR=10
-if [ $VAR -eq 10 ]
-then
-	echo "var is equal to $VAR"
-fi
-if [ $VAR -ne 20 ]
-then
-	echo "var is not equal to 20"
-fi
-if [ $VAR -lt 20 ]
-then
-	echo "var is less than 20"
-fi
-if [ $VAR -le 10 ]
-then
-	echo "var is less than or equal to 10"
-fi
-if [ $VAR -gt 5 ]
-then
-	echo "var is greater than 5"
-fi
-if [ $VAR -ge 10 ]; then
-	echo "var is greater than or equal to 10"
-fi
+# VAR=10
+# if [ $VAR -eq 10 ]
+# then
+# 	echo "var is equal to $VAR"
+# fi
+# if [ $VAR -ne 20 ]
+# then
+# 	echo "var is not equal to 20"
+# fi
+# if [ $VAR -lt 20 ]
+# then
+# 	echo "var is less than 20"
+# fi
+# if [ $VAR -le 10 ]
+# then
+# 	echo "var is less than or equal to 10"
+# fi
+# if [ $VAR -gt 5 ]
+# then
+# 	echo "var is greater than 5"
+# fi
+# if [ $VAR -ge 10 ]; then
+# 	echo "var is greater than or equal to 10"
+# fi
+# if [ ! $VAR -ge 10 ]; then
+# 	echo "var is greater than or equal to 10"
+# fi
 
 # TESTVAR=0
 # while (( $TESTVAR < 10 )) 
