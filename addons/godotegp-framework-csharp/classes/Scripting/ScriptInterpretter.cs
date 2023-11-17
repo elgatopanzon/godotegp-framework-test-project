@@ -588,6 +588,11 @@ public partial class ScriptInterpretter : Node
 				// set line content to the temp function
 				lineResult.Stdout = tempFuncName;
 			}
+			else
+			{
+				// trigger reprocessing
+				return lineResult;
+			}
 		}
 
 		// var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
@@ -662,6 +667,14 @@ public partial class ScriptInterpretter : Node
 					break;
 				}
 
+				var ifStatementParsed = ParseBlockStatementOpening(nextLine);
+				if (ifStatementParsed != null && currentLineReturnCode == 1)
+				{
+					LoggerManager.LogDebug("Parsed elif, exiting out");
+					_scriptLineCounter = tempLineCounter - 1;
+					break;
+				}
+
 				if (nextLine == "else")
 				{
 					blockProcessState++;
@@ -683,7 +696,7 @@ public partial class ScriptInterpretter : Node
 
 	public ScriptProcessResult ParseBlockStatementOpening(string line)
 	{
-		string patternBlockStatement = @"^(if|while|for)\[?(.+)*\]*";
+		string patternBlockStatement = @"^(if|elif|while|for)\[?(.+)*\]*";
 		Match isBlockStatement = Regex.Match(line, patternBlockStatement, RegexOptions.Multiline);
 
 		if (isBlockStatement.Groups.Count >= 3)

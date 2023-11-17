@@ -93,6 +93,26 @@ then
 else
 	echo "condition 2 failed"
 fi
+
+if (( 1 = 2 ))
+then
+	echo "eliftest shouldn't be here"
+elif (( 1 = 1 ))
+then
+	echo "eliftest inside should pass"
+else
+	echo "shouldn't reach here"
+fi
+
+nestedfunc() {
+	echo_func "this is inside a function"
+	echo_func "this is inside the same function"
+	nestedfunc2
+}
+nestedfunc2() {
+	echo_func "this is inside a nested-nested function"
+}
+nestedfunc
 # if [ "$(echo_func 123)" = "123" ]
 # then 
 # 	echo "condition 1 passed"
