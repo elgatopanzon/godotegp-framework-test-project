@@ -351,6 +351,8 @@ public partial class ScriptInterpretter : Node
 
 				// resume execution
 				_processState.Transition(STATE_RUNNING);
+
+				_processState.Update();
 			}
 		}
 	}
