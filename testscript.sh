@@ -93,6 +93,68 @@ then
 else
 	echo "condition 2 failed"
 fi
+if (( 1 = 2 ))
+then 
+	echo "condition 2 passed"
+fi
+
+for f in one two three
+do
+	echo $f
+done
+
+# test if var name has been set
+if [ -v FAKEVAR ]
+then
+	echo "it's not set so we'll never see this"
+fi
+if [ ! -v FAKEVAR ]
+then
+	echo "reverse, so we WILL see this"
+fi
+if [ -z "$FAKEVAR" ]
+then
+	echo "string var is empty"
+fi
+if [ -n "$VARNAME" ]
+then
+	echo "string $VARNAME length is not 0"
+fi
+
+if [ "$VARNAME" = "$VARNAME" ]
+then
+	echo "both strings match!"
+fi
+if [ "$VARNAME" != "$VARNAME skjsdkj" ]
+then
+	echo "both strings don't match!"
+fi
+
+# testing number operations
+VAR=10
+if [ $VAR -eq 10 ]
+then
+	echo "var is equal to $VAR"
+fi
+if [ $VAR -ne 20 ]
+then
+	echo "var is not equal to 20"
+fi
+if [ $VAR -lt 20 ]
+then
+	echo "var is less than 20"
+fi
+if [ $VAR -le 10 ]
+then
+	echo "var is less than or equal to 10"
+fi
+if [ $VAR -gt 5 ]
+then
+	echo "var is greater than 5"
+fi
+if [ $VAR -ge 10 ]; then
+	echo "var is greater than or equal to 10"
+fi
 
 # TESTVAR=0
 # while (( $TESTVAR < 10 )) 

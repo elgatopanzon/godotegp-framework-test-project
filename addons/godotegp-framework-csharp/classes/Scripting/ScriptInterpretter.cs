@@ -710,6 +710,14 @@ public partial class ScriptInterpretter : Node
 		
 		int blockProcessState = -1;
 
+		// skip past the then/do line if it's on the same line
+		if (_currentScriptLinesSplit[currentStartLine].Contains("; then") ||
+				_currentScriptLinesSplit[currentStartLine].Contains("; do"))
+		{
+			blockProcessState++;
+		}
+
+
 		bool isLoopMode = false;
 
 		int tempLineCounter = _scriptLineCounter + 1;
@@ -828,6 +836,10 @@ public partial class ScriptInterpretter : Node
 						{
 							conditionTrueCount++;
 						}
+					}
+					else if (conditionType == "condition")
+					{
+						LoggerManager.LogDebug("Evaluating script condition", "", "condition", conditionParams);
 					}
 				}
 			}
