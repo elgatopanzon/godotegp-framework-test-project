@@ -42,7 +42,7 @@ testscript3 "this is a function param"
 
 # some var setting tests
 c="$(a)$(b)"
-c="$( ((a + b)) )"
+c="$( (($a + $b)) )"
 
 echo "testing functions"
 test_func() {
@@ -104,15 +104,24 @@ else
 	echo "shouldn't reach here"
 fi
 
-nestedfunc() {
-	echo_func "this is inside a function"
-	echo_func "this is inside the same function"
-	nestedfunc2
-}
-nestedfunc2() {
-	echo_func "this is inside a $(echo nested-nested) function"
-}
-nestedfunc
+TESTVAR=0
+while (( $TESTVAR < 10 )) 
+do
+	echo "inside loop!"
+	echo "still inside loop!"
+	TESTVAR="(($TESTVAR + 3))"
+	echo "loop count: $TESTVAR!"
+done
+
+# nestedfunc() {
+# 	echo_func "this is inside a function"
+# 	echo_func "this is inside the same function"
+# 	nestedfunc2
+# }
+# nestedfunc2() {
+# 	echo_func "this is inside a $(echo nested-nested) function"
+# }
+# nestedfunc
 # if [ "$(echo_func 123)" = "123" ]
 # then 
 # 	echo "condition 1 passed"

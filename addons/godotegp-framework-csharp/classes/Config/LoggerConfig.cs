@@ -40,7 +40,6 @@ public partial class LoggerConfig : VObject
     				{"VObject", Logging.Message.LogLevel.Info},
     				{"VNative", Logging.Message.LogLevel.Info},
     				{"ObjectPool", Logging.Message.LogLevel.Info},
-    				{"HStateMachine", Logging.Message.LogLevel.Info},
             	})
         	.ChangeEventsEnabled()
             ;

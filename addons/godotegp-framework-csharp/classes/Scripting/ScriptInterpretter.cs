@@ -71,6 +71,13 @@ public partial class ScriptInterpretter : Node
 	private int _childScriptHash = 0;
 	private bool _childScriptKeepEnv = false;
 
+	private ScriptInterpretter _parentScript;
+	public ScriptInterpretter ParentScript
+	{
+		get { return _parentScript; }
+		set { _parentScript = value; }
+	}
+
 	private bool _processFinished;
 	public bool ProcessFinished
 	{
@@ -99,7 +106,7 @@ public partial class ScriptInterpretter : Node
 	}
 
 	private double _deltaCounter = 0;
-	private double _deltaTimeStep = 0.01875;
+	private double _deltaTimeStep = 0.03333;
 	// 0.5 = 2 per sec
 	// 0.05 = 20 per sec
 	// 0.025 = 40 per sec
@@ -201,7 +208,8 @@ public partial class ScriptInterpretter : Node
 		return (
 			IsValidScriptName(func) || // scripts as function name
 			_scriptFunctions.ContainsKey(func) || // function registry
-			func == "source" // built in method source (TODO: re-implement this as _builtinFunctions property)
+			func == "source" || // built in method source (TODO: re-implement this as _builtinFunctions property)
+			func == "goto" // built in method source (TODO: re-implement this as _builtinFunctions property)
 			);
 	}
 
@@ -312,10 +320,7 @@ public partial class ScriptInterpretter : Node
 
 	public void _State_Waiting_OnUpdate()
 	{
-		// TODO: implement transition back to running state after we waited for
-		// what we want to wait for
 		// _processState.Transition(STATE_RUNNING);
-
 		// if we have a child script, then we're waiting for it
 		if (_childScript != null)
 		{
@@ -362,7 +367,6 @@ public partial class ScriptInterpretter : Node
 
 				// resume execution
 				_processState.Transition(STATE_RUNNING);
-
 				_processState.Update();
 			}
 		}
@@ -392,6 +396,16 @@ public partial class ScriptInterpretter : Node
 
 			return ExecuteFunctionCall(func, funcParams);
 		}
+		else if (func == "goto")
+		{
+
+			// created a function call as if we are calling this script directly
+			LoggerManager.LogDebug("Goto called", "", "goto", funcParams[0]);
+
+			_scriptLineCounter = Convert.ToInt32(funcParams[0]) - 1;
+
+			return new ScriptProcessResult(0);
+		}
 		else if (_scriptFunctions.ContainsKey(func))
 		{
 			ScriptProcessResult res;
@@ -415,6 +429,7 @@ public partial class ScriptInterpretter : Node
 
 			// create a child script interpreter instance to run the script
 			_childScript = new ScriptInterpretter(_gameScripts, _scriptFunctions, scriptParams: funcParams);
+			_childScript._parentScript = this;
 			AddChild(_childScript);
 
 			// set child vars to match ours
@@ -571,6 +586,19 @@ public partial class ScriptInterpretter : Node
 			// TODO: implement expression processing
 			// lineResult = ExecuteExpression(lineProcess.Expression, lineResult);
 			LoggerManager.LogDebug("Expression found", "", "exp", lineProcess);
+			try
+			{
+				var expressionRes = ExecuteScriptExpression(lineProcess.Expression.Trim());
+				LoggerManager.LogDebug("Expression render", "", "expRes", expressionRes);
+				lineResult.Stdout = lineResult.Stdout.Replace("(("+lineProcess.Expression.Trim()+"))", expressionRes.ToString());
+			}
+			catch (System.Exception e)
+			{
+				lineResult.ReturnCode = 127;
+				lineResult.Stderr = e.Message;
+
+				break;
+			}
 		}
 		// processes.AddRange(ParseExpressions(line));
 
@@ -605,7 +633,6 @@ public partial class ScriptInterpretter : Node
 		var ifStatementParsed = ParseBlockStatementOpening(lineResult.Result);
 		if (ifStatementParsed != null)
 		{
-
 			LoggerManager.LogDebug("Found block statement", "", "if", ifStatementParsed.Stdout);
 
 			if (ifStatementParsed.ReturnCode == 0)
@@ -676,6 +703,7 @@ public partial class ScriptInterpretter : Node
 	public List<string> ParseBlockStatementLines(int currentLineReturnCode = 0)
 	{
 		List<string> parsedLines = new();
+		int currentStartLine = _scriptLineCounter;
 
 		// look ahead to extract the lines inside the if block, and the lines
 		// inside any else block, until we reach a fi/done
@@ -704,6 +732,14 @@ public partial class ScriptInterpretter : Node
 				if (nextLine == "fi" || nextLine == "done")
 				{
 					_scriptLineCounter = tempLineCounter;
+
+					// inject a goto into the return script to return to the
+					// current line of the loop to continue executing it
+					if (nextLine == "done" && currentLineReturnCode == 0)
+					{
+						_scriptLineCounter = currentStartLine - 1;
+						LoggerManager.LogDebug("End of loop, returning to line", "", "line", _currentScriptLinesSplit[_scriptLineCounter+1]);
+					}
 					break;
 				}
 
@@ -746,6 +782,7 @@ public partial class ScriptInterpretter : Node
 
 			var conditions = ParseProcessBlockConditions(statementCondition);
 
+			LoggerManager.LogDebug($"Parsed {statementType} start", "", "line", line);
 			LoggerManager.LogDebug($"Parsed {statementType} start", "", "conditions", conditions);
 
 			int conditionTrueCount = 0;
@@ -777,7 +814,7 @@ public partial class ScriptInterpretter : Node
 
 					if (conditionType == "expr")
 					{
-						var conditionParseRes = (dynamic) ParseBlockStatementCondition(conditionParams[0]);
+						var conditionParseRes = (dynamic) ExecuteScriptExpression(conditionParams[0]);
 						LoggerManager.LogDebug($"Condition {i} expr result", "", "res", conditionParseRes);
 
 						if (conditionParseRes is bool rb && rb == true)
@@ -804,10 +841,11 @@ public partial class ScriptInterpretter : Node
 		return null;
 	}
 
-	public object ParseBlockStatementCondition(string condition)
+	public object ExecuteScriptExpression(string expression)
 	{
 		System.Data.DataTable table = new System.Data.DataTable();
-		return table.Compute(condition.ToString(), null);
+		var r = table.Compute(expression.ToString(), null);
+		return r;
 	}
 
 	// parse a line starting with if/while/for as a block of script to be
@@ -1075,7 +1113,7 @@ public partial class ScriptInterpretter : Node
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
-		string patternExpression = @"^\(\((.+)\)\)";
+		string patternExpression = @"\(\((.+)\)\)";
 		MatchCollection expressionMatches = Regex.Matches(line, patternExpression);
 
 		foreach (Match match in expressionMatches)
