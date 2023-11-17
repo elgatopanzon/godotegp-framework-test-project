@@ -706,6 +706,7 @@ public partial class ScriptInterpretter : Node
 			else
 			{
 				// trigger reprocessing
+				lineResult.Stdout = "";
 				return lineResult;
 			}
 		}
@@ -723,7 +724,7 @@ public partial class ScriptInterpretter : Node
 			// case AND function calls
 			if (varAssignmentProcesses.Count == 0)
 			{
-				foreach (ScriptProcessFunctionCall lineProcess in ParseFunctionCalls(lineResult.Result))
+				foreach (ScriptProcessFunctionCall lineProcess in ParseFunctionCalls(lineResult.Result, verifyFunctionName: true))
 				{
 					lineResult = ExecuteFunctionCall(lineProcess.Function, lineProcess.Params.ToArray());
 				}
@@ -1015,8 +1016,7 @@ public partial class ScriptInterpretter : Node
 	public object ExecuteScriptExpression(string expression)
 	{
 		System.Data.DataTable table = new System.Data.DataTable();
-		var r = table.Compute(expression.ToString(), null);
-		return r;
+		return table.Compute(expression.ToString(), null);
 	}
 
 	// parse a line starting with if/while/for as a block of script to be
@@ -1387,6 +1387,9 @@ public partial class ScriptInterpretter : Node
 					processes.Add(new ScriptProcessFunctionCall(line, funcName, funcParams));
 					// LoggerManager.LogDebug("Function call match", "", "call", $"func name: {funcName}, params: [{string.Join("|", funcParams.ToArray())}]");
 				}
+				// else {
+				// 	processes.Add(new ScriptProcessFunctionCall(line, "echo", new List<string>() { $"err: command not found: {funcName}" }));
+				// }
 
 			}
 		}

@@ -17,6 +17,7 @@ echo asd | cat
 test_func | fake_stdin
 
 $(echo "nested line line" | fake_stdin) | fake_stdin
+fakefunc
 
 # echo "this text should act like a simple print statement"
 # echo "testing: setting variables content"
