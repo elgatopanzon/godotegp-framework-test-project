@@ -447,10 +447,14 @@ public partial class ScriptInterpretter : Node
 			AddChild(_childScript);
 
 			// set child vars to match ours
-			// if (_childScriptKeepEnv || _gameScriptFunctionNames.Contains(func))
-			// {
+			if (_childScriptKeepEnv || _gameScriptFunctionNames.Contains(func))
+			{
 				_childScript._scriptVars = _scriptVars;
-			// }
+			}
+			if (_scriptVars.ContainsKey("STDIN"))
+			{
+				_childScript._scriptVars["STDIN"] = _scriptVars["STDIN"];
+			}
 
 			LoggerManager.LogDebug("Creating child script", "", "stdin", _childScript.GetVariableValue("STDIN"));
 

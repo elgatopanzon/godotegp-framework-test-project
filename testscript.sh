@@ -40,6 +40,7 @@ VARNAME="this is cool!"
 testscript2
 source testscript2
 echo $TESTVAR
+fake_stdin
 
 # echo "this text should act like a simple print statement"
 # echo "testing: setting variables content"
