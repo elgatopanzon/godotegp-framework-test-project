@@ -34,7 +34,21 @@ public partial class Source : IScriptFunction
 		string func = (string) p[0];
 		p = p.Skip(1).ToArray();
 
+		i.ChildKeepEnv = true;
+
 		return i.ExecuteFunctionCall(func, p as string[]);
+	}
+}
+
+public partial class Goto : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		LoggerManager.LogDebug("Goto called", "", "goto", p[0]);
+
+		i.ScriptLinerCounter = Convert.ToInt32(p[0]) - 1;
+
+		return new ScriptProcessResult(0);
 	}
 }
 

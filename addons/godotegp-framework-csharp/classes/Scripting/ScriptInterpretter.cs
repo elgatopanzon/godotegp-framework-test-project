@@ -47,6 +47,12 @@ public partial class ScriptInterpretter : Node
 	private string[] _currentScriptLinesSplit;
 	private int _scriptLineCounter = 0;
 
+	public int ScriptLinerCounter
+	{
+		get { return _scriptLineCounter; }
+		set { _scriptLineCounter = value; }
+	}
+
 	private string[] _scriptPipeQueue = new string[] {};
 
 	private List<ScriptProcessResult> _scriptLineResults = new List<ScriptProcessResult>();
@@ -72,6 +78,12 @@ public partial class ScriptInterpretter : Node
 	private ScriptInterpretter _childScript;
 	private int _childScriptHash = 0;
 	private bool _childScriptKeepEnv = false;
+
+	public bool ChildKeepEnv
+	{
+		get { return _childScriptKeepEnv; }
+		set { _childScriptKeepEnv = value; }
+	}
 
 	private ScriptInterpretter _parentScript;
 	public ScriptInterpretter ParentScript
@@ -211,9 +223,7 @@ public partial class ScriptInterpretter : Node
 	{
 		return (
 			IsValidScriptName(func) || // scripts as function name
-			_scriptFunctions.ContainsKey(func) || // function registry
-			func == "source" || // built in method source (TODO: re-implement this as _builtinFunctions property)
-			func == "goto" // built in method source (TODO: re-implement this as _builtinFunctions property)
+			_scriptFunctions.ContainsKey(func)
 			);
 	}
 
@@ -403,28 +413,7 @@ public partial class ScriptInterpretter : Node
 	// main script process execution functions
 	public ScriptProcessResult ExecuteFunctionCall(string func, params string[] funcParams)
 	{
-		if (func == "source")
-		{
-			LoggerManager.LogDebug("Source called");
-
-			// created a function call as if we are calling this script directly
-			func = funcParams[0];
-			funcParams = funcParams.Skip(1).ToArray();
-
-			_childScriptKeepEnv = true;
-
-			return ExecuteFunctionCall(func, funcParams);
-		}
-		else if (func == "goto")
-		{
-			// created a function call as if we are calling this script directly
-			LoggerManager.LogDebug("Goto called", "", "goto", funcParams[0]);
-
-			_scriptLineCounter = Convert.ToInt32(funcParams[0]) - 1;
-
-			return new ScriptProcessResult(0);
-		}
-		else if (_scriptFunctions.ContainsKey(func))
+		if (_scriptFunctions.ContainsKey(func))
 		{
 			ScriptProcessResult res;
 
