@@ -98,6 +98,13 @@ public partial class ScriptInterpretter : Node
 		}
 	}
 
+	private double _deltaCounter = 0;
+	private double _deltaTimeStep = 0.01875;
+	// 0.5 = 2 per sec
+	// 0.05 = 20 per sec
+	// 0.025 = 40 per sec
+	// 0.0125 = 80 per sec
+
 	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts, Dictionary<string, IScriptFunction> scriptFuncs, string[] scriptParams = null)
 	{
 		_scriptParams = scriptParams;
@@ -130,7 +137,10 @@ public partial class ScriptInterpretter : Node
 	
 	public override void _Process(double delta)
 	{
-		_processState.Update();
+		for (_deltaCounter += delta; _deltaCounter >= _deltaTimeStep; _deltaCounter -= _deltaTimeStep)
+		{
+			_processState.Update();
+		}
 	}
 
 	/****************************
