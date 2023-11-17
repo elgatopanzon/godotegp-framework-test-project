@@ -75,6 +75,49 @@ echo "last statement"
 FUNCRES="$(testscript2)"
 echo "$FUNCRES"
 
+# evaluateexpression "1 = 1"
+# evaluateexpression ""123" = "123""
+# evaluateexpression ""123" = "123""
+# evaluateexpression "true"
+# evaluateexpression "(2 * 5) + 12 / 6"
+
+if (( 1 = 1 ))
+then 
+	echo "condition 1 passed"
+else
+	echo "condition 1 failed"
+fi
+if (( 1 = 2 ))
+then 
+	echo "condition 2 passed"
+else
+	echo "condition 2 failed"
+fi
+# if [ "$(echo_func 123)" = "123" ]
+# then 
+# 	echo "condition 1 passed"
+# fi
+# if (( $VARFLOAT = 1 ))
+# then 
+# 	echo "condition 1 passed"
+# fi
+# if (( $VARFLOAT = $VARFLOAT ))
+# then 
+# 	echo "condition 1 passed"
+# fi
+# if (( $VARFLOAT = 1 )) || (( 1 <= $VARFLOAT ))
+# then 
+# 	echo "condition 1 passed"
+# fi
+# if [ $VARFLOAT = $VARINT ]
+# then 
+# 	echo "condition 2 passed"
+# fi
+# if [ "$VARNAME" = "$VARNAME" ] || [ "$VARNAME" = "$VARNAME" ]
+# then 
+# 	echo_func "$(echo_func condition 3 passed)"
+# fi
+
 # # parsing of conditionals
 # if [ "$(echo_func "123" )" = "123" ]; 
 # then

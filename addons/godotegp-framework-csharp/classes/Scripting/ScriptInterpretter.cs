@@ -127,7 +127,7 @@ public partial class ScriptInterpretter : Node
 	*  Godot methods  *
 	*******************/
 	
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
 		_processState.Update();
 	}
@@ -522,7 +522,6 @@ public partial class ScriptInterpretter : Node
 		foreach (ScriptProcessVarSubstitution lineProcess in ParseVarSubstitutions(lineResult.Result))
 		{
 			lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
-			LoggerManager.LogDebug("Sub res", "", "r", lineResult);
 		}
 		// processes.AddRange(ParseVarSubstitutions(line));
 
@@ -531,6 +530,7 @@ public partial class ScriptInterpretter : Node
 		{
 			// TODO: implement expression processing
 			// lineResult = ExecuteExpression(lineProcess.Expression, lineResult);
+			LoggerManager.LogDebug("Expression found", "", "exp", lineProcess);
 		}
 		// processes.AddRange(ParseExpressions(line));
 
@@ -559,6 +559,35 @@ public partial class ScriptInterpretter : Node
 		if (lineResult.ReturnCode != 0)
 		{
 			return lineResult;
+		}
+
+		// process if statement
+		var ifStatementParsed = ParseBlockStatementOpening(lineResult.Result);
+		if (ifStatementParsed != null)
+		{
+
+			LoggerManager.LogDebug("Found block statement", "", "if", ifStatementParsed.Stdout);
+
+			if (ifStatementParsed.ReturnCode == 0)
+			{
+				LoggerManager.LogDebug("Enter block statement!", "", "line", lineResult.Stdout);
+			}
+			else
+			{
+				LoggerManager.LogDebug("Skip block statement", "", "line", lineResult.Stdout);
+			}
+
+			var parsedBlockLines = ParseBlockStatementLines(ifStatementParsed.ReturnCode);
+
+			LoggerManager.LogDebug("Parsed block lines", "", "lines", parsedBlockLines);
+			if (parsedBlockLines.Count > 0)
+			{
+				string tempFuncName = $"{_scriptLineCounter}_{GetHashCode()}";
+				RegisterFunctionFromContent(tempFuncName, parsedBlockLines.ToArray().Join("\n"));
+				
+				// set line content to the temp function
+				lineResult.Stdout = tempFuncName;
+			}
 		}
 
 		// var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
@@ -598,6 +627,135 @@ public partial class ScriptInterpretter : Node
 	/**************************************
 	*  Parse if/while/for block methods  *
 	**************************************/
+
+	public List<string> ParseBlockStatementLines(int currentLineReturnCode = 0)
+	{
+		List<string> parsedLines = new();
+
+		// look ahead to extract the lines inside the if block, and the lines
+		// inside any else block, until we reach a fi/done
+		
+		int blockProcessState = -1;
+
+		int tempLineCounter = _scriptLineCounter + 1;
+		while (tempLineCounter < _currentScriptLinesSplit.Count())
+		{
+			string nextLine = _currentScriptLinesSplit[tempLineCounter].Trim();
+
+			// look for then/do, and continue
+			if (blockProcessState == -1)
+			{
+				if (nextLine == "then" || nextLine == "do")
+				{
+					blockProcessState++;
+				}
+			}
+
+			// look for lines or end
+			// 1 = if content
+			else if (blockProcessState >= 0)
+			{
+				// if its an end, stop the loop
+				if (nextLine == "fi" || nextLine == "done")
+				{
+					_scriptLineCounter = tempLineCounter;
+					break;
+				}
+
+				if (nextLine == "else")
+				{
+					blockProcessState++;
+					tempLineCounter++;
+					continue;
+				}
+
+				if (blockProcessState == currentLineReturnCode)
+				{
+					parsedLines.Add(nextLine);
+				}
+			}
+
+			tempLineCounter++;
+		}
+
+		return parsedLines;
+	}
+
+	public ScriptProcessResult ParseBlockStatementOpening(string line)
+	{
+		string patternBlockStatement = @"^(if|while|for)\[?(.+)*\]*";
+		Match isBlockStatement = Regex.Match(line, patternBlockStatement, RegexOptions.Multiline);
+
+		if (isBlockStatement.Groups.Count >= 3)
+		{
+			string statementType = isBlockStatement.Groups[1].Value;
+			string statementCondition = isBlockStatement.Groups[2].Value.Trim();
+
+			var conditions = ParseProcessBlockConditions(statementCondition);
+
+			LoggerManager.LogDebug($"Parsed {statementType} start", "", "conditions", conditions);
+
+			int conditionTrueCount = 0;
+
+			int andOr = -1;
+			for (int i = 0; i < conditions.Count; i++)
+			{
+				var condition = conditions[i];
+				ScriptProcessOperation functionParse = condition.Item1[0];
+
+				// set andOr type to AND or OR mode
+				if (andOr == -1 && (condition.Item2 == "||"))
+				{
+					// LoggerManager.LogDebug($"Condition {i} compare type", "", "compareType", "OR");
+					andOr = 1;
+				}
+				else if (andOr == -1 && (condition.Item2 == ""))
+				{
+					// LoggerManager.LogDebug($"Condition {i} compare type", "", "compareType", "AND");
+					andOr = 0;
+				}
+
+				if (functionParse is ScriptProcessFunctionCall fc)
+				{
+					List<string> conditionParams = fc.Params;
+					string conditionType = fc.Function;
+
+					// LoggerManager.LogDebug($"Condition {i} {conditionType}", "", "condition", conditionParams);
+
+					if (conditionType == "expr")
+					{
+						var conditionParseRes = (dynamic) ParseBlockStatementCondition(conditionParams[0]);
+						LoggerManager.LogDebug($"Condition {i} expr result", "", "res", conditionParseRes);
+
+						if (conditionParseRes is bool rb && rb == true)
+						{
+							conditionTrueCount++;
+						}
+					}
+				}
+			}
+
+			bool conditionTrue = false;
+			if ((conditionTrueCount == conditions.Count && andOr == 0))
+			{
+				conditionTrue = true;
+			}
+			else if ((conditionTrueCount >= 1 && andOr == 1))
+			{
+				conditionTrue = true;
+			}
+
+			return new ScriptProcessResult((conditionTrue) ? 0 : 1, line);
+		}
+
+		return null;
+	}
+
+	public object ParseBlockStatementCondition(string condition)
+	{
+		System.Data.DataTable table = new System.Data.DataTable();
+		return table.Compute(condition.ToString(), null);
+	}
 
 	// parse a line starting with if/while/for as a block of script to be
 	// treated up the stack as a single process object
@@ -722,23 +880,36 @@ public partial class ScriptInterpretter : Node
 	public List<(List<ScriptProcessOperation>, string)> ParseProcessBlockConditions(string scriptLine)
 	{
 		string patternBlockProcessCondition = @"\[(.*?)\] ?(\|?\|?)";
+		string patternBlockProcessConditionExpression = @"\(\((.*?)\)\) ?(\|?\|?)";
 
 		MatchCollection blockProcessConditionMatches = Regex.Matches(scriptLine, patternBlockProcessCondition, RegexOptions.Multiline);
+		MatchCollection blockProcessConditionMatchesExpressions = Regex.Matches(scriptLine, patternBlockProcessConditionExpression, RegexOptions.Multiline);
 
 		List<(List<ScriptProcessOperation>, string)> conditionsList = new List<(List<ScriptProcessOperation>, string)>();
 
-		if (scriptLine.StartsWith("for "))
-		{
-			conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(scriptLine.Replace("for ", "")).Stdout)}, ""));
-		}
+		// if (scriptLine.StartsWith("for "))
+		// {
+		// 	conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(scriptLine.Replace("for ", "")).Stdout)}, ""));
+		// }
 
+		// process condition brackets
 		foreach (Match match in blockProcessConditionMatches)
 		{
 			string blockConditionInside = match.Groups[1].Value;
 			string blockConditionCompareType = match.Groups[2].Value;
 
 			// var interpretted = InterpretLine(blockConditionInside.Trim());
-			conditionsList.Add((ParseFunctionCalls("evalcondition " + InterpretLine(blockConditionInside.Trim()).Stdout), blockConditionCompareType.Trim()));
+			conditionsList.Add((ParseFunctionCalls("condition " + InterpretLine(blockConditionInside.Trim()).Stdout, verifyFunctionName: false), blockConditionCompareType.Trim()));
+		}
+
+		// process expression matches
+		foreach (Match match in blockProcessConditionMatchesExpressions)
+		{
+			string blockConditionInside = match.Groups[1].Value;
+			string blockConditionCompareType = match.Groups[2].Value;
+
+			// var interpretted = InterpretLine(blockConditionInside.Trim());
+			conditionsList.Add((ParseFunctionCalls("expr \"" + InterpretLine(blockConditionInside.Trim()).Stdout+ "\"", verifyFunctionName: false), blockConditionCompareType.Trim()));
 		}
 
 		return conditionsList;
@@ -851,7 +1022,7 @@ public partial class ScriptInterpretter : Node
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
-		string patternExpression = @"\(\((.+)\)\)";
+		string patternExpression = @"^\(\((.+)\)\)";
 		MatchCollection expressionMatches = Regex.Matches(line, patternExpression);
 
 		foreach (Match match in expressionMatches)
@@ -906,7 +1077,7 @@ public partial class ScriptInterpretter : Node
 	}
 
 	// parse function calls with params in a script line
-	public List<ScriptProcessOperation> ParseFunctionCalls(string line)
+	public List<ScriptProcessOperation> ParseFunctionCalls(string line, bool verifyFunctionName = true)
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
@@ -939,7 +1110,7 @@ public partial class ScriptInterpretter : Node
 					nm = nm.NextMatch();
 				}
 
-				if (IsValidFunction(funcName))
+				if (IsValidFunction(funcName) || verifyFunctionName == false)
 				{
 					processes.Add(new ScriptProcessFunctionCall(line, funcName, funcParams));
 					// LoggerManager.LogDebug("Function call match", "", "call", $"func name: {funcName}, params: [{string.Join("|", funcParams.ToArray())}]");
