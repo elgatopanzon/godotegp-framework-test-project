@@ -128,7 +128,7 @@ public partial class ScriptInterpretter : Node
 	*  Godot methods  *
 	*******************/
 	
-	public override void _PhysicsProcess(double delta)
+	public override void _Process(double delta)
 	{
 		_processState.Update();
 	}
@@ -231,6 +231,7 @@ public partial class ScriptInterpretter : Node
 
 
 		_processState.Transition(STATE_RUNNING);
+		_processState.Update();
 	}
 
 	public void _State_Running_OnUpdate()
