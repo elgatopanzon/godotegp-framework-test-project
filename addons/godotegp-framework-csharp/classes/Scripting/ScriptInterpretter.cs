@@ -412,7 +412,6 @@ public partial class ScriptInterpretter : Node
 		}
 		else if (func == "goto")
 		{
-
 			// created a function call as if we are calling this script directly
 			LoggerManager.LogDebug("Goto called", "", "goto", funcParams[0]);
 
@@ -1278,7 +1277,7 @@ public partial class ScriptInterpretter : Node
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
-		string patternVarSubstitution = @"\$([a-zA-Z0-9_\[\]'#?@*]+)";
+		string patternVarSubstitution = @"\$([a-zA-Z0-9_\[\]']+)|\$([#?@*])";
 		MatchCollection varSubstitutionMatches = Regex.Matches(line, patternVarSubstitution);
 
 		foreach (Match match in varSubstitutionMatches.Reverse())

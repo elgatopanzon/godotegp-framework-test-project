@@ -7,6 +7,7 @@
 namespace GodotEGP.Scripting.Functions;
 
 using System;
+using System.Linq;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -20,6 +21,20 @@ public partial class Echo : IScriptFunction
 	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		return new ScriptProcessResult(0, (p as string[]).Join(" "));
+	}
+}
+
+public partial class Source : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		LoggerManager.LogDebug("Source called");
+
+		// created a function call as if we are calling this script directly
+		string func = (string) p[0];
+		p = p.Skip(1).ToArray();
+
+		return i.ExecuteFunctionCall(func, p as string[]);
 	}
 }
 

@@ -19,23 +19,27 @@ test_func | fake_stdin
 $(echo "nested line line" | fake_stdin) | fake_stdin
 
 
-TESTVAR=0
-while (( $TESTVAR < 10 )) 
-do
-	echo "inside loop!"
-	echo "still inside loop!"
-	TESTVAR="(($TESTVAR + 3))"
-	echo "loop count: $TESTVAR!"
-	if (( $TESTVAR < 5 ))
-	then
-		echo "low!"		
-	else
-		echo "high!"
-	fi
-done
+# TESTVAR=0
+# while (( $TESTVAR < 10 )) 
+# do
+# 	echo "inside loop!"
+# 	echo "still inside loop!"
+# 	TESTVAR="(($TESTVAR + 3))"
+# 	echo "loop count: $TESTVAR!"
+# 	if (( $TESTVAR < 5 ))
+# 	then
+# 		echo "low!"		
+# 	else
+# 		echo "high!"
+# 	fi
+# done
 
 
 fakefunc
+VARNAME="this is cool!"
+testscript2
+source testscript2
+echo $TESTVAR
 
 # echo "this text should act like a simple print statement"
 # echo "testing: setting variables content"
@@ -73,7 +77,6 @@ fakefunc
 # # testing calling other scripts as functions
 # testscript2
 # echo "is it true: $TESTVAR"
-# source testscript2
 # echo "is it true: $TESTVAR"
 # testscript3 "this is a function param"
 #
