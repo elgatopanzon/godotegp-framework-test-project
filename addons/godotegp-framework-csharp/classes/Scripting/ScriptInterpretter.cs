@@ -370,6 +370,11 @@ public partial class ScriptInterpretter : Node
 					_currentScriptLinesSplit[_scriptLineCounter] = _scriptLineResult.Stdout;
 				}
 
+				if (_scriptPipeQueue.Count() == 0)
+				{
+					_scriptVars["STDIN"] = "";
+				}
+
 				_childScriptHash = _childScript.GetHashCode();
 
 				// clear child script instance since we're done with it
