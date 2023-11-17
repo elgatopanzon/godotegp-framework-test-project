@@ -24,6 +24,22 @@ public partial class Echo : IScriptFunction
 	}
 }
 
+public partial class Return : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		i.ScriptLinerCounter = i.CurrentScriptLineCount();
+
+		int returnCode = 0;
+		if (p.Count() > 0)
+		{
+			returnCode = Convert.ToInt32(p[0]);
+		}
+
+		return new ScriptProcessResult(returnCode);
+	}
+}
+
 public partial class Source : IScriptFunction
 {
 	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)

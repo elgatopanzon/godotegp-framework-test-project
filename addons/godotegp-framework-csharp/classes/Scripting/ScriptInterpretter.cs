@@ -227,6 +227,11 @@ public partial class ScriptInterpretter : Node
 			);
 	}
 
+	public int CurrentScriptLineCount()
+	{
+		return _currentScriptLinesSplit.Count();
+	}
+
 	public void Reset()
 	{
 		_scriptLineResult = null;
@@ -377,6 +382,15 @@ public partial class ScriptInterpretter : Node
 					_scriptLineCounter--;
 					LoggerManager.LogDebug("Async line to reprocess", "", "line", _currentScriptLinesSplit[_scriptLineCounter]);
 
+					_currentScriptLinesSplit[_scriptLineCounter] = _scriptLineResult.Stdout;
+				}
+
+				// fix: when a block statement contains one or more nested line,
+				// reprocess the line to evaluate the final block statement
+				if (ParseBlockStatementOpening(_scriptLineResult.Result, parseConditions: true) != null)
+				{
+					LoggerManager.LogDebug("Found block statement opening line in async result");
+					_scriptLineCounter--;
 					_currentScriptLinesSplit[_scriptLineCounter] = _scriptLineResult.Stdout;
 				}
 
@@ -834,12 +848,12 @@ public partial class ScriptInterpretter : Node
 		return parsedLines;
 	}
 
-	public ScriptProcessResult ParseBlockStatementOpening(string line)
+	public ScriptProcessResult ParseBlockStatementOpening(string line, bool parseConditions = true)
 	{
 		string patternBlockStatement = @"^(if|elif|while|for)\[?(.+)*\]*";
 		Match isBlockStatement = Regex.Match(line, patternBlockStatement, RegexOptions.Multiline);
 
-		if (isBlockStatement.Groups.Count >= 3)
+		if (isBlockStatement.Groups.Count >= 3 && parseConditions)
 		{
 			string statementType = isBlockStatement.Groups[1].Value;
 			string statementCondition = isBlockStatement.Groups[2].Value.Trim();
@@ -894,6 +908,13 @@ public partial class ScriptInterpretter : Node
 						if (reverseCondition)
 						{
 							conditionParams = conditionParams.Skip(1).ToList();
+						}
+
+						// if there's just a single param, replace it with a -n
+						if (conditionParams.Count() == 1)
+						{
+							conditionParams.Add("-n");
+							conditionParams.Reverse();
 						}
 
 						bool conditionRes = false;
@@ -1008,6 +1029,10 @@ public partial class ScriptInterpretter : Node
 			}
 
 			return new ScriptProcessResult((conditionTrue) ? 0 : 1, line);
+		}
+		else if (isBlockStatement.Groups.Count >= 3 && parseConditions == false)
+		{
+			return new ScriptProcessResult(0);
 		}
 
 		return null;
@@ -1617,9 +1642,14 @@ public class ScriptProcessResult
 		{
 			return _stdout;
 		}
+		else if (_returnCode != 0 && _stderr.Length > 0)
+		{
+			
+			return $"err {_returnCode}: {_stderr}";
+		}
 		else
 		{
-			return $"err {_returnCode}: {_stderr}";
+			return _stdout;
 		}
 	}
 }

@@ -35,12 +35,38 @@ $(echo "nested line line" | fake_stdin) | fake_stdin
 # done
 
 
-fakefunc
-VARNAME="this is cool!"
-testscript2
-source testscript2
-echo $TESTVAR
-fake_stdin
+# fakefunc
+# VARNAME="this is cool!"
+# testscript2
+# source testscript2
+# echo $TESTVAR
+# fake_stdin
+
+func_returns_0() {
+	echo "a good function"
+	return 0
+}
+func_returns_1() {
+	echo "a bad function"
+	return 0
+}
+
+if func_returns_0; then
+	echo "the good function returned 0!"
+fi
+if func_returns_1; then
+	echo "the bad function returned 0, naughty!"
+fi
+
+echo "testing multiple nested lines in function conditions"
+if [ "$(func_returns_0)" = "$(func_returns_1)" ]
+then
+	echo "does it work with 2 nested calls?"
+fi
+if [ "1" = "2" ]
+then
+	echo "1 = 2???"
+fi
 
 # echo "this text should act like a simple print statement"
 # echo "testing: setting variables content"
@@ -151,10 +177,6 @@ fake_stdin
 # if [ -z "$FAKEVAR" ]
 # then
 # 	echo "string var is empty"
-# fi
-# if [ -n "$VARNAME" ]
-# then
-# 	echo "string $VARNAME length is not 0"
 # fi
 #
 # if [ "$VARNAME" = "$VARNAME" ]
