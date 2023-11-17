@@ -17,6 +17,24 @@ echo asd | cat
 test_func | fake_stdin
 
 $(echo "nested line line" | fake_stdin) | fake_stdin
+
+
+TESTVAR=0
+while (( $TESTVAR < 10 )) 
+do
+	echo "inside loop!"
+	echo "still inside loop!"
+	TESTVAR="(($TESTVAR + 3))"
+	echo "loop count: $TESTVAR!"
+	if (( $TESTVAR < 5 ))
+	then
+		echo "low!"		
+	else
+		echo "high!"
+	fi
+done
+
+
 fakefunc
 
 # echo "this text should act like a simple print statement"
@@ -173,20 +191,6 @@ fakefunc
 # 	echo "var is greater than or equal to 10"
 # fi
 
-# TESTVAR=0
-# while (( $TESTVAR < 10 )) 
-# do
-# 	echo "inside loop!"
-# 	echo "still inside loop!"
-# 	TESTVAR="(($TESTVAR + 3))"
-# 	echo "loop count: $TESTVAR!"
-# 	if (( $TESTVAR < 5 ))
-# 	then
-# 		echo "low!"		
-# 	else
-# 		echo "high!"
-# 	fi
-# done
 #
 # echo "yay!"
 

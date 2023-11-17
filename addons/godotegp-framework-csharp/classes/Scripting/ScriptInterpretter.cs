@@ -569,7 +569,7 @@ public partial class ScriptInterpretter : Node
 
 	// accepts a single script line and generates a list of process objects to
 	// achieve the final rendered result for each line
-	public ScriptProcessResult InterpretLine(string line)
+	public ScriptProcessResult InterpretLine(string line, bool verifyFunctionName = false)
 	{
 		// TODO: split and process lines with ; and pipes
 		// var lineSplitPipe = line.Split(new string[] {"|"}, StringSplitOptions.None).Select(x => x.Trim()).ToArray();
@@ -724,7 +724,7 @@ public partial class ScriptInterpretter : Node
 			// case AND function calls
 			if (varAssignmentProcesses.Count == 0)
 			{
-				foreach (ScriptProcessFunctionCall lineProcess in ParseFunctionCalls(lineResult.Result, verifyFunctionName: true))
+				foreach (ScriptProcessFunctionCall lineProcess in ParseFunctionCalls(lineResult.Result, verifyFunctionName: verifyFunctionName))
 				{
 					lineResult = ExecuteFunctionCall(lineProcess.Function, lineProcess.Params.ToArray());
 				}
@@ -1161,7 +1161,7 @@ public partial class ScriptInterpretter : Node
 			string blockConditionCompareType = match.Groups[2].Value;
 
 			// var interpretted = InterpretLine(blockConditionInside.Trim());
-			conditionsList.Add((ParseFunctionCalls("condition " + InterpretLine(blockConditionInside.Trim()).Stdout, verifyFunctionName: false), blockConditionCompareType.Trim()));
+			conditionsList.Add((ParseFunctionCalls("condition " + InterpretLine(blockConditionInside.Trim(), true).Stdout, verifyFunctionName: false), blockConditionCompareType.Trim()));
 		}
 
 		// process expression matches
@@ -1171,7 +1171,7 @@ public partial class ScriptInterpretter : Node
 			string blockConditionCompareType = match.Groups[2].Value;
 
 			// var interpretted = InterpretLine(blockConditionInside.Trim());
-			conditionsList.Add((ParseFunctionCalls("expr \"" + InterpretLine(blockConditionInside.Trim()).Stdout+ "\"", verifyFunctionName: false), blockConditionCompareType.Trim()));
+			conditionsList.Add((ParseFunctionCalls("expr \"" + InterpretLine(blockConditionInside.Trim(), true).Stdout+ "\"", verifyFunctionName: false), blockConditionCompareType.Trim()));
 		}
 
 		return conditionsList;
