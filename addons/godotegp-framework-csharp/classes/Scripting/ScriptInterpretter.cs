@@ -68,6 +68,7 @@ public partial class ScriptInterpretter : Node
 
 	// child script properties
 	private ScriptInterpretter _childScript;
+	private int _childScriptHash = 0;
 	private bool _childScriptKeepEnv = false;
 
 	private bool _processFinished;
@@ -234,6 +235,12 @@ public partial class ScriptInterpretter : Node
 
 	public void _State_Running_OnUpdate()
 	{
+		ResultProcessMode previousResultProcessMode = ResultProcessMode.NORMAL;
+		if (_scriptLineResult != null)
+		{
+			previousResultProcessMode = _scriptLineResult.ResultProcessMode;
+		}
+
 		if (_scriptLineCounter >= _currentScriptLinesSplit.Count())
 		{
 			_processState.Transition(STATE_FINISHED); // end of the script
@@ -262,6 +269,11 @@ public partial class ScriptInterpretter : Node
 
 			LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter +1}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
 
+			if (previousResultProcessMode == ResultProcessMode.ASYNC)
+			{
+				LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter +1} can we fix?", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+			}
+
 			// increase script line after processing
 			_scriptLineCounter++;
 
@@ -283,6 +295,7 @@ public partial class ScriptInterpretter : Node
 
 				return;
 			}
+
 		}
 	}
 
@@ -298,29 +311,43 @@ public partial class ScriptInterpretter : Node
 			// check if it's finished
 			if (_childScript.ProcessFinished)
 			{
-				// forward compiled stdout/stderr and return code
-				AssignVariableValue("func"+_childScript.GetHashCode().ToString(), _childScript.Stdout);
+				// copy the childScript's stdout
+				string childStdout = _childScript.Stdout;
+				LoggerManager.LogDebug($"Child script finished", "", "childStdout", childStdout);
 
-				// _scriptLineResult.Stdout = _childScript.Stdout;
+				// assign the variable to the childstd result after replacing
+				// the result in the script content
+				AssignVariableValue("func"+_childScript.GetHashCode().ToString(), childStdout.Replace("$func"+GetHashCode()+"\n", ""));
+
+				// perform variable substitution to replace the line with the
+				// child's result
+				_scriptLineResult = ExecuteVariableSubstitution("func"+_childScript.GetHashCode(), _scriptLineResult);
+
 				_scriptLineResults.Add(_scriptLineResult);
 
-				LoggerManager.LogDebug("Child script finished", "", "childRes", _scriptLineResult);
+				LoggerManager.LogDebug($"Child script processed", "", "lineRes", _scriptLineResult);
 
 				LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter} (async)", "", "asyncLine", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
+
+				// if there's any unparsed vars, trigger the line for
+				// re-processing
+				var resultUnparsedVars = ParseVarSubstitutions(_scriptLineResult.Stdout);
+				if (resultUnparsedVars.Count > 0)
+				{
+					LoggerManager.LogDebug("Async line contains unparsed variables", "", "vars", resultUnparsedVars);
+					_scriptLineCounter--;
+					LoggerManager.LogDebug("Async line to reprocess", "", "line", _currentScriptLinesSplit[_scriptLineCounter]);
+
+					_currentScriptLinesSplit[_scriptLineCounter] = _scriptLineResult.Stdout;
+				}
+
+				_childScriptHash = _childScript.GetHashCode();
 
 				// clear child script instance since we're done with it
 				_childScript.QueueFree();
 				_childScript = null;
 				_childScriptKeepEnv = false;
 
-				var resultUnparsedVars = ParseVarSubstitutions(_scriptLineResult.Stdout);
-				if (resultUnparsedVars.Count > 0)
-				{
-					LoggerManager.LogDebug("Async line contains unparsed variables", "", "vars", resultUnparsedVars);
-					_scriptLineCounter--;
-					_currentScriptLinesSplit[_scriptLineCounter] = _scriptLineResult.Stdout;
-					LoggerManager.LogDebug("Async line to reprocess", "", "line", _currentScriptLinesSplit[_scriptLineCounter]);
-				}
 
 				// resume execution
 				_processState.Transition(STATE_RUNNING);
@@ -969,7 +996,7 @@ public partial class ScriptInterpretter : Node
 		ScriptProcessResult lineResult = new ScriptProcessResult(0, line);
 
 		MatchCollection nl = Regex.Matches(line, patternNestedLine, RegexOptions.Multiline);
-		foreach (Match match in nl)
+		foreach (Match match in nl.Reverse())
 		{
 			if (match.Groups.Count >= 1)
 			{
@@ -1019,7 +1046,7 @@ public partial class ScriptInterpretter : Node
 		string patternVarSubstitution = @"\$([a-zA-Z0-9_\[\]'#?@*]+)";
 		MatchCollection varSubstitutionMatches = Regex.Matches(line, patternVarSubstitution);
 
-		foreach (Match match in varSubstitutionMatches)
+		foreach (Match match in varSubstitutionMatches.Reverse())
 		{
 			if (match.Groups.Count >= 2)
 			{

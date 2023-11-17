@@ -110,7 +110,7 @@ nestedfunc() {
 	nestedfunc2
 }
 nestedfunc2() {
-	echo_func "this is inside a nested-nested function"
+	echo_func "this is inside a $(echo nested-nested) function"
 }
 nestedfunc
 # if [ "$(echo_func 123)" = "123" ]
