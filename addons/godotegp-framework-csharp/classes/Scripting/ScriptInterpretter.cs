@@ -955,13 +955,13 @@ public partial class ScriptInterpretter : Node
 							switch (conditionParams[1])
 							{
 								case "=":
-									if ((conditionParams[0] as string) == (conditionParams[0] as string))
+									if ((conditionParams[0] as string) == (conditionParams[2] as string))
 									{
 										conditionRes = true;
 									}
 									break;
 								case "!=":
-									if ((conditionParams[0] as string) != (conditionParams[0] as string))
+									if ((conditionParams[0] as string) != (conditionParams[2] as string))
 									{
 										conditionRes = true;
 									}
