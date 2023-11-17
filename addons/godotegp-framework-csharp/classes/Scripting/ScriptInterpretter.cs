@@ -165,6 +165,8 @@ public partial class ScriptInterpretter : Node
 			_gameScript = gs.Value;
 			_gameScriptName = scriptName;
 
+			LoggerManager.LogDebug($"[{_gameScriptName}] running");
+
 			// Start the state machine
 			if (_processFinished)
 			{
@@ -386,6 +388,7 @@ public partial class ScriptInterpretter : Node
 	public void _State_Finished_OnEnter()
 	{
 		_processFinished = true;
+		LoggerManager.LogDebug($"[{_gameScriptName}] finished");
 	}
 
 	/*********************************
