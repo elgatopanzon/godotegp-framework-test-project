@@ -144,10 +144,10 @@ public partial class ScriptInterpretter : Node
 	
 	public override void _Process(double delta)
 	{
-		for (_deltaCounter += delta; _deltaCounter >= _deltaTimeStep; _deltaCounter -= _deltaTimeStep)
-		{
-			_processState.Update();
-		}
+		// for (_deltaCounter += delta; _deltaCounter >= _deltaTimeStep; _deltaCounter -= _deltaTimeStep)
+		// {
+		// }
+		_processState.Update();
 	}
 
 	/****************************
