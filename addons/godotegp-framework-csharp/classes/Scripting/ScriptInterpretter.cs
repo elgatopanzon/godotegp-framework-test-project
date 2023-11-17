@@ -710,6 +710,8 @@ public partial class ScriptInterpretter : Node
 		
 		int blockProcessState = -1;
 
+		bool isLoopMode = false;
+
 		int tempLineCounter = _scriptLineCounter + 1;
 		while (tempLineCounter < _currentScriptLinesSplit.Count())
 		{
@@ -721,6 +723,11 @@ public partial class ScriptInterpretter : Node
 				if (nextLine == "then" || nextLine == "do")
 				{
 					blockProcessState++;
+
+					if (nextLine == "do")
+					{
+						isLoopMode = true;
+					}
 				}
 			}
 
@@ -729,7 +736,7 @@ public partial class ScriptInterpretter : Node
 			else if (blockProcessState >= 0)
 			{
 				// if its an end, stop the loop
-				if (nextLine == "fi" || nextLine == "done")
+				if ((nextLine == "fi" && isLoopMode == false) || (nextLine == "done" && isLoopMode == true))
 				{
 					_scriptLineCounter = tempLineCounter;
 
@@ -744,14 +751,14 @@ public partial class ScriptInterpretter : Node
 				}
 
 				var ifStatementParsed = ParseBlockStatementOpening(nextLine);
-				if (ifStatementParsed != null && currentLineReturnCode == 1)
+				if (ifStatementParsed != null && currentLineReturnCode == 1 && isLoopMode == false)
 				{
 					LoggerManager.LogDebug("Parsed elif, exiting out");
 					_scriptLineCounter = tempLineCounter - 1;
 					break;
 				}
 
-				if (nextLine == "else")
+				if (nextLine == "else" && isLoopMode == false)
 				{
 					blockProcessState++;
 					tempLineCounter++;

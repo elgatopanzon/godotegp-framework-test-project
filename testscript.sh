@@ -94,24 +94,22 @@ else
 	echo "condition 2 failed"
 fi
 
-if (( 1 = 2 ))
-then
-	echo "eliftest shouldn't be here"
-elif (( 1 = 1 ))
-then
-	echo "eliftest inside should pass"
-else
-	echo "shouldn't reach here"
-fi
-
-TESTVAR=0
-while (( $TESTVAR < 10 )) 
-do
-	echo "inside loop!"
-	echo "still inside loop!"
-	TESTVAR="(($TESTVAR + 3))"
-	echo "loop count: $TESTVAR!"
-done
+# TESTVAR=0
+# while (( $TESTVAR < 10 )) 
+# do
+# 	echo "inside loop!"
+# 	echo "still inside loop!"
+# 	TESTVAR="(($TESTVAR + 3))"
+# 	echo "loop count: $TESTVAR!"
+# 	if (( $TESTVAR < 5 ))
+# 	then
+# 		echo "low!"		
+# 	else
+# 		echo "high!"
+# 	fi
+# done
+#
+# echo "yay!"
 
 # nestedfunc() {
 # 	echo_func "this is inside a function"
