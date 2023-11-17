@@ -66,7 +66,7 @@ public partial class ScriptInterpretter : Node
 	private Dictionary<string, IScriptFunction> _scriptFunctions = new Dictionary<string, IScriptFunction>();
 
 	// holds session variables used by the script
-	Dictionary<string, object> _scriptVars = new Dictionary<string, object>();
+	Dictionary<string, object> _scriptVars = new Dictionary<string, object>() { { "?", "-1" } };
 
 	public Dictionary<string, object> ScriptVars
 	{
@@ -303,6 +303,7 @@ public partial class ScriptInterpretter : Node
 		// happen
 		if (linestr.Length > 0)
 		{
+			
 			_scriptLineResult = InterpretLine(linestr);
 
 			LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter +1}", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
@@ -311,6 +312,7 @@ public partial class ScriptInterpretter : Node
 			{
 				LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter +1} can we fix?", "", "line", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
 			}
+			ExecuteVariableAssignment("?", _scriptLineResult.ReturnCode.ToString());
 
 			// increase script line after processing
 			if (_scriptPipeQueue.Count() == 0)
@@ -363,6 +365,7 @@ public partial class ScriptInterpretter : Node
 				{
 					LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter} (async)", "", "stdin", _childScript.ScriptVars["STDIN"]);
 					_scriptVars["STDIN"] = _childScript.ScriptVars["STDIN"];
+					_scriptVars["?"] = _childScript.ScriptVars["?"];
 				}
 				_scriptLineResult = ExecuteVariableSubstitution("func"+_childScript.GetHashCode(), _scriptLineResult);
 
@@ -372,6 +375,7 @@ public partial class ScriptInterpretter : Node
 
 				LoggerManager.LogDebug($"[{_gameScriptName}] Line {_scriptLineCounter} (async)", "", "asyncLine", $"[{_scriptLineResult.ReturnCode}] {_scriptLineResult.Result}");
 
+				ExecuteVariableAssignment("?", _childScript.ReturnCode.ToString());
 
 				// if there's any unparsed vars, trigger the line for
 				// re-processing
@@ -462,6 +466,7 @@ public partial class ScriptInterpretter : Node
 			if (_scriptVars.ContainsKey("STDIN"))
 			{
 				_childScript._scriptVars["STDIN"] = _scriptVars["STDIN"];
+				_childScript._scriptVars["?"] = _scriptVars["?"];
 			}
 
 			LoggerManager.LogDebug("Creating child script", "", "stdin", _childScript.GetVariableValue("STDIN"));
@@ -545,11 +550,13 @@ public partial class ScriptInterpretter : Node
 				varValue = _scriptParams.Count().ToString();
 			}
 			// last return code
-			else if (varName == "?" && _scriptLineResult != null)
-			{
-				varValue = _scriptLineResult.ReturnCode.ToString();
-			}
+			// else if (varName == "?" && _scriptLineResult != null)
+			// {
+			// 	varValue = _scriptLineResult.ReturnCode.ToString();
+			// }
 		}
+
+		LoggerManager.LogDebug("Get var value", "", varName, varValue);
 
 		return varValue;
 	}
@@ -1305,9 +1312,13 @@ public partial class ScriptInterpretter : Node
 
 		foreach (Match match in varSubstitutionMatches.Reverse())
 		{
-			if (match.Groups.Count >= 2)
+			if (match.Groups.Count >= 3)
 			{
-				processes.Add(new ScriptProcessVarSubstitution(line, match.Groups[1].Value));
+				// match special var if group 2 isn't empty
+				if (match.Groups[2].Value != "")
+					processes.Add(new ScriptProcessVarSubstitution(line, match.Groups[2].Value));
+				else
+					processes.Add(new ScriptProcessVarSubstitution(line, match.Groups[1].Value));
 			}
 		}
 

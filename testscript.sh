@@ -48,7 +48,12 @@ func_returns_0() {
 }
 func_returns_1() {
 	echo "a bad function"
-	return 0
+	return 1
+}
+
+print_return_code() {
+	RT="$?"
+	echo $RT
 }
 
 if func_returns_0; then
@@ -58,15 +63,26 @@ if func_returns_1; then
 	echo "the bad function returned 0, naughty!"
 fi
 
-echo "testing multiple nested lines in function conditions"
-if [ "$(func_returns_0)" = "$(func_returns_1)" ]
-then
-	echo "does it work with 2 nested calls?"
+if [ "$(func_returns_0 | print_return_code)" = "0" ]; then
+	echo "the good function returned 0!"
 fi
-if [ "1" = "2" ]
-then
-	echo "1 = 2???"
+if [ "$(func_returns_1 | print_return_code)" = "1" ]; then
+	echo "the bad function returned 1, bad!"
 fi
+
+func_returns_1
+RT="$?"
+echo $RT
+
+# echo "testing multiple nested lines in function conditions"
+# if [ "$(func_returns_0)" = "$(func_returns_1)" ]
+# then
+# 	echo "does it work with 2 nested calls?"
+# fi
+# if [ "1" = "2" ]
+# then
+# 	echo "1 = 2???"
+# fi
 
 # echo "this text should act like a simple print statement"
 # echo "testing: setting variables content"
