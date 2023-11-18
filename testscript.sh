@@ -1,18 +1,20 @@
 # #!/usr/bin/env sh
 # #
-for f in one two three
-do
-	echo "first loop item: $f"
-done
+# for f in one two three
+# do
+# 	echo "first loop item: $f"
+# done
 #
-ARRAY=("item1" "item2" "item3" "item4")
+ARRAY=("item1 1" "item2 2" "item3 3" "item4 4")
 
-echo "${ARRAY[@]}"
 #
 for f in "${ARRAY[@]}"
 do
 	echo "loop item: $f"
 done
+
+# echo "${ARRAY[@]}"
+
 #
 # for f in {1..10}
 # do

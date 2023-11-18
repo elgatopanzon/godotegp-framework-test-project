@@ -588,9 +588,9 @@ public partial class ScriptInterpretter : Node
 				else if (dictKey == "@")
 				{
 					if (varName.StartsWith("!"))
-						varValue = (string) string.Join(" ", dict.Select(x => x.Key).ToArray());
+						varValue = (string) string.Join("\n", dict.Select(x => "\""+x.Key+"\"").ToArray());
 					else
-						varValue = (string) string.Join(" ", dict.Select(x => x.Value).ToArray());
+						varValue = (string) string.Join(" ", dict.Select(x => "\""+x.Value+"\"").ToArray());
 				}
 			}
 			else
@@ -1587,7 +1587,7 @@ public partial class ScriptInterpretter : Node
 				{
 					Match nm = fmatches;
 
-					if (nm.Groups[0].Value != " ")
+					if (nm.Groups[0].Value != " " && nm.Groups[0].Value.Length > 0)
 					{
 						funcParams.Add(nm.Groups[0].Value);
 					}
