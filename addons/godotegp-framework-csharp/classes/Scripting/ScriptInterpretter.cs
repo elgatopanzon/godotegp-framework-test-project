@@ -103,13 +103,13 @@ public partial class ScriptInterpretter : Node
 	public string Stdout
 	{
 		get { 
-			return string.Join("\n", _scriptLineResults.Where(x => x.Result.Length > 0).Select(x => x.Stdout));
+			return string.Join("\n", _scriptLineResults.Where(x => x.Result.Length > 0 && x.ResultProcessMode != ResultProcessMode.DISCARD).Select(x => x.Stdout));
 		}
 	}
 	public string Stderr
 	{
 		get { 
-			return string.Join("\n", _scriptLineResults.Where(x => x.Result.Length > 0).Select(x => x.Stderr));
+			return string.Join("\n", _scriptLineResults.Where(x => x.Result.Length > 0 && x.ResultProcessMode != ResultProcessMode.DISCARD).Select(x => x.Stderr));
 		}
 	}
 	public int ReturnCode
@@ -561,18 +561,20 @@ public partial class ScriptInterpretter : Node
 
 		string dictKey = "";
 
+		LoggerManager.LogDebug("Getting var value", "", "varName", varName);
+
 		// parse the dictionary key name
-		if (m.Groups.Count > 0)
+		if (m.Groups.Count > 0 && m.Groups[1].Value.Length > 0)
 		{
 			dictKey = m.Groups[1].Value;
 			varName = varName.Replace("["+dictKey+"]", String.Empty);
 			dictKey = dictKey.Trim('\"', '\"');
 
-			LoggerManager.LogDebug("Get dictionary value", "", "key", dictKey);
+			LoggerManager.LogDebug($"Get dictionary value {varName}", "", "key", dictKey);
 		}
 
 		// check if we have an assigned var
-		if (_scriptVars.TryGetValue(varName.Replace("!", String.Empty), out object obj))
+		if (_scriptVars.TryGetValue(varName.Replace("!", String.Empty).Replace("[", String.Empty).Replace("]", String.Empty), out object obj))
 		{
 			// if we are looking for a dictionary key, try and get it
 			if (dictKey.Length > 0)
@@ -716,9 +718,18 @@ public partial class ScriptInterpretter : Node
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
 		// first thing, parse and replace variable names with values
-		foreach (ScriptProcessVarSubstitution lineProcess in ParseVarSubstitutions(lineResult.Result))
+		while (ParseVarSubstitutions(lineResult.Result).Count > 0)
 		{
-			lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
+			foreach (ScriptProcessVarSubstitution lineProcess in ParseVarSubstitutions(lineResult.Result))
+			{
+				lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
+				LoggerManager.LogDebug("Parsed var sub result", "", "lineResult", lineResult.Stdout);
+				// _currentScriptLinesSplit[_scriptLineCounter] = lineResult.Stdout;
+				// _scriptLineCounter--;
+				// lineResult.ResultProcessMode = ResultProcessMode.DISCARD;
+				// return lineResult;
+				break;
+			}
 		}
 		// processes.AddRange(ParseVarSubstitutions(line));
 
@@ -1417,7 +1428,15 @@ public partial class ScriptInterpretter : Node
 				if (match.Groups[2].Value != "")
 					processes.Add(new ScriptProcessVarSubstitution(line, match.Groups[2].Value));
 				else
-					processes.Add(new ScriptProcessVarSubstitution(line, match.Groups[1].Value));
+				{
+					// TODO: fix the actual regex
+					string varmatch = match.Groups[1].Value;
+					if (varmatch.EndsWith("["))
+					{
+						varmatch = varmatch.TrimEnd('[');	
+					}
+					processes.Add(new ScriptProcessVarSubstitution(line, varmatch));
+				}
 			}
 		}
 
@@ -1693,7 +1712,8 @@ public class ScriptProcessBlockProcess : ScriptProcessOperation
 public enum ResultProcessMode
 {
 	NORMAL,
-	ASYNC
+	ASYNC,
+	DISCARD
 }
 
 public class ScriptProcessResult

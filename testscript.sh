@@ -6,25 +6,33 @@ do
 done
 
 ARRAY=("item1" "item2" "item3" "item4")
-ARRAYNUM=(1 10 100 1000)
-ARRAYMIXED=(1 "two is cool" 3 "4")
 
+COUNTER=0
+while [ "${ARRAY[${COUNTER}]}" != "" ]
+do
+	echo "current item: ${ARRAY[${COUNTER}]}"
+	COUNTER="(($COUNTER + 1))"
+done
+
+# ARRAYNUM=(1 10 100 1000)
+# ARRAYMIXED=(1 "two is cool" 3 "4")
+#
 echo "${ARRAY[0]}"
 echo "${ARRAY[@]}"
 echo "${!ARRAY[@]}"
-
-echo "${ARRAY["1"]}"
-
-declare -A animals
-animals["cat"]="it's a cat"
-animals["dog"]="it's a dog"
-
-ARRAYMIXED["dog"]="it's a dog"
-echo "${ARRAYMIXED["dog"]}"
-
-if (( 1 != 1 )); then
-	echo "asd"
-fi
+#
+# echo "${ARRAY["1"]}"
+#
+# declare -A animals
+# animals["cat"]="it's a cat"
+# animals["dog"]="it's a dog"
+#
+# ARRAYMIXED["dog"]="it's a dog"
+# echo "${ARRAYMIXED["dog"]}"
+#
+# if (( 1 != 1 )); then
+# 	echo "asd"
+# fi
 #
 # fake_stdin() {
 # 	echo "this function says STDIN is equal to: $STDIN"
