@@ -41,6 +41,43 @@ public partial class Return : IScriptFunction
 	}
 }
 
+public partial class Continue : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		return i.ExecuteFunctionCall("return");
+	}
+}
+public partial class Break : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		return i.ExecuteFunctionCall("return", new string[] {"-100"});
+	}
+}
+
+public partial class Seq : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		LoggerManager.LogDebug("seq", "", "p", p);
+
+		string seqVal = "";
+		if (p.Count() > 1)
+		{
+			int fromValue = Convert.ToInt32(p[0]);
+			int toValue = Convert.ToInt32(p[1]);
+
+			for (int ii = fromValue; ii <= toValue; ii++)
+			{
+				seqVal += $"{ii} ";
+			}
+		}
+
+		return new ScriptProcessResult(0, seqVal.Trim());
+	}
+}
+
 public partial class Source : IScriptFunction
 {
 	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)

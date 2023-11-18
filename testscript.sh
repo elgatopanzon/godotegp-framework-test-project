@@ -8,18 +8,20 @@
 ARRAY=("item1 1" "item2 2" "item3 3" "item4 4")
 
 #
-for f in "${ARRAY[@]}"
-do
-	echo "loop item: $f"
-done
+# for f in "${ARRAY[@]}"
+# do
+# 	echo "loop item: $f"
+# done
 
 # echo "${ARRAY[@]}"
 
 #
-# for f in {1..10}
-# do
-# 	echo "loop item: $f"
-# done
+for f in $(seq 1 10)
+do
+	echo "loop item 1: $f"
+	echo "loop item 2: $f"
+	break
+done
 
 # COUNTER=0
 # while [ "${ARRAY[${COUNTER}]}" != "" ]; do
