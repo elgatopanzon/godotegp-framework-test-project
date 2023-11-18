@@ -240,6 +240,23 @@ public partial class ScriptInterpretter : Node
 		_currentScriptLinesSplit = new string[]{};
 	}
 
+	public void BroadcastScriptOutput(ScriptProcessResult result, int lineNumber = 0)
+	{
+		if (lineNumber == 0)
+		{
+			lineNumber = _scriptLineCounter;
+		}
+		if (result.ResultProcessMode == ResultProcessMode.NORMAL && result.Result.Length > 0)
+		{
+			_scriptLineResults.Add(result);
+
+			foreach (string line in result.Result.Split('\n'))
+			{
+				LoggerManager.LogDebug("Broadcasting script output", GetHashCode().ToString(), lineNumber.ToString(), line);
+			}
+		}
+	}
+
 	/****************************
 	*  State changed callbacks  *
 	****************************/
@@ -331,7 +348,10 @@ public partial class ScriptInterpretter : Node
 			else
 			{
 				// add process result to results list
-				_scriptLineResults.Add(_scriptLineResult);
+				if (_scriptPipeQueue.Count() == 0)
+				{
+					BroadcastScriptOutput(_scriptLineResult);
+				}
 
 				// trigger another update to process the next line
 				_processState.Update();
@@ -369,7 +389,6 @@ public partial class ScriptInterpretter : Node
 				}
 				_scriptLineResult = ExecuteVariableSubstitution("func"+_childScript.GetHashCode(), _scriptLineResult);
 
-				_scriptLineResults.Add(_scriptLineResult);
 
 				LoggerManager.LogDebug($"Child script processed", "", "lineRes", _scriptLineResult);
 
@@ -387,20 +406,20 @@ public partial class ScriptInterpretter : Node
 					LoggerManager.LogDebug("Async line to reprocess", "", "line", _currentScriptLinesSplit[_scriptLineCounter]);
 
 					_currentScriptLinesSplit[_scriptLineCounter] = _scriptLineResult.Stdout;
+					_scriptLineResult.ResultProcessMode = ResultProcessMode.DISCARD;
 				}
 
 				// fix: when a block statement contains one or more nested line,
 				// reprocess the line to evaluate the final block statement
+				bool asyncBlockStatement = false;
 				if (ParseBlockStatementOpening(_scriptLineResult.Result, parseConditions: true) != null)
 				{
 					LoggerManager.LogDebug("Found block statement opening line in async result");
 					_scriptLineCounter--;
 					_currentScriptLinesSplit[_scriptLineCounter] = _scriptLineResult.Stdout;
-				}
+					_scriptLineResult.ResultProcessMode = ResultProcessMode.DISCARD;
 
-				if (_scriptPipeQueue.Count() == 0)
-				{
-					_scriptVars["STDIN"] = "";
+					asyncBlockStatement = true;
 				}
 
 				// implement a hack to clear the current line so the loop
@@ -411,6 +430,26 @@ public partial class ScriptInterpretter : Node
 					_currentScriptLinesSplit[_scriptLineCounter] = "while (( 0 != 0 )); do";
 				}
 
+				// if the pipe queue is empty broadcast the final result
+				// HACK: if we're just printing the returncode (used by if
+				// function) then also add the result
+				if ((_scriptPipeQueue.Count() == 0 || _scriptPipeQueue.Contains("printreturncode")) && _currentScriptLinesSplit[_scriptLineCounter] != "printreturncode")
+				{
+					if (_childScript.ScriptVars.ContainsKey("STDIN") && asyncBlockStatement)
+					{
+						LoggerManager.LogDebug("Broadcast override (printreturncode)", GetHashCode().ToString(), "stdin", _childScript._scriptVars["STDIN"]);
+
+						// LoggerManager.LogDebug("Broadcast override for pipe", GetHashCode().ToString(), "stdout", _scriptLineResult.Stdout);
+						ScriptProcessResult overrideRes = new(_childScript.ReturnCode, _childScript._scriptVars["STDIN"].ToString(), _childScript.Stderr);
+						BroadcastScriptOutput(overrideRes, _scriptLineCounter + 1);
+					}
+					BroadcastScriptOutput(_scriptLineResult);
+				}
+
+				if (_scriptPipeQueue.Count() == 0)
+				{
+					_scriptVars["STDIN"] = "";
+				}
 
 				_childScriptHash = _childScript.GetHashCode();
 
@@ -823,6 +862,8 @@ public partial class ScriptInterpretter : Node
 				lineResult.Stdout = "";
 				return lineResult;
 			}
+
+			lineResult.ResultProcessMode = ResultProcessMode.DISCARD;
 		}
 
 		// var blockProcess = ParseBlockProcessLine(line, _currentScriptLinesSplit);
@@ -1849,5 +1890,36 @@ public class ScriptProcessResult
 		{
 			return _stdout;
 		}
+	}
+}
+
+public class ScriptResultOutput
+{
+	private ScriptProcessResult _processResult;
+	public ScriptProcessResult ProcessResult
+	{
+		get { return _processResult; }
+		set { _processResult = value; }
+	}
+
+	private string _output;
+	public string Output
+	{
+		get { return _output; }
+		set { _output = value; }
+	}
+
+	private int _lineNumber;
+	public int LineNumber
+	{
+		get { return _lineNumber; }
+		set { _lineNumber = value; }
+	}
+
+	public ScriptResultOutput(ScriptProcessResult processResult, string output, int lineNumber)
+	{
+		_processResult = processResult;
+		_output = output;
+		_lineNumber = lineNumber;
 	}
 }

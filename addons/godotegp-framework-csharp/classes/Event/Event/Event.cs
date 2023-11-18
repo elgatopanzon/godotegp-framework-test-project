@@ -8,6 +8,7 @@ using System.ComponentModel;
 using GodotEGP.Service;
 
 using GodotEGP.Resource;
+using GodotEGP.Scripting;
 
 public partial class Event : IEvent
 {
@@ -355,3 +356,47 @@ public partial class SceneTransitionChainContinued : SceneTransitionChainEvent
 public partial class SceneTransitionChainFinished : SceneTransitionChainEvent
 {
 }
+
+public partial class ScriptInterpretterEvent : Event
+{
+	public GameScript Script;
+	public ScriptProcessResult Result;
+	
+}
+static public partial class ScriptInterpretterEventExtensions
+{
+	static public T SetResult<T>(this T o, ScriptProcessResult result) where T : ScriptInterpretterEvent
+	{
+		o.Result = result;
+		return o;
+	}
+	static public T SetScriptName<T>(this T o, GameScript script) where T : ScriptInterpretterEvent
+	{
+		o.Script = script;
+		return o;
+	}
+}
+
+public partial class ScriptInterpretterRunning : ScriptInterpretterEvent {}
+public partial class ScriptInterpretterWaiting : ScriptInterpretterEvent {}
+public partial class ScriptInterpretterFinished : ScriptInterpretterEvent {}
+public partial class ScriptInterpretterOutput : ScriptInterpretterEvent {}
+
+public partial class ScriptServiceEvent : ScriptInterpretterEvent
+{
+	public string InterpretterName;
+	
+}
+static public partial class ScriptServiceEventExtensions
+{
+	static public T SetInterpretterName<T>(this T o, string interpretterName) where T : ScriptServiceEvent
+	{
+		o.InterpretterName = interpretterName;
+		return o;
+	}
+}
+
+public partial class ScriptRunning : ScriptServiceEvent {}
+public partial class ScriptWaiting : ScriptServiceEvent {}
+public partial class ScriptFinished : ScriptServiceEvent {}
+public partial class ScriptOutput : ScriptServiceEvent {}

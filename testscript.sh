@@ -7,21 +7,44 @@
 #
 ARRAY=("item1 1" "item2 2" "item3 3" "item4 4")
 
+echo "${ARRAY[@]}"
+echo "Testing this"
+
+fake_stdin() {
+	echo "this function says stdin is equal to: $STDIN"
+}
+
+test_func() {
+	echo "a test function to return a value"
+}
+
+multiline_func() {
+	echo "multiline 1"
+	echo "multiline 2"
+}
+
+# echo asd | cat
+# test_func | fake_stdin
+
+test_func | fake_stdin
+if multiline_func; then
+	echo "the multiline_func returned 0"
+fi
+
 #
 # for f in "${ARRAY[@]}"
 # do
 # 	echo "loop item: $f"
 # done
 
-# echo "${ARRAY[@]}"
 
 #
-for f in $(seq 1 10)
-do
-	echo "loop item 1: $f"
-	break
-	echo "loop item 2: $f"
-done
+# for f in $(seq 1 10)
+# do
+# 	echo "loop item 1: $f"
+# 	break
+# 	echo "loop item 2: $f"
+# done
 
 # COUNTER=0
 # while [ "${ARRAY[${COUNTER}]}" != "" ]; do
@@ -49,18 +72,6 @@ done
 # 	echo "asd"
 # fi
 #
-# fake_stdin() {
-# 	echo "this function says STDIN is equal to: $STDIN"
-# }
-#
-# test_func() {
-# 	echo "a test function to return a value"
-# }
-#
-# echo asd | cat
-# test_func | fake_stdin
-#
-# $(echo "nested line line" | fake_stdin) | fake_stdin
 
 
 # TESTVAR=0
