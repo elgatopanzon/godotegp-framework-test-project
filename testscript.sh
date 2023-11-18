@@ -8,8 +8,7 @@ done
 ARRAY=("item1" "item2" "item3" "item4")
 
 COUNTER=0
-while [ "${ARRAY[${COUNTER}]}" != "" ]
-do
+while [ "${ARRAY[${COUNTER}]}" != "" ]; do
 	echo "current item: ${ARRAY[${COUNTER}]}"
 	COUNTER="(($COUNTER + 1))"
 done

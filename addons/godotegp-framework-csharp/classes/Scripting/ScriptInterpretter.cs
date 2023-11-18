@@ -863,16 +863,20 @@ public partial class ScriptInterpretter : Node
 		// inside any else block, until we reach a fi/done
 		
 		int blockProcessState = -1;
+		bool isLoopMode = false;
 
 		// skip past the then/do line if it's on the same line
 		if (_currentScriptLinesSplit[currentStartLine].Contains("; then") ||
 				_currentScriptLinesSplit[currentStartLine].Contains("; do"))
 		{
 			blockProcessState++;
+			LoggerManager.LogDebug("Single opener block statement found");
+
+			if (_currentScriptLinesSplit[currentStartLine].Contains("; do"))
+			{
+				isLoopMode = true;
+			}
 		}
-
-
-		bool isLoopMode = false;
 
 		int tempLineCounter = _scriptLineCounter + 1;
 		while (tempLineCounter < _currentScriptLinesSplit.Count())
