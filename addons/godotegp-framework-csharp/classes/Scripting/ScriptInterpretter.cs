@@ -459,10 +459,10 @@ public partial class ScriptInterpretter : Node
 			AddChild(_childScript);
 
 			// set child vars to match ours
-			if (_childScriptKeepEnv || _gameScriptFunctionNames.Contains(func))
-			{
+			// if (_childScriptKeepEnv || _gameScriptFunctionNames.Contains(func))
+			// {
 				_childScript._scriptVars = _scriptVars;
-			}
+			// }
 			if (_scriptVars.ContainsKey("STDIN"))
 			{
 				_childScript._scriptVars["STDIN"] = _scriptVars["STDIN"];
@@ -533,7 +533,7 @@ public partial class ScriptInterpretter : Node
 			{
 				if (functionCallParams[0] is ScriptProcessFunctionCall fc)
 				{
-					varValueFinal = fc.Params.ToDictionary(key => fc.Params.IndexOf(key).ToString(), value => (object) value);
+					varValueFinal = fc.Params.Select((value,index) => new { value, index}).ToDictionary(value => Convert.ToInt32(value.index).ToString(), value => (object) value.value);
 				}
 			}
 		}
@@ -864,6 +864,51 @@ public partial class ScriptInterpretter : Node
 		
 		int blockProcessState = -1;
 		bool isLoopMode = false;
+		bool isForLoopMode = false;
+
+		if (_currentScriptLinesSplit[currentStartLine].StartsWith("for "))
+		{
+			isForLoopMode = true;
+			isLoopMode = true;
+
+			var parsedFuncs = ParseFunctionCalls(_currentScriptLinesSplit[currentStartLine], false);
+			LoggerManager.LogDebug("Found for loop conditions", "", "for", _currentScriptLinesSplit[currentStartLine]);
+
+			if (parsedFuncs.Count > 0 && parsedFuncs[0] is ScriptProcessFunctionCall fc)
+			{
+				string variableName = fc.Params[0];
+				List<string> loopItems = fc.Params.Skip(2).ToList();
+
+				// TODO: expand bash sequence { .. } into list of values
+				// and replace the loopItems with it
+
+				LoggerManager.LogDebug("Parsed for loop content", "", variableName, loopItems);
+
+				string forParamsVarName = $"{currentStartLine}_for_{GetHashCode()}";
+				string forParamsVarNameIdx = $"{forParamsVarName}idx";
+				string forParamsVarNameFunc = $"{forParamsVarName}func";
+				_scriptVars[forParamsVarName] = loopItems.Select((value,index) => new { value, index}).ToDictionary(value => Convert.ToInt32(value.index).ToString(), value => (object) value.value);
+
+				LoggerManager.LogDebug("For loop variable", "", forParamsVarName, _scriptVars[forParamsVarName]);
+
+				// rewrite line into a while loop
+				_currentScriptLinesSplit[currentStartLine] = $"while (( ${forParamsVarNameIdx} < {loopItems.Count - 1} ))";
+				RegisterFunctionFromContent(forParamsVarNameFunc, $"{forParamsVarNameIdx}=((${forParamsVarNameIdx} + 1))\n{variableName}=\"${{{forParamsVarName}[${{{forParamsVarNameIdx}}}]}}\"");
+
+				int injectPipeLine = currentStartLine + 2;
+				if (_currentScriptLinesSplit[currentStartLine].Contains("; do"))
+				{
+					_currentScriptLinesSplit[currentStartLine] += "; do";
+					injectPipeLine = currentStartLine + 1;
+				}
+				_scriptVars[forParamsVarNameIdx] = "0";
+				ExecuteVariableAssignment(variableName, loopItems[0]);
+
+				_currentScriptLinesSplit[injectPipeLine] = $"{forParamsVarNameFunc} | " + _currentScriptLinesSplit[injectPipeLine];
+
+				_childScriptKeepEnv = true;
+			}
+		}
 
 		// skip past the then/do line if it's on the same line
 		if (_currentScriptLinesSplit[currentStartLine].Contains("; then") ||
@@ -979,6 +1024,11 @@ public partial class ScriptInterpretter : Node
 					_scriptLineCounter--;
 
 				}
+				if (line.StartsWith("for"))
+				{
+					return new ScriptProcessResult(0);
+				}
+
 			}
 
 			LoggerManager.LogDebug($"Parsed {statementType} start", "", "line", line);
@@ -1295,11 +1345,6 @@ public partial class ScriptInterpretter : Node
 
 		List<(List<ScriptProcessOperation>, string)> conditionsList = new List<(List<ScriptProcessOperation>, string)>();
 
-		// if (scriptLine.StartsWith("for "))
-		// {
-		// 	conditionsList.Add((new List<ScriptProcessOperation> {new ScriptProcessOperation(InterpretLine(scriptLine.Replace("for ", "")).Stdout)}, ""));
-		// }
-
 		// process condition brackets
 		foreach (Match match in blockProcessConditionMatches)
 		{
@@ -1439,6 +1484,10 @@ public partial class ScriptInterpretter : Node
 					{
 						varmatch = varmatch.TrimEnd('[');	
 					}
+					if (varmatch.EndsWith("\""))
+					{
+						varmatch = varmatch.TrimEnd('\"');	
+					}
 					processes.Add(new ScriptProcessVarSubstitution(line, varmatch));
 				}
 			}
@@ -1528,7 +1577,7 @@ public partial class ScriptInterpretter : Node
 
 				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"(?<="")[^""\n]*(?="")|[\w]+"))
 				// foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\S]+)"))
-				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w\d!£\$%\^&*\(\)-=+_'><?/\\;,.\n]+)"))
+				foreach (Match fmatches in Regex.Matches(funcParamsStr, @"((?<="")[^""\n]*(?=""))|([\w\d!£\$%\^&*\(\{})-=+_'><?/\\;,.\n]+)"))
 				{
 					Match nm = fmatches;
 

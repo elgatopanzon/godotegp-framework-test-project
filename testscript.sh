@@ -1,24 +1,34 @@
-#!/usr/bin/env sh
-#
+# #!/usr/bin/env sh
+# #
 for f in one two three
 do
-	echo $f
+	echo "first loop item: $f"
 done
-
+#
 ARRAY=("item1" "item2" "item3" "item4")
+#
+# for f in "${ARRAY[@]}"
+# do
+# 	echo "loop item: $f"
+# done
+#
+# for f in {1..10}
+# do
+# 	echo "loop item: $f"
+# done
 
-COUNTER=0
-while [ "${ARRAY[${COUNTER}]}" != "" ]; do
-	echo "current item: ${ARRAY[${COUNTER}]}"
-	COUNTER="(($COUNTER + 1))"
-done
+# COUNTER=0
+# while [ "${ARRAY[${COUNTER}]}" != "" ]; do
+# 	echo "current item: ${ARRAY[${COUNTER}]}"
+# 	COUNTER="(($COUNTER + 1))"
+# done
 
 # ARRAYNUM=(1 10 100 1000)
 # ARRAYMIXED=(1 "two is cool" 3 "4")
 #
-echo "${ARRAY[0]}"
-echo "${ARRAY[@]}"
-echo "${!ARRAY[@]}"
+# echo "${ARRAY[0]}"
+# echo "${ARRAY[@]}"
+# echo "${!ARRAY[@]}"
 #
 # echo "${ARRAY["1"]}"
 #
