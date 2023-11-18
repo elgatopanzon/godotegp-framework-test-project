@@ -649,6 +649,21 @@ public partial class ScriptInterpretter : Node
 		}
 		// processes.AddRange(ParseVarSubstitutions(line));
 
+
+		// third thing, parse nested script lines and replace values
+		lineResult = ParseNestedLines(lineResult.Result);
+		if (lineResult.ReturnCode != 0 || lineResult.ResultProcessMode == ResultProcessMode.ASYNC)
+		{
+			LoggerManager.LogDebug("Nested line process failed or async");
+			return lineResult;
+		}
+		// foreach (ScriptProcessNestedProcess lineProcess in ParseNestdLines(lineResult.Stdout))
+		// {
+		// 	// TODO: process nested lines
+		// 	// lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
+		// }
+		// processes.AddRange(ParseNestdLines(line));
+
 		// second thing, parse and replace expressions with values
 		foreach (ScriptProcessExpression lineProcess in ParseExpressions(lineResult.Result))
 		{
@@ -670,21 +685,6 @@ public partial class ScriptInterpretter : Node
 			}
 		}
 		// processes.AddRange(ParseExpressions(line));
-
-		// third thing, parse nested script lines and replace values
-		lineResult = ParseNestedLines(lineResult.Result);
-		if (lineResult.ReturnCode != 0 || lineResult.ResultProcessMode == ResultProcessMode.ASYNC)
-		{
-			LoggerManager.LogDebug("Nested line process failed or async");
-			return lineResult;
-		}
-		// foreach (ScriptProcessNestedProcess lineProcess in ParseNestdLines(lineResult.Stdout))
-		// {
-		// 	// TODO: process nested lines
-		// 	// lineResult = ExecuteVariableSubstitution(lineProcess.Name, lineResult);
-		// }
-		// processes.AddRange(ParseNestdLines(line));
-
 
 		// parse variable assignments
 		var varAssignmentProcesses = ParseVarAssignments(lineResult.Result);
@@ -865,7 +865,33 @@ public partial class ScriptInterpretter : Node
 			string statementType = isBlockStatement.Groups[1].Value;
 			string statementCondition = isBlockStatement.Groups[2].Value.Trim();
 
+
 			var conditions = ParseProcessBlockConditions(statementCondition);
+
+			// found an if statement with no matching condition (assume it's a
+			// function return code check?)
+			if (conditions.Count == 0)
+			{
+				// strip trailing then/do from the condition
+				bool conditionIsReverse = statementCondition.StartsWith("! ");
+				string nonParsingCondition = statementCondition.Replace("; then", "").Replace("; do", "").Replace("! ", "");
+				LoggerManager.LogDebug("Block statement non-parsing condition", "", "conditionLine", nonParsingCondition);
+
+				var parsedFunctionCondition = ParseFunctionCalls(nonParsingCondition, verifyFunctionName: false);
+				if (parsedFunctionCondition.Count > 0 && statementType != "for")
+				{
+					LoggerManager.LogDebug("Function found in non-parsing condition", "", "func", parsedFunctionCondition);
+
+					// replace with a nested call and pipe to printreturncode
+					// and compare as a string
+					// TODO: implement this in a better way!
+					line = line.Replace(statementCondition, $"(( $({nonParsingCondition} | printreturncode) = {(conditionIsReverse ? "1" : "0")} )); {((statementType == "if" || statementType == "elif") ? "then" : "do")}");
+					LoggerManager.LogDebug("Replaced statement line", "", "line", line);
+					_currentScriptLinesSplit[_scriptLineCounter] = line;
+					_scriptLineCounter--;
+
+				}
+			}
 
 			LoggerManager.LogDebug($"Parsed {statementType} start", "", "line", line);
 			LoggerManager.LogDebug($"Parsed {statementType} start", "", "conditions", conditions);

@@ -51,28 +51,26 @@ func_returns_1() {
 	return 1
 }
 
-print_return_code() {
-	RT="$?"
-	echo $RT
-}
+if [ "$(func_returns_0 | printreturncode)" = "0" ]; then
+	echo "the good function returned 0!"
+fi
+if [ "$(func_returns_1 | printreturncode)" = "1" ]; then
+	echo "the bad function returned 1, bad!"
+fi
+
 
 if func_returns_0; then
+	echo "the good function returned 0!"
+fi
+if ! func_returns_0; then
 	echo "the good function returned 0!"
 fi
 if func_returns_1; then
 	echo "the bad function returned 0, naughty!"
 fi
-
-if [ "$(func_returns_0 | print_return_code)" = "0" ]; then
-	echo "the good function returned 0!"
+if func_returns_2; then
+	echo "func doesn't even exist!"
 fi
-if [ "$(func_returns_1 | print_return_code)" = "1" ]; then
-	echo "the bad function returned 1, bad!"
-fi
-
-func_returns_1
-RT="$?"
-echo $RT
 
 # echo "testing multiple nested lines in function conditions"
 # if [ "$(func_returns_0)" = "$(func_returns_1)" ]

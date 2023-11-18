@@ -96,3 +96,26 @@ public partial class EvaluateExpression : IScriptFunction
 		return new ScriptProcessResult(0, r.ToString(), rawResult: r);
 	}
 }
+
+public partial class PrintReturnCode : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		return new ScriptProcessResult(0, i.GetVariableValue("?").ToString());
+	}
+}
+
+public partial class True : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		return new ScriptProcessResult(0);
+	}
+}
+public partial class False : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		return new ScriptProcessResult(1);
+	}
+}
