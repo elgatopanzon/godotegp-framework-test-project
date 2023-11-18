@@ -797,7 +797,7 @@ public partial class ScriptInterpretter : Node
 				LoggerManager.LogDebug("Skip block statement", "", "line", lineResult.Stdout);
 			}
 
-			var parsedBlockLines = ParseBlockStatementLines(ifStatementParsed.ReturnCode);
+			var parsedBlockLines = ParseBlockStatementLines(ifStatementParsed.ReturnCode, lineResult.Stdout);
 
 			LoggerManager.LogDebug("Parsed block lines", "", "lines", parsedBlockLines);
 			if (parsedBlockLines.Count > 0)
@@ -854,7 +854,7 @@ public partial class ScriptInterpretter : Node
 	*  Parse if/while/for block methods  *
 	**************************************/
 
-	public List<string> ParseBlockStatementLines(int currentLineReturnCode = 0)
+	public List<string> ParseBlockStatementLines(int currentLineReturnCode = 0, string overrideScriptLine = "")
 	{
 		List<string> parsedLines = new();
 		int currentStartLine = _scriptLineCounter;
@@ -871,8 +871,14 @@ public partial class ScriptInterpretter : Node
 			isForLoopMode = true;
 			isLoopMode = true;
 
-			var parsedFuncs = ParseFunctionCalls(_currentScriptLinesSplit[currentStartLine], false);
-			LoggerManager.LogDebug("Found for loop conditions", "", "for", _currentScriptLinesSplit[currentStartLine]);
+			string scriptLine = _currentScriptLinesSplit[currentStartLine];
+			if (overrideScriptLine.Length > 0)
+			{
+				scriptLine = overrideScriptLine;
+			}
+
+			var parsedFuncs = ParseFunctionCalls(scriptLine.Replace("; do", String.Empty), false);
+			LoggerManager.LogDebug("Found for loop conditions", "", "for", scriptLine);
 
 			if (parsedFuncs.Count > 0 && parsedFuncs[0] is ScriptProcessFunctionCall fc)
 			{
@@ -892,11 +898,11 @@ public partial class ScriptInterpretter : Node
 				LoggerManager.LogDebug("For loop variable", "", forParamsVarName, _scriptVars[forParamsVarName]);
 
 				// rewrite line into a while loop
-				_currentScriptLinesSplit[currentStartLine] = $"while (( ${forParamsVarNameIdx} < {loopItems.Count - 1} ))";
-				RegisterFunctionFromContent(forParamsVarNameFunc, $"{forParamsVarNameIdx}=((${forParamsVarNameIdx} + 1))\n{variableName}=\"${{{forParamsVarName}[${{{forParamsVarNameIdx}}}]}}\"");
+				_currentScriptLinesSplit[currentStartLine] = $"while (( ${forParamsVarNameIdx} < {loopItems.Count} ))";
+				RegisterFunctionFromContent(forParamsVarNameFunc, $"{variableName}=\"${{{forParamsVarName}[${{{forParamsVarNameIdx}}}]}}\"\n{forParamsVarNameIdx}=((${forParamsVarNameIdx} + 1))");
 
 				int injectPipeLine = currentStartLine + 2;
-				if (_currentScriptLinesSplit[currentStartLine].Contains("; do"))
+				if (scriptLine.Contains("; do"))
 				{
 					_currentScriptLinesSplit[currentStartLine] += "; do";
 					injectPipeLine = currentStartLine + 1;

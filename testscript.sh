@@ -6,11 +6,13 @@ do
 done
 #
 ARRAY=("item1" "item2" "item3" "item4")
+
+echo "${ARRAY[@]}"
 #
-# for f in "${ARRAY[@]}"
-# do
-# 	echo "loop item: $f"
-# done
+for f in "${ARRAY[@]}"
+do
+	echo "loop item: $f"
+done
 #
 # for f in {1..10}
 # do
