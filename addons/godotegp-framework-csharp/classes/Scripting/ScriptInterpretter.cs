@@ -958,7 +958,7 @@ public partial class ScriptInterpretter : Node
 					// replace with a nested call and pipe to printreturncode
 					// and compare as a string
 					// TODO: implement this in a better way!
-					line = line.Replace(statementCondition, $"(( $({nonParsingCondition} | printreturncode) = {(conditionIsReverse ? "1" : "0")} )); {((statementType == "if" || statementType == "elif") ? "then" : "do")}");
+					line = line.Replace(statementCondition, $"(( $({nonParsingCondition} | printreturncode) {(conditionIsReverse ? "!" : "")}= 0)); {((statementType == "if" || statementType == "elif") ? "then" : "do")}");
 					LoggerManager.LogDebug("Replaced statement line", "", "line", line);
 					_currentScriptLinesSplit[_scriptLineCounter] = line;
 					_scriptLineCounter--;
@@ -1147,7 +1147,7 @@ public partial class ScriptInterpretter : Node
 	public object ExecuteScriptExpression(string expression)
 	{
 		System.Data.DataTable table = new System.Data.DataTable();
-		return table.Compute(expression.ToString(), null);
+		return table.Compute(expression.ToString().Replace("!=", "NOT ="), null);
 	}
 
 	// parse a line starting with if/while/for as a block of script to be

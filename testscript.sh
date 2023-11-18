@@ -21,6 +21,10 @@ animals["dog"]="it's a dog"
 
 ARRAYMIXED["dog"]="it's a dog"
 echo "${ARRAYMIXED["dog"]}"
+
+if (( 1 != 1 )); then
+	echo "asd"
+fi
 #
 # fake_stdin() {
 # 	echo "this function says STDIN is equal to: $STDIN"
