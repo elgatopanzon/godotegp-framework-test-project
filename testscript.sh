@@ -19,8 +19,8 @@ ARRAY=("item1 1" "item2 2" "item3 3" "item4 4")
 for f in $(seq 1 10)
 do
 	echo "loop item 1: $f"
-	echo "loop item 2: $f"
 	break
+	echo "loop item 2: $f"
 done
 
 # COUNTER=0

@@ -403,6 +403,15 @@ public partial class ScriptInterpretter : Node
 					_scriptVars["STDIN"] = "";
 				}
 
+				// implement a hack to clear the current line so the loop
+				// doesn't continue
+				if (_childScript.ReturnCode == -100)
+				{
+					LoggerManager.LogDebug("Break called, overriding loop line");
+					_currentScriptLinesSplit[_scriptLineCounter] = "while (( 0 != 0 )); do";
+				}
+
+
 				_childScriptHash = _childScript.GetHashCode();
 
 				// clear child script instance since we're done with it
