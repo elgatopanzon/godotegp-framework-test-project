@@ -14,6 +14,13 @@ echo "${ARRAY[@]}"
 echo "${!ARRAY[@]}"
 
 echo "${ARRAY["1"]}"
+
+declare -A animals
+animals["cat"]="it's a cat"
+animals["dog"]="it's a dog"
+
+ARRAYMIXED["dog"]="it's a dog"
+echo "${ARRAYMIXED["dog"]}"
 #
 # fake_stdin() {
 # 	echo "this function says STDIN is equal to: $STDIN"

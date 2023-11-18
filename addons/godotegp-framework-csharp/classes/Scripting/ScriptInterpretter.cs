@@ -483,21 +483,42 @@ public partial class ScriptInterpretter : Node
 	public ScriptProcessResult ExecuteVariableAssignment(string varName, string varValue)
 	{
 		// parse variable name and keys
-		string varnamePattern = @"\[([^\\]]*)\]";
-		MatchCollection matches = Regex.Matches(varName, varnamePattern, RegexOptions.Multiline);
+		string arrayIndexPattern = @"(?<=\[)(.+?)(?=\])";
+		Match m = Regex.Match(varName, arrayIndexPattern);
 
-		// TODO: implement nested variable access by parsing key names
-		if (matches.Count > 0)
+		string dictKey = "";
+
+		// parse the dictionary key name
+		if (m.Groups.Count > 0 && m.Groups[0].Value.Length > 0)
 		{
-			LoggerManager.LogDebug("TODO: implement nested variable access", "", "varname", varName);
+			dictKey = m.Groups[1].Value;
+			varName = varName.Replace("["+dictKey+"]", String.Empty);
+			dictKey = dictKey.Trim('\"', '\"');
 
-			return new ScriptProcessResult(127, "", "variable key access not implemented");
+			LoggerManager.LogDebug($"Set dictionary value {varName}[{dictKey}]", "", "value", varValue);
+
+			if (_scriptVars.ContainsKey(varName))
+			{
+				var dict = (Dictionary<string, object>) _scriptVars[varName];
+
+				LoggerManager.LogDebug($"Dictionary exists {varName}", "", "dict", dict);
+
+				dict[dictKey] = varValue;
+
+				return new ScriptProcessResult(0);
+			}
+			else
+			{
+				return new ScriptProcessResult(1, "", $"{varName}: assignment to invalid subscript range");
+			}
+
 		}
 		else
 		{
 			AssignVariableValue(varName, varValue);
 			return new ScriptProcessResult(0);
 		}
+
 	}
 
 	public void AssignVariableValue(string varName, string varValue)
@@ -526,7 +547,8 @@ public partial class ScriptInterpretter : Node
 
 	public ScriptProcessResult ExecuteVariableSubstitution(string varName, ScriptProcessResult res)
 	{
-		return new ScriptProcessResult(0, res.Result.Replace("${"+varName+"}", GetVariableValue(varName)).Replace("$"+varName, GetVariableValue(varName).ToString()));
+		var varValue = GetVariableValue(varName).ToString();
+		return new ScriptProcessResult(0, res.Result.Replace("${"+varName+"}", varValue).Replace("$"+varName, varValue));
 	}
 
 	public string GetVariableValue(string varName)
@@ -1425,7 +1447,7 @@ public partial class ScriptInterpretter : Node
 
 		line = line.Replace("\n", "##NL##");
 
-		string patternIsVarAssignment = @"^[a-zA-Z0-9_]+=.+";
+		string patternIsVarAssignment = @"^[a-zA-Z0-9_\[\]""]+=.+";
 		Match isVarAssignment = Regex.Match(line, patternIsVarAssignment);
 
 		// check if it's a variable
@@ -1434,7 +1456,7 @@ public partial class ScriptInterpretter : Node
 			// string patternVars = @"(^\b[A-Z]+)=([\w.]+)"; // matches VAR assignments without quotes
 			// string patternVars = @"(^\b[A-Z]+)=[""](\w.+)[""|\w.^]"; //
 			// string patternVars = @"(^\b[A-Z_]+)=(([\w.]+)|""(.+)"")"; // matches VAR assignments with and without quotes
-			string patternVars = @"(^\b[a-zA-Z0-9_]+)=(([\w.]+)|.+)"; // matches VAR assignments with and without quotes, keeping the quotes
+			string patternVars = @"(^\b[a-zA-Z0-9_\[\]""]+)=(([\w.]+)|.+)"; // matches VAR assignments with and without quotes, keeping the quotes
 
 			// matches VAR assignments in strings
 			MatchCollection m = Regex.Matches(line, patternVars, RegexOptions.Multiline);

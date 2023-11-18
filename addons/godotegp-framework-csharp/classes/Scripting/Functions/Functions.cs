@@ -8,6 +8,7 @@ namespace GodotEGP.Scripting.Functions;
 
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -117,5 +118,33 @@ public partial class False : IScriptFunction
 	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		return new ScriptProcessResult(1);
+	}
+}
+
+public partial class Declare : IScriptFunction
+{
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		// basic functional implementation of declare -A
+		var res = new ScriptProcessResult(0);
+
+		if (p.Count() >= 2)
+		{
+			string paramType = (string) p[0];
+			string varName = (string) p[1];
+
+			if (paramType == "-A")
+			{
+				LoggerManager.LogDebug("Creating dictionary", "", "name", varName);
+				i.ScriptVars[varName] = new Dictionary<string, object>();
+			}
+			else
+			{
+				res.ReturnCode = 1;
+				res.Stderr = $"{paramType} not implemented";
+			}
+		}
+
+		return res;
 	}
 }
