@@ -502,24 +502,75 @@ public partial class ScriptInterpretter : Node
 
 	public void AssignVariableValue(string varName, string varValue)
 	{
-		LoggerManager.LogDebug("Setting variable value", "", "var", $"{varName} = {varValue}");
+		object varValueFinal = null;
 
-		_scriptVars[varName] = varValue;
+		if (varValue.StartsWith('(') && varValue.EndsWith(')'))
+		{
+			string valueStripped = varValue.Trim('(', ')');
+			var functionCallParams = ParseFunctionCalls("f "+valueStripped, verifyFunctionName: false);
+			if (functionCallParams.Count > 0)
+			{
+				if (functionCallParams[0] is ScriptProcessFunctionCall fc)
+				{
+					varValueFinal = fc.Params.ToDictionary(key => fc.Params.IndexOf(key).ToString(), value => (object) value);
+				}
+			}
+		}
+		else
+			varValueFinal = varValue;
+
+		LoggerManager.LogDebug("Setting variable value", "", varName, varValueFinal);
+
+		_scriptVars[varName] = varValueFinal;
 	}
 
 	public ScriptProcessResult ExecuteVariableSubstitution(string varName, ScriptProcessResult res)
 	{
-		return new ScriptProcessResult(0, res.Result.Replace("$"+varName, GetVariableValue(varName).ToString()));
+		return new ScriptProcessResult(0, res.Result.Replace("${"+varName+"}", GetVariableValue(varName)).Replace("$"+varName, GetVariableValue(varName).ToString()));
 	}
 
 	public string GetVariableValue(string varName)
 	{
 		string varValue = "";
 
-		// check if we have an assigned var
-		if (_scriptVars.TryGetValue(varName, out object obj))
+		// string arrayIndexPattern = @"\[""?([0-9a-zA-Z_@\-])""?\]";
+		string arrayIndexPattern = @"(?<=\[)(.+?)(?=\])";
+		Match m = Regex.Match(varName, arrayIndexPattern);
+
+		string dictKey = "";
+
+		// parse the dictionary key name
+		if (m.Groups.Count > 0)
 		{
-			varValue = (string) obj;
+			dictKey = m.Groups[1].Value;
+			varName = varName.Replace("["+dictKey+"]", String.Empty);
+			dictKey = dictKey.Trim('\"', '\"');
+
+			LoggerManager.LogDebug("Get dictionary value", "", "key", dictKey);
+		}
+
+		// check if we have an assigned var
+		if (_scriptVars.TryGetValue(varName.Replace("!", String.Empty), out object obj))
+		{
+			// if we are looking for a dictionary key, try and get it
+			if (dictKey.Length > 0)
+			{
+				var dict = (Dictionary<string, object>) obj;
+
+				if (dict.ContainsKey(dictKey))
+				{
+					varValue = (string) dict[dictKey];
+				}
+				else if (dictKey == "@")
+				{
+					if (varName.StartsWith("!"))
+						varValue = (string) string.Join(" ", dict.Select(x => x.Key).ToArray());
+					else
+						varValue = (string) string.Join(" ", dict.Select(x => x.Value).ToArray());
+				}
+			}
+			else
+				varValue = (string) obj;
 		}
 
 		// check if it's a special var
@@ -1333,7 +1384,7 @@ public partial class ScriptInterpretter : Node
 	{
 		List<ScriptProcessOperation> processes = new List<ScriptProcessOperation>();
 
-		string patternVarSubstitution = @"\$([a-zA-Z0-9_\[\]']+)|\$([#?@*])";
+		string patternVarSubstitution = @"\$\{?([a-zA-Z0-9_@""!\[\]']+)\}?|\$([#?@*])";
 		MatchCollection varSubstitutionMatches = Regex.Matches(line, patternVarSubstitution);
 
 		foreach (Match match in varSubstitutionMatches.Reverse())
@@ -1578,7 +1629,7 @@ public class ScriptProcessFunctionCall : ScriptProcessOperation
 	private List<string> _funcParams;
 	public List<string> Params
 	{
-		get { return _funcParams; }
+		get { return _funcParams.Select(x => x.Trim()).ToList(); }
 		set { _funcParams = value; }
 	}
 

@@ -5,18 +5,28 @@ do
 	echo $f
 done
 
-fake_stdin() {
-	echo "this function says STDIN is equal to: $STDIN"
-}
+ARRAY=("item1" "item2" "item3" "item4")
+ARRAYNUM=(1 10 100 1000)
+ARRAYMIXED=(1 "two is cool" 3 "4")
 
-test_func() {
-	echo "a test function to return a value"
-}
+echo "${ARRAY[0]}"
+echo "${ARRAY[@]}"
+echo "${!ARRAY[@]}"
 
-echo asd | cat
-test_func | fake_stdin
-
-$(echo "nested line line" | fake_stdin) | fake_stdin
+echo "${ARRAY["1"]}"
+#
+# fake_stdin() {
+# 	echo "this function says STDIN is equal to: $STDIN"
+# }
+#
+# test_func() {
+# 	echo "a test function to return a value"
+# }
+#
+# echo asd | cat
+# test_func | fake_stdin
+#
+# $(echo "nested line line" | fake_stdin) | fake_stdin
 
 
 # TESTVAR=0
@@ -42,35 +52,35 @@ $(echo "nested line line" | fake_stdin) | fake_stdin
 # echo $TESTVAR
 # fake_stdin
 
-func_returns_0() {
-	echo "a good function"
-	return 0
-}
-func_returns_1() {
-	echo "a bad function"
-	return 1
-}
+# func_returns_0() {
+# 	echo "a good function"
+# 	return 0
+# }
+# func_returns_1() {
+# 	echo "a bad function"
+# 	return 1
+# }
 
-if [ "$(func_returns_0 | printreturncode)" = "0" ]; then
-	echo "the good function returned 0!"
-fi
-if [ "$(func_returns_1 | printreturncode)" = "1" ]; then
-	echo "the bad function returned 1, bad!"
-fi
+# if [ "$(func_returns_0 | printreturncode)" = "0" ]; then
+# 	echo "the good function returned 0!"
+# fi
+# if [ "$(func_returns_1 | printreturncode)" = "1" ]; then
+# 	echo "the bad function returned 1, bad!"
+# fi
 
 
-if func_returns_0; then
-	echo "the good function returned 0!"
-fi
-if ! func_returns_0; then
-	echo "the good function returned 0!"
-fi
-if func_returns_1; then
-	echo "the bad function returned 0, naughty!"
-fi
-if func_returns_2; then
-	echo "func doesn't even exist!"
-fi
+# if func_returns_0; then
+# 	echo "the good function returned 0!"
+# fi
+# if ! func_returns_0; then
+# 	echo "the good function returned 0!"
+# fi
+# if func_returns_1; then
+# 	echo "the bad function returned 0, naughty!"
+# fi
+# if func_returns_2; then
+# 	echo "func doesn't even exist!"
+# fi
 
 # echo "testing multiple nested lines in function conditions"
 # if [ "$(func_returns_0)" = "$(func_returns_1)" ]
