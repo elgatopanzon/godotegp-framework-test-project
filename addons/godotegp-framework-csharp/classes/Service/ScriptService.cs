@@ -209,7 +209,7 @@ public partial class ScriptService : Service
 		{
 			LoggerManager.LogDebug("Script event running");
 
-			this.Emit(er);
+			this.Emit<ScriptRunning>(ee => ee.SetResult(er.Result).SetInterpretter(er.Owner as ScriptInterpretter));
 		}	
 	}
 
@@ -219,7 +219,7 @@ public partial class ScriptService : Service
 		{
 			LoggerManager.LogDebug("Script event waiting");
 
-			this.Emit(er);
+			this.Emit<ScriptWaiting>(ee => ee.SetResult(er.Result).SetInterpretter(er.Owner as ScriptInterpretter));
 		}	
 	}
 
@@ -235,7 +235,7 @@ public partial class ScriptService : Service
 				(e.Owner as ScriptInterpretter).QueueFree();
 			}
 
-			this.Emit(er);
+			this.Emit<ScriptFinished>(ee => ee.SetResult(er.Result).SetInterpretter(er.Owner as ScriptInterpretter));
 		}	
 	}
 
@@ -245,7 +245,7 @@ public partial class ScriptService : Service
 		{
 			LoggerManager.LogDebug("Script event output", "", "e", er.Result.Output);
 
-			this.Emit(er);
+			this.Emit<ScriptOutput>(ee => ee.SetResult(er.Result).SetInterpretter(er.Owner as ScriptInterpretter));
 		}	
 	}
 

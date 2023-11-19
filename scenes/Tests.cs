@@ -364,7 +364,15 @@ public partial class Tests : Node2D
 	{
 		if (!ServiceRegistry.Get<ScriptService>().SessionExists("testui"))
 		{
-			ServiceRegistry.Get<ScriptService>().CreateSession("testui");
+			var ses = ServiceRegistry.Get<ScriptService>().CreateSession("testui");
+
+			ServiceRegistry.Get<ScriptService>().SubscribeOwner<ScriptOutput>((e) => {
+					if (e is ScriptOutput o)
+					{
+						"UITests.Scripting.Output".Node<TextEdit>().Text += o.Result.Output+"\n";
+					}
+				}, isHighPriority: true);
+
 		}
 		// if (_scriptingTestInterpretter == null)
 		// {

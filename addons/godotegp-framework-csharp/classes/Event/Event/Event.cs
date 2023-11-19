@@ -383,7 +383,7 @@ public partial class ScriptServiceEvent : ScriptInterpretterEvent
 }
 static public partial class ScriptServiceEventExtensions
 {
-	static public T SetInterpretterName<T>(this T o, ScriptInterpretter interpretter) where T : ScriptServiceEvent
+	static public T SetInterpretter<T>(this T o, ScriptInterpretter interpretter) where T : ScriptServiceEvent
 	{
 		o.Interpretter = interpretter;
 		return o;

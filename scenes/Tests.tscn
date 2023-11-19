@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dyulet4ssd3y3"]
+[gd_scene load_steps=3 format=3 uid="uid://dyulet4ssd3y3"]
 
 [ext_resource type="Script" path="res://scenes/Tests.cs" id="1_hhdyv"]
+[ext_resource type="Script" path="res://scenes/TestsScriptInput.cs" id="2_kidjv"]
 
 [node name="Tests" type="Node2D"]
 script = ExtResource("1_hhdyv")
@@ -230,7 +231,8 @@ metadata/id = "UITests.DataBinding.Label"
 layout_mode = 2
 
 [node name="VBoxContainer8" type="VBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(635, 0)
+layout_direction = 2
 layout_mode = 2
 size_flags_horizontal = 6
 
@@ -239,15 +241,20 @@ layout_mode = 2
 text = "Scripting test"
 
 [node name="Output" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
-editable = false
 wrap_mode = 1
 scroll_fit_content_height = true
+metadata/id = "UITests.Scripting.Output"
 
 [node name="Script" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]
 custom_minimum_size = Vector2(100, 31)
 layout_direction = 2
 layout_mode = 2
+wrap_mode = 1
+scroll_fit_content_height = true
+caret_blink = true
+script = ExtResource("2_kidjv")
 metadata/id = "UITests.Scripting.Script"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]

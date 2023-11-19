@@ -19,6 +19,14 @@ config/icon="res://icon.svg"
 
 Main="*res://addons/godotegp-framework-csharp/classes/Main.cs"
 
+[display]
+
+window/size/viewport_width=2400
+window/size/viewport_height=1200
+window/stretch/mode="viewport"
+window/stretch/aspect="keep_width"
+window/stretch/scale=2.0
+
 [dotnet]
 
 project/assembly_name="Addon - godotegp-framework-csharp"
