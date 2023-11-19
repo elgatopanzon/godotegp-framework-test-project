@@ -139,10 +139,10 @@ public partial class ScriptService : Service
 	{
 		var si = new ScriptInterpretter(_gameScripts, _scriptFunctions);
 
-		si.SubscribeOwner<ScriptInterpretterRunning>(_On_ScriptInterpretter_Running);
-		si.SubscribeOwner<ScriptInterpretterWaiting>(_On_ScriptInterpretter_Waiting);
-		si.SubscribeOwner<ScriptInterpretterFinished>(_On_ScriptInterpretter_Finished);
-		si.SubscribeOwner<ScriptInterpretterOutput>(_On_ScriptInterpretter_Output);
+		si.SubscribeOwner<ScriptInterpretterRunning>(_On_ScriptInterpretter_Running, isHighPriority: true);
+		si.SubscribeOwner<ScriptInterpretterWaiting>(_On_ScriptInterpretter_Waiting, isHighPriority: true);
+		si.SubscribeOwner<ScriptInterpretterFinished>(_On_ScriptInterpretter_Finished, isHighPriority: true);
+		si.SubscribeOwner<ScriptInterpretterOutput>(_On_ScriptInterpretter_Output, isHighPriority: true);
 
 		return si;
 	}

@@ -238,8 +238,14 @@ size_flags_horizontal = 6
 layout_mode = 2
 text = "Scripting test"
 
+[node name="Output" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]
+layout_mode = 2
+editable = false
+wrap_mode = 1
+scroll_fit_content_height = true
+
 [node name="Script" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]
-custom_minimum_size = Vector2(100, 150)
+custom_minimum_size = Vector2(100, 31)
 layout_direction = 2
 layout_mode = 2
 metadata/id = "UITests.Scripting.Script"
@@ -249,7 +255,7 @@ layout_mode = 2
 
 [node name="Run" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
 layout_mode = 2
-text = "Eval"
+text = "Exec"
 metadata/id = "UITests.Scripting.Eval"
 
 [node name="Clear" type="Button" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8/HBoxContainer"]
