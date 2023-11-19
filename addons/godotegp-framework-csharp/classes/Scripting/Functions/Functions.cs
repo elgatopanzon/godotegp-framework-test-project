@@ -17,17 +17,18 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
-public partial class Echo : IScriptFunction
+public partial class Echo : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
+
 		return new ScriptProcessResult(0, (p as string[]).Join(" ").Trim());
 	}
 }
 
-public partial class Return : IScriptFunction
+public partial class Return : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		i.ScriptLinerCounter = i.CurrentScriptLineCount();
 
@@ -41,24 +42,24 @@ public partial class Return : IScriptFunction
 	}
 }
 
-public partial class Continue : IScriptFunction
+public partial class Continue : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		return i.ExecuteFunctionCall("return");
 	}
 }
-public partial class Break : IScriptFunction
+public partial class Break : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		return i.ExecuteFunctionCall("return", new string[] {"-100"});
 	}
 }
 
-public partial class Seq : IScriptFunction
+public partial class Seq : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		LoggerManager.LogDebug("seq", "", "p", p);
 
@@ -78,9 +79,9 @@ public partial class Seq : IScriptFunction
 	}
 }
 
-public partial class Source : IScriptFunction
+public partial class Source : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		LoggerManager.LogDebug("Source called");
 
@@ -94,9 +95,9 @@ public partial class Source : IScriptFunction
 	}
 }
 
-public partial class Goto : IScriptFunction
+public partial class Goto : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		LoggerManager.LogDebug("Goto called", "", "goto", p[0]);
 
@@ -106,9 +107,9 @@ public partial class Goto : IScriptFunction
 	}
 }
 
-public partial class Cat : IScriptFunction
+public partial class Cat : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		string result = "";
 
@@ -122,9 +123,9 @@ public partial class Cat : IScriptFunction
 	}
 }
 
-public partial class EvaluateExpression : IScriptFunction
+public partial class EvaluateExpression : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		System.Data.DataTable table = new System.Data.DataTable();
 		var r = table.Compute(p[0].ToString(), null);
@@ -135,32 +136,32 @@ public partial class EvaluateExpression : IScriptFunction
 	}
 }
 
-public partial class PrintReturnCode : IScriptFunction
+public partial class PrintReturnCode : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		return new ScriptProcessResult(0, i.GetVariableValue("?").ToString());
 	}
 }
 
-public partial class True : IScriptFunction
+public partial class True : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		return new ScriptProcessResult(0);
 	}
 }
-public partial class False : IScriptFunction
+public partial class False : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		return new ScriptProcessResult(1);
 	}
 }
 
-public partial class Declare : IScriptFunction
+public partial class Declare : ScriptFunction
 {
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		// basic functional implementation of declare -A
 		var res = new ScriptProcessResult(0);
@@ -186,7 +187,7 @@ public partial class Declare : IScriptFunction
 	}
 }
 
-public partial class CallbackAsFunction : IScriptFunction
+public partial class CallbackAsFunction : ScriptFunction
 {
 	private Func<ScriptInterpretter, object[], ScriptProcessResult> _cb;
 
@@ -195,7 +196,7 @@ public partial class CallbackAsFunction : IScriptFunction
 		_cb = cb;
 	}
 
-	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 		if (_cb != null)
 		{

@@ -17,3 +17,11 @@ public interface IScriptFunction
 {
 	ScriptProcessResult Call(ScriptInterpretter i, params object[] p);
 }
+
+public  class ScriptFunction : IScriptFunction
+{
+	public virtual ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		return new ScriptProcessResult(0);
+	}
+}
