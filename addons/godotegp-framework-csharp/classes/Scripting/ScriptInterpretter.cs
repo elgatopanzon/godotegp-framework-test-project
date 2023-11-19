@@ -387,6 +387,12 @@ public partial class ScriptInterpretter : Node
 			{
 				// copy the childScript's stdout
 				string childStdout = _childScript.Stdout;
+				if (_childScript.ReturnCode != 0)
+				{
+					childStdout = _childScript.Stderr;
+					_scriptLineResult.ReturnCode = _childScript.ReturnCode;
+					_scriptLineResult.Stderr = _childScript.Stderr;
+				}
 				LoggerManager.LogDebug($"Child script finished", "", "childStdout", childStdout);
 
 				// assign the variable to the childstd result after replacing
