@@ -371,13 +371,14 @@ public partial class Tests : Node2D
 		{
 			var ses = ServiceRegistry.Get<ScriptService>().CreateSession("testui");
 
+			ServiceRegistry.Get<EventManager>().Unsubscribe("UITests.Scripting.Output");
 			ServiceRegistry.Get<ScriptService>().SubscribeOwner<ScriptOutput>((e) => {
 					if (e is ScriptOutput o)
 					{
 						"UITests.Scripting.Output".Node<TextEdit>().Text += o.Result.Output+"\n";
 						"UITests.Scripting.Output".Node<TextEdit>().ScrollVertical = 9999990;
 					}
-				}, isHighPriority: true);
+				}, isHighPriority: true, groupName: "UITests.Scripting.Output");
 
 			ServiceRegistry.Get<ScriptService>().RegisterFunctionCallback(ScriptCbFunctionTest, "cbfunctiontest");
 		}

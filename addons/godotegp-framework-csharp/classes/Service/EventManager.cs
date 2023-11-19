@@ -2,6 +2,7 @@ namespace GodotEGP.Service;
 
 using Godot;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using GodotEGP.Logging;
@@ -90,6 +91,36 @@ public partial class EventManager : Service
 		{
 			Unsubscribe(unsub);
 		}
+	}
+
+	public bool Unsubscribe(string groupName)
+	{
+		bool unsubbed = false;
+
+		foreach (var sub in GetSubscriptions(groupName))
+		{
+			unsubbed = Unsubscribe(sub);
+		}	
+
+		return unsubbed;
+	}
+		
+	public List<IEventSubscription<Event>> GetSubscriptions(string groupName)
+	{
+		List<IEventSubscription<Event>> matchingSubs = new List<IEventSubscription<Event>>();
+
+		foreach (var subList in _eventSubscriptions)
+		{
+			foreach (var sub in subList.Value)
+			{
+				if (sub.Group == groupName)
+				{
+					matchingSubs.Add(sub);
+				}
+			}
+		}
+
+		return matchingSubs;
 	}
 
 	public T GetQueue<T>() where T : EventQueue, new()

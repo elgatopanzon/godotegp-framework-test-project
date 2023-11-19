@@ -16,8 +16,9 @@ public partial class EventSubscription<T> : IEventSubscription<Event>
     public bool Oneshot { get; set; }
     public Type EventType { get; }
     public List<IFilter> EventFilters { get; set; }
+    public string Group { get; set; }
 
-    public EventSubscription(object subscriberObj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
+    public EventSubscription(object subscriberObj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "")
     {
         EventType = typeof(T);
         Subscriber = subscriberObj;
@@ -31,5 +32,7 @@ public partial class EventSubscription<T> : IEventSubscription<Event>
         }
 
         EventFilters = eventFilters;
+
+        Group = groupName;
     }
 }

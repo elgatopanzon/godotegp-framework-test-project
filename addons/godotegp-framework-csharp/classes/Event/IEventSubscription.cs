@@ -14,5 +14,6 @@ public partial interface IEventSubscription<in T> where T : Event
 	bool IsHighPriority { get; }
 	bool Oneshot { get; }
 	List<IFilter> EventFilters { get; set; }
+	string Group { get; set; }
 }
 
