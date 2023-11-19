@@ -58,6 +58,12 @@ public partial class ScriptInterpretter : Node
 	private List<ScriptProcessResult> _scriptLineResults = new List<ScriptProcessResult>();
 	private ScriptProcessResult _scriptLineResult;
 
+	public ScriptProcessResult CurrentScriptResult
+	{
+		get { return _scriptLineResult; }
+		set { _scriptLineResult = value; }
+	}
+
 	private string[] _scriptParams;
 	private string _gameScriptName;
 	private List<string> _gameScriptFunctionNames = new();
