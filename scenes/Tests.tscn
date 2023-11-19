@@ -243,8 +243,10 @@ text = "Scripting test"
 [node name="Output" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
+size_flags_vertical = 3
+editable = false
 wrap_mode = 1
-scroll_fit_content_height = true
+scroll_smooth = true
 metadata/id = "UITests.Scripting.Output"
 
 [node name="Script" type="TextEdit" parent="CanvasLayer/MarginContainer/HBoxContainer/VBoxContainer8"]

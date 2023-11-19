@@ -199,7 +199,7 @@ public partial class ScriptInterpretter : Node
 
 	public void RunScriptContent(string scriptContent)
 	{
-		RegisterFunctionFromContent("eval", scriptContent);
+		RegisterFunctionFromContent("eval", "# script from content\n"+scriptContent+"\n# end script from content");
 
 		// run the created resource
 		RunScript("eval");
@@ -305,7 +305,7 @@ public partial class ScriptInterpretter : Node
 			previousResultProcessMode = _scriptLineResult.ResultProcessMode;
 		}
 
-		if (_scriptLineCounter >= _currentScriptLinesSplit.Count())
+		if (_scriptLineCounter >= _currentScriptLinesSplit.Count() || _scriptLineCounter < 0)
 		{
 			_processState.Transition(STATE_FINISHED); // end of the script
 			return;

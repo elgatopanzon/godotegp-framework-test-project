@@ -370,6 +370,7 @@ public partial class Tests : Node2D
 					if (e is ScriptOutput o)
 					{
 						"UITests.Scripting.Output".Node<TextEdit>().Text += o.Result.Output+"\n";
+						"UITests.Scripting.Output".Node<TextEdit>().ScrollVertical = 9999990;
 					}
 				}, isHighPriority: true);
 
