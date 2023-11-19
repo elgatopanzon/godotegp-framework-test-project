@@ -147,7 +147,7 @@ public partial class ScriptService : Service
 		return si;
 	}
 
-	public void CreateSession(string sessionName = "default")
+	public ScriptInterpretter CreateSession(string sessionName = "default")
 	{
 		if (!SessionExists(sessionName))
 		{
@@ -158,6 +158,8 @@ public partial class ScriptService : Service
 			_sessions[sessionName] = sessionInterpretter;
 
 			AddChild(sessionInterpretter);
+
+			return sessionInterpretter;
 		}
 		else
 		{
