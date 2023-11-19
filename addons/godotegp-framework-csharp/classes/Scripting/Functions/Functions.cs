@@ -21,7 +21,7 @@ public partial class Echo : IScriptFunction
 {
 	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
-		return new ScriptProcessResult(0, (p as string[]).Join(" "));
+		return new ScriptProcessResult(0, (p as string[]).Join(" ").Trim());
 	}
 }
 
