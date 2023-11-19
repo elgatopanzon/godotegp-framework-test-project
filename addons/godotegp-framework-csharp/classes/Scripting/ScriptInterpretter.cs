@@ -134,7 +134,9 @@ public partial class ScriptInterpretter : Node
 
 		// setup process sub-states
 		_statePreparing.OnEnter = _State_Preparing_OnEnter;
+		_stateRunning.OnEnter = _State_Running_OnEnter;
 		_stateRunning.OnUpdate = _State_Running_OnUpdate;
+		_stateWaiting.OnEnter = _State_Waiting_OnEnter;
 		_stateWaiting.OnUpdate = _State_Waiting_OnUpdate;
 		_stateFinished.OnEnter = _State_Finished_OnEnter;
 
@@ -253,6 +255,8 @@ public partial class ScriptInterpretter : Node
 			foreach (string line in result.Result.Split('\n'))
 			{
 				LoggerManager.LogDebug("Broadcasting script output", GetHashCode().ToString(), lineNumber.ToString(), line);
+
+				this.Emit<ScriptInterpretterOutput>((e) => e.SetResult(new ScriptResultOutput(result, line, lineNumber, _gameScript)));
 			}
 		}
 	}
@@ -286,6 +290,11 @@ public partial class ScriptInterpretter : Node
 
 		_processState.Transition(STATE_RUNNING);
 		_processState.Update();
+	}
+
+	public void _State_Running_OnEnter()
+	{
+		this.Emit<ScriptInterpretterRunning>();
 	}
 
 	public void _State_Running_OnUpdate()
@@ -362,6 +371,11 @@ public partial class ScriptInterpretter : Node
 		}
 	}
 
+	public void _State_Waiting_OnEnter()
+	{
+		this.Emit<ScriptInterpretterWaiting>();
+	}
+
 	public void _State_Waiting_OnUpdate()
 	{
 		// _processState.Transition(STATE_RUNNING);
@@ -426,14 +440,16 @@ public partial class ScriptInterpretter : Node
 				// doesn't continue
 				if (_childScript.ReturnCode == -100)
 				{
-					LoggerManager.LogDebug("Break called, overriding loop line");
-					_currentScriptLinesSplit[_scriptLineCounter] = "while (( 0 != 0 )); do";
+					LoggerManager.LogDebug("Break called, overriding loop line", "", "line", _scriptLineCounter);
+					LoggerManager.LogDebug("Break called, overriding loop line", "", "line", _currentScriptLinesSplit.Count());
+					LoggerManager.LogDebug("Break called, overriding loop line", "", "line", _currentScriptLinesSplit[_scriptLineCounter - 1]);
+					_currentScriptLinesSplit[_scriptLineCounter-1] = "while (( 0 != 0 )); do";
 				}
 
 				// if the pipe queue is empty broadcast the final result
 				// HACK: if we're just printing the returncode (used by if
 				// function) then also add the result
-				if ((_scriptPipeQueue.Count() == 0 || _scriptPipeQueue.Contains("printreturncode")) && _currentScriptLinesSplit[_scriptLineCounter] != "printreturncode")
+				if ((_scriptPipeQueue.Count() == 0 || _scriptPipeQueue.Contains("printreturncode")) && (_currentScriptLinesSplit.ElementAtOrDefault(_scriptLineCounter) != null && _currentScriptLinesSplit[_scriptLineCounter] != "printreturncode"))
 				{
 					if (_childScript.ScriptVars.ContainsKey("STDIN") && asyncBlockStatement)
 					{
@@ -445,7 +461,13 @@ public partial class ScriptInterpretter : Node
 					}
 					BroadcastScriptOutput(_scriptLineResult);
 				}
-
+				else
+				{
+					if (_scriptPipeQueue.Count() == 0)
+					{
+						BroadcastScriptOutput(_scriptLineResult);
+					}
+				}
 				if (_scriptPipeQueue.Count() == 0)
 				{
 					_scriptVars["STDIN"] = "";
@@ -470,6 +492,8 @@ public partial class ScriptInterpretter : Node
 	{
 		_processFinished = true;
 		LoggerManager.LogDebug($"[{_gameScriptName}] finished");
+
+		this.Emit<ScriptInterpretterFinished>();
 	}
 
 	/*********************************
@@ -933,7 +957,7 @@ public partial class ScriptInterpretter : Node
 			if (parsedFuncs.Count > 0 && parsedFuncs[0] is ScriptProcessFunctionCall fc)
 			{
 				string variableName = fc.Params[0];
-				List<string> loopItems = fc.Params.Skip(2).ToList();
+				List<string> loopItems = fc.Params.Skip(2).Where(x => x.Length > 0).ToList();
 
 				// TODO: expand bash sequence { .. } into list of values
 				// and replace the loopItems with it
@@ -1637,7 +1661,7 @@ public partial class ScriptInterpretter : Node
 				{
 					Match nm = fmatches;
 
-					if (nm.Groups[0].Value != " " && nm.Groups[0].Value.Length > 0)
+					if (nm.Groups[0].Value != " ")
 					{
 						funcParams.Add(nm.Groups[0].Value);
 					}
@@ -1902,6 +1926,13 @@ public class ScriptResultOutput
 		set { _processResult = value; }
 	}
 
+	private GameScript _gameScript;
+	public GameScript Script
+	{
+		get { return _gameScript; }
+		set { _gameScript = value; }
+	}
+
 	private string _output;
 	public string Output
 	{
@@ -1916,10 +1947,11 @@ public class ScriptResultOutput
 		set { _lineNumber = value; }
 	}
 
-	public ScriptResultOutput(ScriptProcessResult processResult, string output, int lineNumber)
+	public ScriptResultOutput(ScriptProcessResult processResult, string output, int lineNumber, GameScript gameScript)
 	{
 		_processResult = processResult;
 		_output = output;
 		_lineNumber = lineNumber;
+		_gameScript = gameScript;
 	}
 }
