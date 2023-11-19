@@ -34,9 +34,6 @@ public partial class SaveDataManager : Service
 	public SaveDataManager()
 	{
 		_saveBaseDir = "Save";
-
-		// create base System data
-		Create<SystemData>("System");
 	}
 
 
@@ -76,6 +73,11 @@ public partial class SaveDataManager : Service
 	// Called when service is considered ready
 	public override void _OnServiceReady()
 	{
+		// create base System data
+		if (!Exists("System"))
+		{
+			Create<SystemData>("System");
+		}
 	}
 
 

@@ -13,10 +13,13 @@ using GodotEGP.Objects.Extensions;
 public partial class EventManager : Service
 {
 	private Dictionary<Type, List<IEventSubscription<Event>>> _eventSubscriptions = new Dictionary<Type, List<IEventSubscription<Event>>>();
+	private readonly object _eventSubscriptionsLock = new Object();
 
 	private Dictionary<Type, EventQueue> _eventQueues = new Dictionary<Type, EventQueue>();
+	private readonly object _eventQueuesLock = new Object();
 
 	private Dictionary<GodotObject, string> _connectedSignals = new Dictionary<GodotObject, string>();
+	private readonly object _connectedSignalsLock = new Object();
 
 	public override void _Ready()
 	{
@@ -25,40 +28,44 @@ public partial class EventManager : Service
 
 	public void Subscribe(IEventSubscription<Event> eventSubscription)
 	{
-		if (!_eventSubscriptions.TryGetValue(eventSubscription.EventType, out List<IEventSubscription<Event>> subList))
-		{
-			subList = new List<IEventSubscription<Event>>();
-			_eventSubscriptions.TryAdd(eventSubscription.EventType, subList);
+		lock (_eventSubscriptionsLock) {
+			if (!_eventSubscriptions.TryGetValue(eventSubscription.EventType, out List<IEventSubscription<Event>> subList))
+			{
+				subList = new List<IEventSubscription<Event>>();
+				_eventSubscriptions.TryAdd(eventSubscription.EventType, subList);
 
-			LoggerManager.LogDebug("Creating subscriber list for event type", "", "eventType", eventSubscription.EventType.Name);
+				LoggerManager.LogDebug("Creating subscriber list for event type", "", "eventType", eventSubscription.EventType.Name);
+			}
+
+			subList.Add(eventSubscription);
+
+			LoggerManager.LogDebug("Adding event subscription", "", "eventSubscription", new Dictionary<string, object> 
+					{
+						{ "subscriberType", eventSubscription.Subscriber.GetType().Name },
+						{ "eventType", eventSubscription.EventType.Name },
+						{ "isHighPriority", eventSubscription.IsHighPriority },
+						{ "filterCount", eventSubscription.EventFilters.Count },
+					}
+				);
 		}
-
-		subList.Add(eventSubscription);
-
-		LoggerManager.LogDebug("Adding event subscription", "", "eventSubscription", new Dictionary<string, object> 
-				{
-					{ "subscriberType", eventSubscription.Subscriber.GetType().Name },
-					{ "eventType", eventSubscription.EventType.Name },
-					{ "isHighPriority", eventSubscription.IsHighPriority },
-					{ "filterCount", eventSubscription.EventFilters.Count },
-				}
-			);
 	}
 
 	public bool Unsubscribe(IEventSubscription<Event> eventSubscription)
 	{
-		if (_eventSubscriptions.TryGetValue(eventSubscription.EventType, out List<IEventSubscription<Event>> subList))
-		{
-			LoggerManager.LogDebug("Removing event subscription", "", "eventSubscription", new Dictionary<string, object> 
-				{
-					{ "subscriberType", eventSubscription.Subscriber.GetType().Name },
-					{ "eventType", eventSubscription.EventType.Name },
-					{ "isHighPriority", eventSubscription.IsHighPriority },
-					{ "filterCount", eventSubscription.EventFilters.Count },
-				}
-			);
+		lock (_eventSubscriptionsLock) {
+			if (_eventSubscriptions.TryGetValue(eventSubscription.EventType, out List<IEventSubscription<Event>> subList))
+			{
+				LoggerManager.LogDebug("Removing event subscription", "", "eventSubscription", new Dictionary<string, object> 
+					{
+						{ "subscriberType", eventSubscription.Subscriber.GetType().Name },
+						{ "eventType", eventSubscription.EventType.Name },
+						{ "isHighPriority", eventSubscription.IsHighPriority },
+						{ "filterCount", eventSubscription.EventFilters.Count },
+					}
+				);
 
-			return subList.Remove(eventSubscription);
+				return subList.Remove(eventSubscription);
+			}
 		}
 
 		return false;
@@ -87,15 +94,18 @@ public partial class EventManager : Service
 
 	public T GetQueue<T>() where T : EventQueue, new()
 	{
-		if (!_eventQueues.TryGetValue(typeof(T), out EventQueue eventQueue))
-		{
-			eventQueue = new T();
-			_eventQueues.TryAdd(typeof(T), eventQueue);
+		lock (_eventQueuesLock) {
+			if (!_eventQueues.TryGetValue(typeof(T), out EventQueue eventQueue))
+			{
+				eventQueue = new T();
+				_eventQueues.TryAdd(typeof(T), eventQueue);
 
-			LoggerManager.LogDebug("Creating event queue", "", "eventQueue", typeof(T).Name);
+				LoggerManager.LogDebug("Creating event queue", "", "eventQueue", typeof(T).Name);
+			}
+
+			return (T) eventQueue;
 		}
 
-		return (T) eventQueue;
 	}
 
 	public void Queue<T>(IEvent eventObj) where T : EventQueue, new()
@@ -106,23 +116,27 @@ public partial class EventManager : Service
 	public Queue<IEvent> Fetch<T>(Type eventType, List<IFilter> eventFilters = null, int fetchCount = 1) where T : EventQueue, new()
 	{
 		// init eventFilters list if it's null
-		if (Object.Equals(eventFilters, default(List<IFilter>)))
-		{
-			eventFilters = new List<IFilter>();
+		lock (_eventQueuesLock) {
+			if (Object.Equals(eventFilters, default(List<IFilter>)))
+			{
+				eventFilters = new List<IFilter>();
+			}
+
+			// add the eventType filter
+			eventFilters.Add(new ObjectType(eventType));
+
+			return GetQueue<T>().Fetch(eventFilters, fetchCount);
 		}
-
-		// add the eventType filter
-		eventFilters.Add(new ObjectType(eventType));
-
-		return GetQueue<T>().Fetch(eventFilters, fetchCount);
 	}
 
 	public void Emit(IEvent eventObj)
 	{
-		bool eventConsumed = BroadcastEvent(eventObj, true);
+		lock (_eventQueuesLock) {
+			bool eventConsumed = BroadcastEvent(eventObj, true);
 
-		// queue event for low-priority subscribers
-		GetQueue<EventQueueDeferred>().Queue(eventObj);
+			// queue event for low-priority subscribers
+			GetQueue<EventQueueDeferred>().Queue(eventObj);
+		}
 	}
 
 	public override void _Process(double delta)
@@ -130,16 +144,18 @@ public partial class EventManager : Service
 		// process events for each subscription type
 		Queue<IEvent> eventQueue = GetQueue<EventQueueDeferred>().Fetch(null, 0);
 
-		while (eventQueue.TryPeek(out IEvent eventObj))
-		{
-			// remove item from the queue
-			eventObj = eventQueue.Dequeue();
+		lock (_eventQueuesLock) {
+			while (eventQueue.TryPeek(out IEvent eventObj))
+			{
+				// remove item from the queue
+				eventObj = eventQueue.Dequeue();
 
-			bool eventConsumed = BroadcastEvent(eventObj, false);
+				bool eventConsumed = BroadcastEvent(eventObj, false);
 
-			LoggerManager.LogDebug("Deferred event consumed state", "", "event", new Dictionary<string, string> { { "eventType", eventObj.GetType().Name }, {"consumed", eventConsumed.ToString() } });
+				LoggerManager.LogDebug("Deferred event consumed state", "", "event", new Dictionary<string, string> { { "eventType", eventObj.GetType().Name }, {"consumed", eventConsumed.ToString() } });
 
-			eventObj.ReturnInstance();
+				// eventObj.ReturnInstance();
+			}
 		}
 	}
 
@@ -147,13 +163,9 @@ public partial class EventManager : Service
 	{
 		bool eventConsumed = false;
 
-		if (_eventSubscriptions == null)
-		{
-			LoggerManager.LogError("event subs null");
-		}
 		if (eventObj == null)
 		{
-			LoggerManager.LogError("event object null");
+			LoggerManager.LogCritical("TODO: fix null event object");
 		}
 
 		// emit the event to high-priority subscribers
