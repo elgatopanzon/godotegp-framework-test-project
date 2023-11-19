@@ -340,28 +340,32 @@ public partial class Tests : Node2D
 
 	public void _On_ScriptingTest_Eval_pressed(IEvent e)
 	{
-		// InitScriptInterpretter();
+		InitScriptInterpretter();
 
 		LoggerManager.LogDebug("Scripting test eval pressed");
 		LoggerManager.LogDebug("Script content", "", "script", _scriptingTestScript);
 
 		// _scriptingTestInterpretter.RunScriptContent(_scriptingTestScript);
-		ServiceRegistry.Get<ScriptService>().RunScriptContent(_scriptingTestScript);
+		ServiceRegistry.Get<ScriptService>().GetSession("testui").RunScriptContent(_scriptingTestScript);
 	}
 
 	public void _On_ScriptingTest_Run_pressed(IEvent e)
 	{
-		// InitScriptInterpretter();
+		InitScriptInterpretter();
 
 		LoggerManager.LogDebug("Scripting test run pressed");
 		LoggerManager.LogDebug("Script name", "", "scriptName", _scriptingTestName);
 
 		// _scriptingTestInterpretter.RunScript(_scriptingTestName);
-		ServiceRegistry.Get<ScriptService>().RunScript(_scriptingTestName);
+		ServiceRegistry.Get<ScriptService>().GetSession("testui").RunScript(_scriptingTestName);
 	}
 
 	public void InitScriptInterpretter()
 	{
+		if (!ServiceRegistry.Get<ScriptService>().SessionExists("testui"))
+		{
+			ServiceRegistry.Get<ScriptService>().CreateSession("testui");
+		}
 		// if (_scriptingTestInterpretter == null)
 		// {
 		// 	var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();

@@ -34,6 +34,8 @@ public partial class ScriptService : Service
 		set { _scriptFunctions = value; }
 	}
 
+	private Dictionary<string, ScriptInterpretter> _sessions = new();
+
 	public ScriptService()
 	{
 	}
@@ -145,6 +147,51 @@ public partial class ScriptService : Service
 		return si;
 	}
 
+	public void CreateSession(string sessionName = "default")
+	{
+		if (!SessionExists(sessionName))
+		{
+			LoggerManager.LogDebug("Creating session", "", "sessionName", sessionName);
+
+			var sessionInterpretter = CreateInterpretterInstance();
+
+			_sessions[sessionName] = sessionInterpretter;
+
+			AddChild(sessionInterpretter);
+		}
+		else
+		{
+			throw new InterpretterSessionExistsException($"Session already exists with the name '{sessionName}'!");
+		}
+
+	}
+
+	public void DestroySession(string sessionName = "default")
+	{
+		if (SessionExists(sessionName))
+		{
+			LoggerManager.LogDebug("Removing session", "", "sessionName", sessionName);
+
+			_sessions[sessionName].QueueFree();
+			_sessions.Remove(sessionName);
+		}
+	}
+
+	public ScriptInterpretter GetSession(string sessionName = "default")
+	{
+		if (_sessions.TryGetValue(sessionName, out var ses))
+		{
+			return ses;
+		}
+
+		throw new InvalidSessionNameException($"Invalid session name: {sessionName}");
+	}
+
+	public bool SessionExists(string sessionName)
+	{
+		return _sessions.ContainsKey(sessionName);
+	}
+
 	public bool IsValidScriptName(string scriptName)
 	{
 		return _gameScripts.ContainsKey(scriptName);
@@ -159,6 +206,8 @@ public partial class ScriptService : Service
 		if (e is ScriptInterpretterRunning er)
 		{
 			LoggerManager.LogDebug("Script event running");
+
+			this.Emit(er);
 		}	
 	}
 
@@ -167,6 +216,8 @@ public partial class ScriptService : Service
 		if (e is ScriptInterpretterWaiting er)
 		{
 			LoggerManager.LogDebug("Script event waiting");
+
+			this.Emit(er);
 		}	
 	}
 
@@ -176,7 +227,13 @@ public partial class ScriptService : Service
 		{
 			LoggerManager.LogDebug("Script event finished");
 
-			(e.Owner as ScriptInterpretter).QueueFree();
+			// remove the instance if it's not a managed session
+			if (!_sessions.ContainsValue(er.Owner as ScriptInterpretter))
+			{
+				(e.Owner as ScriptInterpretter).QueueFree();
+			}
+
+			this.Emit(er);
 		}	
 	}
 
@@ -185,6 +242,8 @@ public partial class ScriptService : Service
 		if (e is ScriptInterpretterOutput er)
 		{
 			LoggerManager.LogDebug("Script event output", "", "e", er.Result.Output);
+
+			this.Emit(er);
 		}	
 	}
 
@@ -198,6 +257,28 @@ public partial class ScriptService : Service
 		public InvalidScriptNameException(string message) : base(message) { }
 		public InvalidScriptNameException(string message, Exception inner) : base(message, inner) { }
 		protected InvalidScriptNameException(
+			System.Runtime.Serialization.SerializationInfo info,
+			System.Runtime.Serialization.StreamingContext context)
+				: base(info, context) { }
+	}
+
+	public class InterpretterSessionExistsException : Exception
+	{
+		public InterpretterSessionExistsException() { }
+		public InterpretterSessionExistsException(string message) : base(message) { }
+		public InterpretterSessionExistsException(string message, Exception inner) : base(message, inner) { }
+		protected InterpretterSessionExistsException(
+			System.Runtime.Serialization.SerializationInfo info,
+			System.Runtime.Serialization.StreamingContext context)
+				: base(info, context) { }
+	}
+
+	public class InvalidSessionNameException : Exception
+	{
+		public InvalidSessionNameException() { }
+		public InvalidSessionNameException(string message) : base(message) { }
+		public InvalidSessionNameException(string message, Exception inner) : base(message, inner) { }
+		protected InvalidSessionNameException(
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)
 				: base(info, context) { }
