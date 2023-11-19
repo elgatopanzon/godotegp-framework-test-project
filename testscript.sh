@@ -24,7 +24,11 @@ multiline_func() {
 }
 
 test_func | fake_stdin
-if multiline_func; then
+test_func | fake_stdin
+
+# if this is a single line, it doesn't work!
+if multiline_func
+then
 	echo "the multiline_func returned 0"
 fi
 
@@ -44,19 +48,16 @@ done
 
 echo "yay!"
 
-#
-# for f in "${ARRAY[@]}"; do
-# 	echo "loop item: $f"
-# done
+for f in "${ARRAY[@]}"; do
+	echo "loop item: $f"
+done
 
 
-#
-# for f in $(seq 1 10)
-# do
-# 	echo "loop item 1: $f"
-# 	break
-# 	echo "loop item 2: $f"
-# done
+for f in $(seq 1 10); do
+	echo "loop item 1: $f"
+	break
+	echo "loop item 2: $f"
+done
 
 # COUNTER=0
 # while [ "${ARRAY[${COUNTER}]}" != "" ]; do
