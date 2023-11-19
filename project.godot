@@ -29,8 +29,10 @@ enabled=PackedStringArray("res://addons/godotegp-framework-csharp/plugin.cfg")
 
 [network]
 
-limits/debugger/max_chars_per_second=327680
-limits/debugger/max_queued_messages=20048
+limits/packet_peer_stream/max_buffer_po2=32
+limits/debugger/max_chars_per_second=3276800
+limits/debugger/max_queued_messages=200048
+limits/webrtc/max_channel_in_buffer_kb=128
 
 [rendering]
 

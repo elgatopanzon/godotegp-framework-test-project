@@ -1,10 +1,10 @@
 # #!/usr/bin/env sh
-# #
-# for f in one two three
-# do
-# 	echo "first loop item: $f"
-# done
-#
+ 
+for f in one two three
+do
+	echo "first loop item: $f"
+done
+ 
 ARRAY=("item1 1" "item2 2" "item3 3" "item4 4")
 
 echo "${ARRAY[@]}"
@@ -23,17 +23,29 @@ multiline_func() {
 	echo "multiline 2"
 }
 
-# echo asd | cat
-# test_func | fake_stdin
-
 test_func | fake_stdin
 if multiline_func; then
 	echo "the multiline_func returned 0"
 fi
 
+for f in "${ARRAY[@]}"; do
+	echo "loop item: $f"
+done
+
+COUNTER=0
+while [ "${ARRAY[${COUNTER}]}" != "" ]; do
+	echo "current item: ${ARRAY[${COUNTER}]}"
+	COUNTER="(($COUNTER + 1))"
+
+	if (( $COUNTER >= 2 )); then
+		echo "getting higher!"
+	fi
+done
+
+echo "yay!"
+
 #
-# for f in "${ARRAY[@]}"
-# do
+# for f in "${ARRAY[@]}"; do
 # 	echo "loop item: $f"
 # done
 

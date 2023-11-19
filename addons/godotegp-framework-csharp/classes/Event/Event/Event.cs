@@ -359,20 +359,14 @@ public partial class SceneTransitionChainFinished : SceneTransitionChainEvent
 
 public partial class ScriptInterpretterEvent : Event
 {
-	public GameScript Script;
-	public ScriptProcessResult Result;
+	public ScriptResultOutput Result;
 	
 }
 static public partial class ScriptInterpretterEventExtensions
 {
-	static public T SetResult<T>(this T o, ScriptProcessResult result) where T : ScriptInterpretterEvent
+	static public T SetResult<T>(this T o, ScriptResultOutput result) where T : ScriptInterpretterEvent
 	{
 		o.Result = result;
-		return o;
-	}
-	static public T SetScriptName<T>(this T o, GameScript script) where T : ScriptInterpretterEvent
-	{
-		o.Script = script;
 		return o;
 	}
 }
@@ -384,14 +378,14 @@ public partial class ScriptInterpretterOutput : ScriptInterpretterEvent {}
 
 public partial class ScriptServiceEvent : ScriptInterpretterEvent
 {
-	public string InterpretterName;
+	public ScriptInterpretter Interpretter;
 	
 }
 static public partial class ScriptServiceEventExtensions
 {
-	static public T SetInterpretterName<T>(this T o, string interpretterName) where T : ScriptServiceEvent
+	static public T SetInterpretterName<T>(this T o, ScriptInterpretter interpretter) where T : ScriptServiceEvent
 	{
-		o.InterpretterName = interpretterName;
+		o.Interpretter = interpretter;
 		return o;
 	}
 }

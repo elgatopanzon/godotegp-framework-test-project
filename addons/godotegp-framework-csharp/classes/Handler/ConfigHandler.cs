@@ -9,6 +9,8 @@ using GodotEGP.Event.Events;
 using GodotEGP.Event.Filter;
 using GodotEGP.Objects.Extensions;
 
+using GodotEGP.Resource;
+
 public partial class ConfigHandler : Handler
 {
 	public ConfigHandler()
@@ -46,6 +48,8 @@ public partial class ConfigHandler : Handler
 			ServiceRegistry.Get<ScreenTransitionManager>().SetConfig(sceneResources);
 		}
 
+		// set game scripts resources in ScriptService
+		ServiceRegistry.Get<ScriptService>().SetConfig(ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>());
 	}
 
 	public void _On_EngineConfig_ValueChanged(IEvent e)

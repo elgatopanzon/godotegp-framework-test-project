@@ -340,33 +340,35 @@ public partial class Tests : Node2D
 
 	public void _On_ScriptingTest_Eval_pressed(IEvent e)
 	{
-		InitScriptInterpretter();
+		// InitScriptInterpretter();
 
 		LoggerManager.LogDebug("Scripting test eval pressed");
 		LoggerManager.LogDebug("Script content", "", "script", _scriptingTestScript);
 
-		_scriptingTestInterpretter.RunScriptContent(_scriptingTestScript);
+		// _scriptingTestInterpretter.RunScriptContent(_scriptingTestScript);
+		ServiceRegistry.Get<ScriptService>().RunScriptContent(_scriptingTestScript);
 	}
 
 	public void _On_ScriptingTest_Run_pressed(IEvent e)
 	{
-		InitScriptInterpretter();
+		// InitScriptInterpretter();
 
 		LoggerManager.LogDebug("Scripting test run pressed");
 		LoggerManager.LogDebug("Script name", "", "scriptName", _scriptingTestName);
 
-		_scriptingTestInterpretter.RunScript(_scriptingTestName);
+		// _scriptingTestInterpretter.RunScript(_scriptingTestName);
+		ServiceRegistry.Get<ScriptService>().RunScript(_scriptingTestName);
 	}
 
 	public void InitScriptInterpretter()
 	{
-		if (_scriptingTestInterpretter == null)
-		{
-			var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
-			var scriptFuncs = ServiceRegistry.Get<ScriptService>().ScriptFunctions;
-			_scriptingTestInterpretter = new ScriptInterpretter(gameScripts, scriptFuncs);
-			AddChild(_scriptingTestInterpretter);
-		}
+		// if (_scriptingTestInterpretter == null)
+		// {
+		// 	var gameScripts = ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>();
+		// 	var scriptFuncs = ServiceRegistry.Get<ScriptService>().ScriptFunctions;
+		// 	_scriptingTestInterpretter = new ScriptInterpretter(gameScripts, scriptFuncs);
+		// 	AddChild(_scriptingTestInterpretter);
+		// }
 
 	}
 }

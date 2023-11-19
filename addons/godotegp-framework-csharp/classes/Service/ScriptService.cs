@@ -18,14 +18,16 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
 using GodotEGP.Scripting;
+using GodotEGP.Resource;
 using GodotEGP.Scripting.Functions;
 
 public partial class ScriptService : Service
 {
+	private Dictionary<string, Resource<GameScript>> _gameScripts = new();
+
 	private string _scriptFunctionsNamespace = "GodotEGP.Scripting.Functions";
 
 	private Dictionary<string, IScriptFunction> _scriptFunctions = new Dictionary<string, IScriptFunction>();
-
 	public Dictionary<string, IScriptFunction> ScriptFunctions
 	{
 		get { return _scriptFunctions; }
@@ -36,6 +38,17 @@ public partial class ScriptService : Service
 	{
 	}
 
+	public void SetConfig(Dictionary<string, Resource<GameScript>> gameScripts)
+	{
+		LoggerManager.LogDebug("Setting config");
+
+		_gameScripts = gameScripts;
+
+		if (!GetReady())
+		{
+			_SetServiceReady(true);
+		}
+	}
 
 	/*******************
 	*  Godot methods  *
@@ -69,8 +82,6 @@ public partial class ScriptService : Service
 			LoggerManager.LogDebug("Registering function", "", "func", $"{functionType.Name.ToLower()} as {functionType}");
 			_scriptFunctions.Add(functionType.Name.ToLower(), (IScriptFunction) Activator.CreateInstance(functionType));
 		}
-
-		_SetServiceReady(true);
 	}
 
 	// Called when service is deregistered from manager
@@ -82,6 +93,114 @@ public partial class ScriptService : Service
 	// Called when service is considered ready
 	public override void _OnServiceReady()
 	{
+	}
+
+	/********************************************
+	*  Script interpretter management methods  *
+	********************************************/
+	
+	// run a script in a managed instance, destroyed once finished
+	public void RunScript(string scriptName)
+	{
+		if (IsValidScriptName(scriptName))
+		{
+			LoggerManager.LogDebug("Running script", "", "name", scriptName);
+
+			// create interpretter instance
+			var si = CreateInterpretterInstance();
+			
+			AddChild(si);
+
+	 		si.RunScript(scriptName);
+		}
+		else {
+			throw new InvalidScriptNameException($"Invalid script name: {scriptName}");
+		}
+	}
+
+	public void RunScriptContent(string scriptContent)
+	{
+		LoggerManager.LogDebug("Running script content as script");
+
+		var scriptResource = new Resource<GameScript>();
+		scriptResource.Value = new GameScript();
+		scriptResource.Value.ScriptContent = scriptContent;
+
+		string tempScriptName = scriptContent.GetHashCode().ToString();
+
+		_gameScripts[tempScriptName] = scriptResource;
+
+		RunScript(tempScriptName);
+	}
+	
+	public ScriptInterpretter CreateInterpretterInstance()
+	{
+		var si = new ScriptInterpretter(_gameScripts, _scriptFunctions);
+
+		si.SubscribeOwner<ScriptInterpretterRunning>(_On_ScriptInterpretter_Running);
+		si.SubscribeOwner<ScriptInterpretterWaiting>(_On_ScriptInterpretter_Waiting);
+		si.SubscribeOwner<ScriptInterpretterFinished>(_On_ScriptInterpretter_Finished);
+		si.SubscribeOwner<ScriptInterpretterOutput>(_On_ScriptInterpretter_Output);
+
+		return si;
+	}
+
+	public bool IsValidScriptName(string scriptName)
+	{
+		return _gameScripts.ContainsKey(scriptName);
+	}
+
+	/***************
+	*  Callbacks  *
+	***************/
+	
+	public void _On_ScriptInterpretter_Running(IEvent e)
+	{
+		if (e is ScriptInterpretterRunning er)
+		{
+			LoggerManager.LogDebug("Script event running");
+		}	
+	}
+
+	public void _On_ScriptInterpretter_Waiting(IEvent e)
+	{
+		if (e is ScriptInterpretterWaiting er)
+		{
+			LoggerManager.LogDebug("Script event waiting");
+		}	
+	}
+
+	public void _On_ScriptInterpretter_Finished(IEvent e)
+	{
+		if (e is ScriptInterpretterFinished er)
+		{
+			LoggerManager.LogDebug("Script event finished");
+
+			(e.Owner as ScriptInterpretter).QueueFree();
+		}	
+	}
+
+	public void _On_ScriptInterpretter_Output(IEvent e)
+	{
+		if (e is ScriptInterpretterOutput er)
+		{
+			LoggerManager.LogDebug("Script event output", "", "e", er.Result.Output);
+		}	
+	}
+
+	/****************
+	*  Exceptions  *
+	****************/
+
+	public class InvalidScriptNameException : Exception
+	{
+		public InvalidScriptNameException() { }
+		public InvalidScriptNameException(string message) : base(message) { }
+		public InvalidScriptNameException(string message, Exception inner) : base(message, inner) { }
+		protected InvalidScriptNameException(
+			System.Runtime.Serialization.SerializationInfo info,
+			System.Runtime.Serialization.StreamingContext context)
+				: base(info, context) { }
 	}
 }
 
