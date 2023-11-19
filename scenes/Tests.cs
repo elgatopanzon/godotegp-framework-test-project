@@ -73,7 +73,12 @@ public partial class Tests : Node2D
 		// bind to pressed signal of clear button to clear script input field
 		"UITests.Scripting.Clear".BindSignal<Button, string>("pressed", false,  
 				(n) => null,
-				(v) => "UITests.Scripting.Script".Node<TextEdit>().Text = ""
+				(v) => {
+					"UITests.Scripting.Script".Node<TextEdit>().Text = "";
+					"UITests.Scripting.Output".Node<TextEdit>().Text = "";
+					ServiceRegistry.Get<ScriptService>().DestroySession("testui");
+					InitScriptInterpretter();
+				}
 			);
 		// bind to text_changed signal of input field to set script content
 		// variable

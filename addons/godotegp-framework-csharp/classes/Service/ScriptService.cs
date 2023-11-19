@@ -208,7 +208,7 @@ public partial class ScriptService : Service
 		var cbf = new CallbackAsFunction();
 		cbf.SetCallbackFunction(callbackFunction);
 
-		_scriptFunctions.Add(functionName, (IScriptFunction) cbf);
+		_scriptFunctions[functionName] = (IScriptFunction) cbf;
 	}
 
 	/***************
