@@ -185,3 +185,24 @@ public partial class Declare : IScriptFunction
 		return res;
 	}
 }
+
+public partial class CallbackAsFunction : IScriptFunction
+{
+	private Func<ScriptInterpretter, object[], ScriptProcessResult> _cb;
+
+	public void SetCallbackFunction(Func<ScriptInterpretter, object[], ScriptProcessResult> cb)
+	{
+		_cb = cb;
+	}
+
+	public ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		if (_cb != null)
+		{
+			return _cb(i, p);
+		}
+		else {
+			return new ScriptProcessResult(0);
+		}
+	}
+}

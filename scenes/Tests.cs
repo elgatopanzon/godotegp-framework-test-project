@@ -374,6 +374,7 @@ public partial class Tests : Node2D
 					}
 				}, isHighPriority: true);
 
+			ServiceRegistry.Get<ScriptService>().RegisterFunctionCallback(ScriptCbFunctionTest, "cbfunctiontest");
 		}
 		// if (_scriptingTestInterpretter == null)
 		// {
@@ -383,5 +384,10 @@ public partial class Tests : Node2D
 		// 	AddChild(_scriptingTestInterpretter);
 		// }
 
+	}
+
+	public ScriptProcessResult ScriptCbFunctionTest(ScriptInterpretter i, object[] p)
+	{
+		return new ScriptProcessResult(0, "this was returned from a C# object method registered at runtime as a callback!");
 	}
 }

@@ -199,6 +199,18 @@ public partial class ScriptService : Service
 		return _gameScripts.ContainsKey(scriptName);
 	}
 
+	/*********************************
+	*  Function management methods  *
+	*********************************/
+	
+	public void RegisterFunctionCallback(Func<ScriptInterpretter, object[], ScriptProcessResult> callbackFunction, string functionName)
+	{
+		var cbf = new CallbackAsFunction();
+		cbf.SetCallbackFunction(callbackFunction);
+
+		_scriptFunctions.Add(functionName, (IScriptFunction) cbf);
+	}
+
 	/***************
 	*  Callbacks  *
 	***************/
