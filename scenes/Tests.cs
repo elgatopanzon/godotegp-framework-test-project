@@ -97,11 +97,24 @@ public partial class Tests : Node2D
 		// connect to pressed signal and wire up to Run callback
 		"UITests.Scripting.Eval".Connect("pressed", false, _On_ScriptingTest_Eval_pressed, isHighPriority: true);
 		"UITests.Scripting.Run".Connect("pressed", false, _On_ScriptingTest_Run_pressed, isHighPriority: true);
+
+		// input mapping tests
+		InputMap.AddAction(new StringName("inputtest1"));
+		var key = new InputEventKey();
+		key.PhysicalKeycode = Key.A;
+		key.ShiftPressed = true;
+		InputMap.ActionAddEvent(new StringName("inputtest1"), key);
+
+		LoggerManager.LogDebug("Key event", "", "e", key);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
+		if (Input.IsActionPressed("inputtest1"))
+		{
+			LoggerManager.LogDebug("Pressed");
+		}
 	}
 
 	// general testing method hooked to the Test button
