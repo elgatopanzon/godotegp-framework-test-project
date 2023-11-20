@@ -18,6 +18,8 @@ using GodotEGP.DataBind;
 using GodotEGP.Scripting;
 using GodotEGP.Resource;
 
+using GodotEGP.Misc;
+
 public partial class Tests : Node2D
 {
 	private string _scriptingTestScript = "";
@@ -99,11 +101,11 @@ public partial class Tests : Node2D
 		"UITests.Scripting.Run".Connect("pressed", false, _On_ScriptingTest_Run_pressed, isHighPriority: true);
 
 		// input mapping tests
-		InputMap.AddAction(new StringName("inputtest1"));
+		InputMap.AddAction(StringNames.Get("inputtest1"));
 		var key = new InputEventKey();
 		key.PhysicalKeycode = Key.A;
 		key.ShiftPressed = true;
-		InputMap.ActionAddEvent(new StringName("inputtest1"), key);
+		InputMap.ActionAddEvent(StringNames.Get("inputtest1"), key);
 
 		LoggerManager.LogDebug("Key event", "", "e", key);
 	}
