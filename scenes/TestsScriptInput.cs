@@ -16,7 +16,7 @@ public partial class TestsScriptInput : TextEdit
 	{
 	}
 
-	public override void _Input(InputEvent @event)
+	public override void _GuiInput(InputEvent @event)
     {
     	if (@event is InputEventKey key)
     	{
@@ -31,6 +31,14 @@ public partial class TestsScriptInput : TextEdit
     			Text = "";
     			AcceptEvent();
     		}
+    		// GetViewport().SetInputAsHandled();
+    	}
+    }
+	public override void _UnhandledInput(InputEvent @event)
+    {
+    	if (@event is InputEventKey key && HasFocus())
+    	{
+    		GetViewport().SetInputAsHandled();
     	}
     }
 }

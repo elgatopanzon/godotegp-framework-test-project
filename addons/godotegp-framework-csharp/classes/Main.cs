@@ -34,6 +34,7 @@ public partial class Main : Node
 		// trigger lazy load ConfigManager to trigger initial load
 		ServiceRegistry.Get<DataService>();
 		ServiceRegistry.Get<ConfigManager>();
+		ServiceRegistry.Get<InputManager>();
 	}
 
 	// Called when the node enters the scene tree for the first time.
