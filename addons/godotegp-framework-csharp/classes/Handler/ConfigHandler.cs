@@ -34,6 +34,9 @@ public partial class ConfigHandler : Handler
 		// set resource manager config
 		ServiceRegistry.Get<ResourceManager>().SetConfig(ServiceRegistry.Get<ConfigManager>().Get<ResourceDefinitionConfig>());
 
+		// set inputmanager mapping config
+		ServiceRegistry.Get<InputManager>().SetMappingConfig(ServiceRegistry.Get<ConfigManager>().Get<GlobalConfig>().InputMapping);
+
 		// trigger EngineConfig changed event
 		_On_EngineConfig_Changed(ec);
 	}
@@ -70,5 +73,8 @@ public partial class ConfigHandler : Handler
 
 		// set scene transition config
 		ServiceRegistry.Get<SceneTransitionManager>().SetConfig(ec.SceneTransitionManager);
+
+		// set input manager config
+		ServiceRegistry.Get<InputManager>().SetConfig(ec.InputManager);
 	}
 }

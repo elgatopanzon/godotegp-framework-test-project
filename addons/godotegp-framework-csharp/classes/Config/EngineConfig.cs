@@ -28,6 +28,13 @@ public partial class EngineConfig : VConfig
 		set { _sceneTransitionManager.Value = value; }
 	}
 
+	internal readonly VNative<InputManagerConfig> _inputManager;
+
+	public InputManagerConfig InputManager
+	{
+		get { return _inputManager.Value; }
+		set { _inputManager.Value = value; }
+	}
 
 	public EngineConfig()
 	{
@@ -41,6 +48,10 @@ public partial class EngineConfig : VConfig
 
 		_sceneTransitionManager = AddValidatedNative<SceneTransitionManagerConfig>(this)
 		    .Default(new SceneTransitionManagerConfig())
+		    .ChangeEventsEnabled();
+
+		_inputManager = AddValidatedNative<InputManagerConfig>(this)
+		    .Default(new InputManagerConfig())
 		    .ChangeEventsEnabled();
 	}
 }

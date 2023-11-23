@@ -1,0 +1,12 @@
+{
+  "InputManager": {
+    "Actions": {
+      "DefaultAction": {
+        "ControlType": 0
+      },
+      "DefaultAction2": {
+        "ControlType": 0
+      }
+    }
+  }
+}

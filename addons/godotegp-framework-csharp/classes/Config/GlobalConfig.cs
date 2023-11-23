@@ -25,10 +25,22 @@ public partial class GlobalConfig : VConfig
 		set { _configVersion.Value = value; }
 	}
 
+	internal readonly VNative<InputMappingConfig> _mappingConfig;
+
+	public InputMappingConfig InputMapping
+	{
+		get { return _mappingConfig.Value; }
+		set { _mappingConfig.Value = value; }
+	}
+
 	public GlobalConfig()
 	{
 		_configVersion = AddValidatedValue<int>(this)
 		    .Default(1)
+		    .ChangeEventsEnabled();
+
+		_mappingConfig = AddValidatedNative<InputMappingConfig>(this)
+		    .Default(new InputMappingConfig())
 		    .ChangeEventsEnabled();
 	}
 }
