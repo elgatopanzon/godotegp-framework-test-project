@@ -17,14 +17,63 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using GodotEGP.State;
+
 public partial class InputManager : Service
 {
+	// states
+	class InputState : HStateMachine {}
+	class InputConfigurationState : HStateMachine {}
+	class InputListeningState : HStateMachine {}
+	class InputProcessingState : HStateMachine {}
+
+	private InputState _inputState  { get; set; }
+	private InputConfigurationState _inputConfigurationState  { get; set; }
+	private InputListeningState _inputListeningState  { get; set; }
+	private InputProcessingState _inputProcessingState  { get; set; }
+
+	private const int CONFIGURATION_STATE = 0;
+	private const int LISTENING_STATE = 1;
+	private const int PROCESSING_STATE = 2;
+
+	// config
 	private InputManagerConfig _config { get; set; }
 	private InputMappingConfig _mappingConfig { get; set; }
 
+	private InputEvent _previousInputEvent;
+
+	// input state
+	private Dictionary<StringName, ActionInputState> _actionStates = new();
+
 	public InputManager()
 	{
-		
+		// init default configs
+		_config = new();
+		_mappingConfig = new();
+
+		// setup states
+		_inputState = new();
+		_inputConfigurationState = new();
+		_inputListeningState = new();
+		_inputProcessingState = new();
+
+		_inputState.AddState(_inputConfigurationState);
+		_inputState.AddState(_inputListeningState);
+		_inputState.AddState(_inputProcessingState);
+
+		_inputConfigurationState.OnEnter = _State_Configuration_OnEnter;
+		_inputConfigurationState.OnUpdate = _State_Configuration_OnUpdate;
+		_inputListeningState.OnEnter = _State_Listening_OnEnter;
+		_inputListeningState.OnUpdate = _State_Listening_OnUpdate;
+		_inputProcessingState.OnEnter = _State_Processing_OnEnter;
+		_inputProcessingState.OnUpdate = _State_Processing_OnUpdate;
+
+		_inputState.AddTransition(_inputConfigurationState, _inputListeningState, LISTENING_STATE);
+		_inputState.AddTransition(_inputProcessingState, _inputListeningState, LISTENING_STATE);
+
+		_inputState.AddTransition(_inputListeningState, _inputProcessingState, PROCESSING_STATE);
+
+		_inputState.AddTransition(_inputListeningState, _inputConfigurationState, CONFIGURATION_STATE);
 	}
 
 	public void SetMappingConfig(InputMappingConfig mappingConfig)
@@ -43,8 +92,7 @@ public partial class InputManager : Service
 			_SetServiceReady(true);
 		}
 
-		ResetInputActions();
-		SetupInputActions();
+		_inputState.Transition(CONFIGURATION_STATE);
 	}
 
 
@@ -55,11 +103,13 @@ public partial class InputManager : Service
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		_inputState.Enter();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		_inputState.Update();
 	}
 
 	public override void _UnhandledInput(InputEvent @event)
@@ -87,6 +137,57 @@ public partial class InputManager : Service
 	{
 	}
 
+	/***************************
+	*  State related methods  *
+	***************************/
+
+	public void _State_Configuration_OnEnter()
+	{
+		LoggerManager.LogDebug("Entering configuration state");
+
+		ResetInputActions();
+		SetupInputActions();
+		UpdateActionInputStates();
+
+		_inputState.Transition(LISTENING_STATE);
+	}
+	
+	public void _State_Configuration_OnUpdate()
+	{
+	}
+
+	public void _State_Listening_OnEnter()
+	{
+		LoggerManager.LogDebug("Entering listening state");
+	}
+	
+	public void _State_Listening_OnUpdate()
+	{
+		// we don't want to emit an event here, we just want to update the state
+		if (Input.IsAnythingPressed())
+		{
+			UpdateActionInputStates();
+		}
+	}
+
+	public void _State_Processing_OnEnter()
+	{
+		LoggerManager.LogDebug("Entering processing state");
+	}
+
+	public void _State_Processing_OnUpdate()
+	{
+		LoggerManager.LogDebug("Updating processing state");
+
+		UpdateActionInputStates();
+
+		LoggerManager.LogDebug("Action states", "", "state", _actionStates);
+
+		// TODO: emit event here containing the current action states object
+		
+		// return to listening state
+		_inputState.Transition(LISTENING_STATE);
+	}
 
 	/*************************************
 	*  Input action management methods  *
@@ -103,7 +204,10 @@ public partial class InputManager : Service
 				if (eraseActions)
 				{
 					LoggerManager.LogDebug("Erasing input action", "", "action", action.ToString());
+
 					InputMap.EraseAction(action);
+
+					_actionStates.Remove(action);
 				}
 			}
 
@@ -135,6 +239,13 @@ public partial class InputManager : Service
 			InputMap.AddAction(action.Key, (float) action.Value.Deadzone);
 
 			ConfigureActionMapping(action.Key);
+
+			// add current action to input states
+			if (!_actionStates.ContainsKey(action.Key))
+			{
+				_actionStates.Add(action.Key, new ActionInputState());
+				_actionStates[action.Key].Config = action.Value;
+			}
 		}
 	}
 
@@ -153,13 +264,81 @@ public partial class InputManager : Service
 		}
 	}
 
+	public void UpdateActionInputStates()
+	{
+		// update internal state for all known actions
+		LoggerManager.LogDebug("Updating action states");
+
+		foreach (var action in _config.Actions)
+		{
+			var actionName = action.Key;
+			var actionConfig = action.Value;
+
+			_actionStates[actionName].Pressed = Input.IsActionPressed(actionName);
+			_actionStates[actionName].JustPressed = Input.IsActionJustPressed(actionName);
+			_actionStates[actionName].JustReleased = Input.IsActionJustReleased(actionName);
+		}
+	}
+
+	/***********************************
+	*  Input action state management  *
+	***********************************/
+	
+	public void _On_Input(InputEvent @e = null)
+	{
+		foreach (var action in InputMap.GetActions())
+		{
+			if (Input.IsActionJustPressed(action))
+			{
+				LoggerManager.LogDebug("Action just pressed", "", "action", action);
+			}
+			else if (Input.IsActionPressed(action))
+			{
+				LoggerManager.LogDebug("Action pressed", "", "action", action);
+			}
+			else if (Input.IsActionJustReleased(action))
+			{
+				LoggerManager.LogDebug("Action just released", "", "action", action);
+			}
+		}
+	}
+
 	/********************
 	*  Event handlers  *
 	********************/
 	
 	public void _On_InputEvent(InputEvent @e)
 	{
-		LoggerManager.LogDebug(@e.AsText());
+		_inputState.Transition(PROCESSING_STATE, true);
 	}
 }
 
+public class ActionInputState {
+	private bool _pressed;
+	public bool Pressed
+	{
+		get { return _pressed; }
+		set { _pressed = value; }
+	}
+
+	private bool _justPressed;
+	public bool JustPressed
+	{
+		get { return _justPressed; }
+		set { _justPressed = value; }
+	}
+
+	private bool _justReleased;
+	public bool JustReleased
+	{
+		get { return _justReleased; }
+		set { _justReleased = value; }
+	}
+
+	private InputActionConfig _actionConfig;
+	public InputActionConfig Config
+	{
+		get { return _actionConfig; }
+		set { _actionConfig = value; }
+	}
+}
