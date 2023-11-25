@@ -44,6 +44,7 @@ public partial class InputManager : Service
 
 	// input state
 	private Dictionary<StringName, ActionInputState> _actionStates = new();
+	private MouseState _mouseState = new();
 
 	public InputManager()
 	{
@@ -168,6 +169,8 @@ public partial class InputManager : Service
 		{
 			UpdateActionInputStates();
 		}
+
+		UpdateMouseState();
 	}
 
 	public void _State_Processing_OnEnter()
@@ -180,8 +183,10 @@ public partial class InputManager : Service
 		LoggerManager.LogDebug("Updating processing state");
 
 		UpdateActionInputStates();
+		UpdateMouseState();
 
 		LoggerManager.LogDebug("Action states", "", "state", _actionStates);
+		LoggerManager.LogDebug("Mouse state", "", "state", _mouseState);
 
 		// TODO: emit event here containing the current action states object
 		
@@ -267,8 +272,6 @@ public partial class InputManager : Service
 	public void UpdateActionInputStates()
 	{
 		// update internal state for all known actions
-		LoggerManager.LogDebug("Updating action states");
-
 		foreach (var action in _config.Actions)
 		{
 			var actionName = action.Key;
@@ -278,6 +281,28 @@ public partial class InputManager : Service
 			_actionStates[actionName].JustPressed = Input.IsActionJustPressed(actionName);
 			_actionStates[actionName].JustReleased = Input.IsActionJustReleased(actionName);
 		}
+	}
+
+	public void UpdateMouseState()
+	{
+		var mousePosition = GetViewport().GetMousePosition();
+
+		_mouseState.X = mousePosition.X;
+		_mouseState.Y = mousePosition.Y;
+
+		var mouseVelocity = Input.GetLastMouseVelocity();
+
+		_mouseState.VelocityX = mouseVelocity.X;
+		_mouseState.VelocityY = mouseVelocity.Y;
+
+		_mouseState.LeftButtonPressed = Input.IsMouseButtonPressed(MouseButton.Left);
+		_mouseState.RightButtonPressed = Input.IsMouseButtonPressed(MouseButton.Right);
+		_mouseState.MiddleButtonPressed = Input.IsMouseButtonPressed(MouseButton.Middle);
+
+		_mouseState.WheelUp = Input.IsMouseButtonPressed(MouseButton.WheelUp);
+		_mouseState.WheelDown = Input.IsMouseButtonPressed(MouseButton.WheelDown);
+		_mouseState.WheelLeft = Input.IsMouseButtonPressed(MouseButton.WheelLeft);
+		_mouseState.WheelRight = Input.IsMouseButtonPressed(MouseButton.WheelRight);
 	}
 
 	/***********************************
@@ -313,7 +338,8 @@ public partial class InputManager : Service
 	}
 }
 
-public class ActionInputState {
+public class ActionInputState 
+{
 	private bool _pressed;
 	public bool Pressed
 	{
@@ -340,5 +366,85 @@ public class ActionInputState {
 	{
 		get { return _actionConfig; }
 		set { _actionConfig = value; }
+	}
+}
+
+public class MouseState 
+{
+	private float _x;
+	public float X
+	{
+		get { return _x; }
+		set { _x = value; }
+	}
+
+	private float _y;
+	public float Y
+	{
+		get { return _y; }
+		set { _y = value; }
+	}
+
+	private float _velocityX;
+	public float VelocityX
+	{
+		get { return _velocityX; }
+		set { _velocityX = value; }
+	}
+
+	private float _velocityY;
+	public float VelocityY
+	{
+		get { return _velocityY; }
+		set { _velocityY = value; }
+	}
+
+	private bool _leftButtonPressed;
+	public bool LeftButtonPressed
+	{
+		get { return _leftButtonPressed; }
+		set { _leftButtonPressed = value; }
+	}
+
+	private bool _rightButtonPressed;
+	public bool RightButtonPressed
+	{
+		get { return _rightButtonPressed; }
+		set { _rightButtonPressed = value; }
+	}
+
+	private bool _middleButtonPressed;
+	public bool MiddleButtonPressed
+	{
+		get { return _middleButtonPressed; }
+		set { _middleButtonPressed = value; }
+	}
+
+	private bool _wheelUp;
+	public bool WheelUp
+	{
+		get { return _wheelUp; }
+		set { _wheelUp = value; }
+	}
+
+	private bool _wheelDown;
+	public bool WheelDown
+	{
+		get { return _wheelDown; }
+		set { _wheelDown = value; }
+	}
+
+	private bool _wheelLeft;
+	public bool WheelLeft
+	{
+		get { return _wheelLeft; }
+		set { _wheelLeft = value; }
+	}
+
+	private bool _wheelRight;
+	public bool WheelRight
+	{
+		get { return _wheelRight; }
+		set { _wheelRight = value; }
 	}
 }
