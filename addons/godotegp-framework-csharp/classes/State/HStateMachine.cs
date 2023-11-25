@@ -96,7 +96,7 @@ public partial class HStateMachine
 	public virtual void CallbackOnUpdate() { }
 	public virtual void CallbackOnExit() { }
 
-	public void Change(HStateMachine state)
+	public void Change(HStateMachine state, bool runUpdate = false)
 	{
 		// run Exit callback on current sub state
 		CurrentSubState?.Exit();
@@ -114,9 +114,15 @@ public partial class HStateMachine
 
 		// run Enter callback on new sub state
 		CurrentSubState.Enter();
+
+		// run a single process iteration right away
+		if (runUpdate)
+		{
+			CurrentSubState.Update();
+		}
 	}
 
-	public void Transition(int trigger)
+	public void Transition(int trigger, bool runUpdate = false)
 	{
 		var root = this;
 		while (root?.Parent != null)
@@ -128,7 +134,7 @@ public partial class HStateMachine
 		{
 			if (root.Transitions.TryGetValue(trigger, out HStateMachine to))
 			{
-				root.Parent?.Change(to);
+				root.Parent?.Change(to, runUpdate);
 				return;
 			}
 
