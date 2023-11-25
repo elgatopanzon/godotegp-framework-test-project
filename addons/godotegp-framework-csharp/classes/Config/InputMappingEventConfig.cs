@@ -67,8 +67,8 @@ public partial class InputMappingEvent
 		set { _joyAxis = value; }
 	}
 
-	private bool _joyAxisDirection;
-	public bool AxisDirection
+	private int _joyAxisDirection = -1;
+	public int AxisDirection
 	{
 		get { return _joyAxisDirection; }
 		set { _joyAxisDirection = value; }
@@ -81,50 +81,124 @@ public partial class InputMappingEvent
 		set { _keycode = value; }
 	}
 
-	internal bool _allowEcho = false;
-	public bool AllowEcho
+	internal bool _echo = false;
+	public bool Echo
 	{
-		get { return _allowEcho = false; }
-		set { _allowEcho = value; }
+		get { return _echo = false; }
+		set { _echo = value; }
 	}
 
-	private bool _altPressed;
+	private bool _altPressed = false;
 	public bool AltPressed
 	{
 		get { return _altPressed; }
 		set { _altPressed = value; }
 	}
 
-	private bool _ctrlPressed;
+	private bool _ctrlPressed = false;
 	public bool CtrlPressed
 	{
 		get { return _ctrlPressed; }
 		set { _ctrlPressed = value; }
 	}
 
-	private bool _metaPressed;
+	private bool _metaPressed = false;
 	public bool MetaPressed
 	{
 		get { return _metaPressed; }
 		set { _metaPressed = value; }
 	}
 
-	private bool _shiftPressed;
+	private bool _shiftPressed = false;
 	public bool ShiftPressed
 	{
 		get { return _shiftPressed; }
 		set { _shiftPressed = value; }
 	}
 
-	private MouseButton _mouseButton;
+	private MouseButton _mouseButton = MouseButton.None;
 	public MouseButton MouseButton
 	{
 		get { return _mouseButton; }
 		set { _mouseButton = value; }
 	}
 
+	private bool _doubleClick = false;
+	public bool DoubleClick
+	{
+		get { return _doubleClick = false; }
+		set { _doubleClick = value; }
+	}
+
 	public InputMappingEvent()
 	{
 
+	}
+
+	public InputEvent ToInputEvent()
+	{
+		// mouse button event
+		if (_mouseButton != MouseButton.None)
+		{
+			var e = new InputEventMouseButton();
+
+			e.ButtonIndex = _mouseButton;
+			e.Device = _deviceId;
+			e.DoubleClick = _doubleClick;
+			e.Pressed = true;
+
+			// include keyboard modifier keys
+			e.MetaPressed = _metaPressed;
+			e.ShiftPressed = _shiftPressed;
+			e.CtrlPressed = _ctrlPressed;
+			e.AltPressed = _altPressed;
+
+			return e;
+		}
+
+		// key event
+		if (_keycode != Key.None)
+		{
+			var e = new InputEventKey();
+
+			e.Keycode = _keycode;
+			e.Device = _deviceId;
+			e.Pressed = true;
+
+			e.MetaPressed = _metaPressed;
+			e.ShiftPressed = _shiftPressed;
+			e.CtrlPressed = _ctrlPressed;
+			e.AltPressed = _altPressed;
+			e.Echo = _echo;
+
+			return e;
+		}
+
+		// joypad button event
+		if (_joypadButton != JoyButton.Invalid)
+		{
+			var e = new InputEventJoypadButton();
+
+			e.ButtonIndex = _joypadButton;
+			e.Device = _deviceId;
+			e.Pressed = true;
+
+			return e;
+		}
+
+		// joypad button event
+		if (_joyAxisDirection != -1)
+		{
+			var e = new InputEventJoypadMotion();
+
+			e.Axis = _joyAxis;
+			e.Device = _deviceId;
+
+			// TODO: incorporate axis direction into the event somehow
+
+			return e;
+		}
+
+		return null;
 	}
 }
