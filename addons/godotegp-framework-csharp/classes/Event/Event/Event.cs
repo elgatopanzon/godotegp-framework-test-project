@@ -394,3 +394,32 @@ public partial class ScriptRunning : ScriptServiceEvent {}
 public partial class ScriptWaiting : ScriptServiceEvent {}
 public partial class ScriptFinished : ScriptServiceEvent {}
 public partial class ScriptOutput : ScriptServiceEvent {}
+
+
+
+public partial class InputStateEvent : Event
+{
+	public Dictionary<StringName, ActionInputState> ActionStates;
+	public Dictionary<string, JoypadState> JoypadStates;
+	public MouseState MouseState;
+	
+}
+static public partial class InputStateEventExtensions
+{
+	static public T SetStates<T>(this T o, Dictionary<StringName, ActionInputState> actionStates, Dictionary<string, JoypadState> joypadStates, MouseState mouseState) where T : InputStateEvent
+	{
+		o.ActionStates = actionStates;
+		o.JoypadStates = joypadStates;
+		o.MouseState = mouseState;
+		return o;
+	}
+}
+
+public partial class InputStateChanged : InputStateEvent {}
+
+public partial class InputStateJoypadAvailable : InputStateEvent
+{
+	public string JoypadGuid = "";
+}
+public partial class InputStateJoypadUnavailable : InputStateJoypadAvailable {}
+public partial class InputStateNoJoypadsAvailable : InputStateJoypadAvailable {}

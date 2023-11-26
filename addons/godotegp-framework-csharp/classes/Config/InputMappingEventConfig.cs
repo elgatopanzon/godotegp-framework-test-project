@@ -46,11 +46,11 @@ public partial class InputMappingEventConfig : VConfig
 
 public partial class InputMappingEvent
 {
-	private int _deviceId = 0;
-	public int DeviceId
+	private string _deviceGuid = "";
+	public string DeviceGuid
 	{
-		get { return _deviceId; }
-		set { _deviceId = value; }
+		get { return _deviceGuid; }
+		set { _deviceGuid = value; }
 	}
 
 	private JoyButton _joypadButton = JoyButton.Invalid;
@@ -143,7 +143,6 @@ public partial class InputMappingEvent
 			var e = new InputEventMouseButton();
 
 			e.ButtonIndex = _mouseButton;
-			e.Device = _deviceId;
 			e.DoubleClick = _doubleClick;
 			e.Pressed = true;
 
@@ -162,7 +161,6 @@ public partial class InputMappingEvent
 			var e = new InputEventKey();
 
 			e.Keycode = _keycode;
-			e.Device = _deviceId;
 			e.Pressed = true;
 
 			e.MetaPressed = _metaPressed;
@@ -180,7 +178,6 @@ public partial class InputMappingEvent
 			var e = new InputEventJoypadButton();
 
 			e.ButtonIndex = _joypadButton;
-			e.Device = _deviceId;
 			e.Pressed = true;
 
 			return e;
@@ -192,7 +189,6 @@ public partial class InputMappingEvent
 			var e = new InputEventJoypadMotion();
 
 			e.Axis = _joyAxis;
-			e.Device = _deviceId;
 
 			// TODO: incorporate axis direction into the event somehow
 

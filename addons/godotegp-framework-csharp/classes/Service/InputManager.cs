@@ -40,11 +40,14 @@ public partial class InputManager : Service
 	private InputManagerConfig _config { get; set; }
 	private InputMappingConfig _mappingConfig { get; set; }
 
-	private InputEvent _previousInputEvent;
+	private bool _processingInputEvent;
 
 	// input state
 	private Dictionary<StringName, ActionInputState> _actionStates = new();
 	private MouseState _mouseState = new();
+
+	private Dictionary<string, JoypadState> _joypadStates = new();
+	private Dictionary<int, string> _joypadGuidMappings = new();
 
 	public InputManager()
 	{
@@ -159,18 +162,17 @@ public partial class InputManager : Service
 	public void _State_Listening_OnEnter()
 	{
 		LoggerManager.LogDebug("Entering listening state");
-
-		// trigger initial input state update
-		UpdateInputState();
 	}
 	
 	public void _State_Listening_OnUpdate()
 	{
 		// we don't want to emit an event here, we just want to update the state
-		if (Input.IsAnythingPressed())
+		if (Input.IsAnythingPressed() && _processingInputEvent == false)
 		{
 			UpdateInputState();
 		}
+
+		_processingInputEvent = false;
 	}
 
 	public void _State_Processing_OnEnter()
@@ -186,9 +188,10 @@ public partial class InputManager : Service
 
 		LoggerManager.LogDebug("Action states", "", "state", _actionStates);
 		LoggerManager.LogDebug("Mouse state", "", "state", _mouseState);
+		LoggerManager.LogDebug("Joypad states", "", "state", _joypadStates);
 
-		// TODO: emit event here containing the current action states object
-		
+		this.Emit<InputStateChanged>(e => e.SetStates(_actionStates, _joypadStates, _mouseState));
+
 		// return to listening state
 		_inputState.Transition(LISTENING_STATE);
 	}
@@ -199,9 +202,14 @@ public partial class InputManager : Service
 
 	public void UpdateInputState()
 	{
-		UpdateActionInputStates();
+		LoggerManager.LogDebug("Updating input state");
+
 		UpdateMouseState();
 		UpdateJoypadState();
+
+		UpdateActionInputStates();
+
+		LoggerManager.LogDebug("Updating input state finished");
 	}
 	
 	public void ResetInputActions(bool eraseActions = true)
@@ -268,6 +276,19 @@ public partial class InputManager : Service
 			{
 				var e = (dynamic) actionMapping.ToInputEvent();
 
+				if (e is InputEventWithModifiers ee)
+				{
+					int joyId = 0;
+
+					// set joy id to the found guid
+					if (actionMapping.DeviceGuid.Length > 0)
+					{
+						joyId = _joypadGuidMappings.FirstOrDefault(x => x.Value == actionMapping.DeviceGuid).Key;
+					}
+
+					ee.Device = joyId;
+				}
+
 				LoggerManager.LogDebug("Action mapping found", "", "mapping", actionMapping);
 
 				InputMap.ActionAddEvent(action, e);
@@ -296,10 +317,11 @@ public partial class InputManager : Service
 		_mouseState.X = mousePosition.X;
 		_mouseState.Y = mousePosition.Y;
 
-		var mouseVelocity = Input.GetLastMouseVelocity();
-
-		_mouseState.VelocityX = mouseVelocity.X;
-		_mouseState.VelocityY = mouseVelocity.Y;
+		// TODO: figure out why this takes 14ms??
+		// var mouseVelocity = Input.GetLastMouseVelocity();
+        //
+		// _mouseState.VelocityX = mouseVelocity.X;
+		// _mouseState.VelocityY = mouseVelocity.Y;
 
 		_mouseState.LeftButtonPressed = Input.IsMouseButtonPressed(MouseButton.Left);
 		_mouseState.RightButtonPressed = Input.IsMouseButtonPressed(MouseButton.Right);
@@ -317,10 +339,77 @@ public partial class InputManager : Service
 
 		LoggerManager.LogDebug("Connected joypad count", "", "joypadIds", joypadIds);
 
+		// set any existing joypads as unavailable
+		foreach (var joyState in _joypadStates)
+		{
+			if (!joypadIds.Contains(joyState.Value.CurrentDeviceId))
+			{
+				joyState.Value.Available = false;
+
+				this.Emit<InputStateJoypadUnavailable>(e => e.JoypadGuid = joyState.Key);
+
+				// TODO: trigger re-configure of mappings to set new action
+				// states to new guids
+			}
+		}
+
+		// set joypads states
 		foreach (int joyId in joypadIds)
 		{
-			LoggerManager.LogDebug("joy", "", "name", Input.GetJoyName(joyId));
-			LoggerManager.LogDebug("joy", "", "guid", Input.GetJoyGuid(joyId));
+			var joyName = Input.GetJoyName(joyId);
+			var joyGuid = Input.GetJoyGuid(joyId);
+
+			// set joyID's GUID
+			_joypadGuidMappings[joyId] = Input.GetJoyGuid(joyId);
+
+			if (!_joypadStates.TryGetValue(joyGuid, out var joyState))
+			{
+				joyState = new JoypadState();
+				joyState.Name = joyName;
+				joyState.Guid = joyGuid;
+				joyState.CurrentDeviceId = joyId;
+				_joypadStates[joyGuid] = joyState;
+
+				LoggerManager.LogDebug($"Adding joypad as ID {joyId}", "", joyGuid, joyName);
+
+				this.Emit<InputStateJoypadAvailable>(e => e.JoypadGuid = joyGuid);
+			}
+
+			joyState.Available = true;
+
+			// set axes values
+			foreach (JoyAxis i in new JoyAxis[] {JoyAxis.LeftX, JoyAxis.LeftY, JoyAxis.RightX, JoyAxis.RightY, JoyAxis.TriggerLeft, JoyAxis.TriggerRight})
+			{
+				joyState.SetAxisState(i, Input.GetJoyAxis(joyId, i));
+			}
+
+			// set joypad buttons
+			foreach (JoyButton i in new JoyButton[] {
+					JoyButton.A, 
+					JoyButton.B, 
+					JoyButton.X, 
+					JoyButton.Y, 
+					JoyButton.DpadUp, 
+					JoyButton.DpadDown, 
+					JoyButton.DpadLeft, 
+					JoyButton.DpadRight, 
+					JoyButton.LeftShoulder, 
+					JoyButton.RightShoulder, 
+					JoyButton.LeftStick, 
+					JoyButton.RightStick, 
+					JoyButton.Start, 
+					JoyButton.Back, 
+					JoyButton.Guide, 
+					JoyButton.Touchpad, 
+					JoyButton.Paddle1, 
+					JoyButton.Paddle2, 
+					JoyButton.Paddle3, 
+					JoyButton.Paddle4, 
+					JoyButton.Misc1, 
+				})
+			{
+				joyState.SetButtonState(i, Input.IsJoyButtonPressed(joyId, i));
+			}
 		}
 	}
 
@@ -354,6 +443,8 @@ public partial class InputManager : Service
 	public void _On_InputEvent(InputEvent @e)
 	{
 		LoggerManager.LogDebug("Input event", "", "event", @e);
+
+		_processingInputEvent = true;
 
 		_inputState.Transition(PROCESSING_STATE, true);
 	}
@@ -467,5 +558,60 @@ public class MouseState
 	{
 		get { return _wheelRight; }
 		set { _wheelRight = value; }
+	}
+}
+
+public class JoypadState
+{
+	private string _name;
+	public string Name
+	{
+		get { return _name; }
+		set { _name = value; }
+	}
+
+	private string _guid;
+	public string Guid
+	{
+		get { return _guid; }
+		set { _guid = value; }
+	}
+
+	private int _currentDeviceId;
+	public int CurrentDeviceId
+	{
+		get { return _currentDeviceId; }
+		set { _currentDeviceId = value; }
+	}
+
+	private Dictionary<JoyAxis, float> _axes = new();
+	public Dictionary<JoyAxis, float> Axes
+	{
+		get { return _axes; }
+		set { _axes = value; }
+	}
+
+	private Dictionary<JoyButton, bool> _buttons = new();
+	public Dictionary<JoyButton, bool> Buttons
+	{
+		get { return _buttons; }
+		set { _buttons = value; }
+	}
+
+	private bool _available;
+	public bool Available
+	{
+		get { return _available; }
+		set { _available = value; }
+	}
+
+	public void SetAxisState(JoyAxis axisId, float axisValue)
+	{
+		_axes[axisId] = axisValue;
+	}
+
+	public void SetButtonState(JoyButton buttonId, bool pressed)
+	{
+		_buttons[buttonId] = pressed;
 	}
 }
