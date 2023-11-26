@@ -2,10 +2,12 @@
   "InputManager": {
     "Actions": {
       "DefaultAction": {
-        "ControlType": 0
+        "ControlType": 0,
+        "Player": 0
       },
       "DefaultAction2": {
-        "ControlType": 0
+        "ControlType": 0,
+        "Player": 1
       }
     }
   }

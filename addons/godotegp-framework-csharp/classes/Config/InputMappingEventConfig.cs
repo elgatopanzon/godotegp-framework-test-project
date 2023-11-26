@@ -33,14 +33,14 @@ public partial class InputMappingEventConfig : VConfig
 		    .Default(new List<InputMappingEvent>())
 		    .ChangeEventsEnabled();
 
-		var e1 = new InputMappingEvent();
-		e1.Keycode = Key.A;
-
-		var e2 = new InputMappingEvent();
-		e2.JoypadButton = JoyButton.A;
-
-		Events.Add(e1);
-		Events.Add(e2);
+		// var e1 = new InputMappingEvent();
+		// e1.Keycode = Key.A;
+        //
+		// var e2 = new InputMappingEvent();
+		// e2.JoypadButton = JoyButton.A;
+        //
+		// Events.Add(e1);
+		// Events.Add(e2);
 	}
 }
 
@@ -130,6 +130,19 @@ public partial class InputMappingEvent
 		set { _doubleClick = value; }
 	}
 
+	internal bool IsMouseMapping
+	{
+		get { return (_mouseButton != MouseButton.None); }
+	}
+	internal bool IsKeyboardMapping
+	{
+		get { return (_keycode != Key.None); }
+	}
+	internal bool IsJoypadMapping
+	{
+		get { return (_joypadButton != JoyButton.Invalid || _joyAxis != JoyAxis.Invalid); }
+	}
+
 	public InputMappingEvent()
 	{
 
@@ -184,7 +197,7 @@ public partial class InputMappingEvent
 		}
 
 		// joypad button event
-		if (_joyAxisDirection != -1)
+		if (_joyAxis != JoyAxis.Invalid)
 		{
 			var e = new InputEventJoypadMotion();
 

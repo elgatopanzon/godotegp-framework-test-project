@@ -41,6 +41,7 @@ public partial class InputManager : Service
 	private InputMappingConfig _mappingConfig { get; set; }
 
 	private bool _processingInputEvent;
+	private bool _triggerConfiguration = true;
 
 	// input state
 	private Dictionary<StringName, ActionInputState> _actionStates = new();
@@ -48,6 +49,8 @@ public partial class InputManager : Service
 
 	private Dictionary<string, JoypadState> _joypadStates = new();
 	private Dictionary<int, string> _joypadGuidMappings = new();
+
+	private Godot.Collections.Array<int> _connectedJoypadCount = Input.GetConnectedJoypads();
 
 	public InputManager()
 	{
@@ -78,6 +81,7 @@ public partial class InputManager : Service
 		_inputState.AddTransition(_inputListeningState, _inputProcessingState, PROCESSING_STATE);
 
 		_inputState.AddTransition(_inputListeningState, _inputConfigurationState, CONFIGURATION_STATE);
+		_inputState.AddTransition(_inputProcessingState, _inputConfigurationState, CONFIGURATION_STATE);
 	}
 
 	public void SetMappingConfig(InputMappingConfig mappingConfig)
@@ -152,6 +156,8 @@ public partial class InputManager : Service
 		ResetInputActions();
 		SetupInputActions();
 
+		UpdateInputState();
+
 		_inputState.Transition(LISTENING_STATE);
 	}
 	
@@ -166,13 +172,32 @@ public partial class InputManager : Service
 	
 	public void _State_Listening_OnUpdate()
 	{
+		var connectedJoypads = Input.GetConnectedJoypads();
+
 		// we don't want to emit an event here, we just want to update the state
 		if (Input.IsAnythingPressed() && _processingInputEvent == false)
 		{
+			LoggerManager.LogDebug("Something pressed, updating input state");
 			UpdateInputState();
 		}
 
+		if (connectedJoypads.Count != _connectedJoypadCount.Count)
+		{
+			LoggerManager.LogDebug("Connected joypad count changed");
+			UpdateInputState();
+			_triggerConfiguration = true;
+		}
+
+		if (_triggerConfiguration)
+		{
+			LoggerManager.LogDebug("Triggered action re-configuration");
+			_inputState.Transition(CONFIGURATION_STATE);
+
+			_triggerConfiguration = false;
+		}
+
 		_processingInputEvent = false;
+		_connectedJoypadCount = connectedJoypads;
 	}
 
 	public void _State_Processing_OnEnter()
@@ -274,22 +299,49 @@ public partial class InputManager : Service
 		{
 			foreach (var actionMapping in ev.Events)
 			{
-				var e = (dynamic) actionMapping.ToInputEvent();
+				LoggerManager.LogDebug("Action mapping found", "", "mapping", actionMapping);
 
-				if (e is InputEventWithModifiers ee)
+				InputEvent e = actionMapping.ToInputEvent();
+
+				// set correct device from the mapping config
+				if (actionMapping.IsJoypadMapping)
 				{
 					int joyId = 0;
 
 					// set joy id to the found guid
-					if (actionMapping.DeviceGuid.Length > 0)
+					if (actionMapping.DeviceGuid.Length == 0)
+					{
+						if (_config.Actions[action].Player == 0)
+						{
+							LoggerManager.LogDebug("Empty guid for primary action mapping", "", action, e);
+
+							joyId = _joypadGuidMappings.FirstOrDefault().Key;
+
+							LoggerManager.LogDebug("Using first device id", "", action, joyId);
+						}
+						else
+						{
+							LoggerManager.LogDebug("Action is not primary, don't auto-bind guid", "", "playerSlot", _config.Actions[action].Player);
+						}
+					}
+					else
 					{
 						joyId = _joypadGuidMappings.FirstOrDefault(x => x.Value == actionMapping.DeviceGuid).Key;
+
+						if (_joypadGuidMappings.ContainsKey(joyId) && _joypadGuidMappings[joyId] == actionMapping.DeviceGuid)
+						{
+							LoggerManager.LogDebug("Found device id from guid", "", actionMapping.DeviceGuid, joyId);
+						}
+						else
+						{
+							joyId = _joypadGuidMappings.FirstOrDefault().Key;
+							LoggerManager.LogDebug("Guid not found, using first device id", "", _joypadGuidMappings[joyId], joyId);
+						}
+
 					}
 
-					ee.Device = joyId;
+					e.Device = joyId;
 				}
-
-				LoggerManager.LogDebug("Action mapping found", "", "mapping", actionMapping);
 
 				InputMap.ActionAddEvent(action, e);
 			}
@@ -346,14 +398,16 @@ public partial class InputManager : Service
 			{
 				joyState.Value.Available = false;
 
+				_joypadGuidMappings.Remove(joyState.Value.CurrentDeviceId);
+
 				this.Emit<InputStateJoypadUnavailable>(e => e.JoypadGuid = joyState.Key);
 
-				// TODO: trigger re-configure of mappings to set new action
-				// states to new guids
+				_triggerConfiguration = true;
 			}
 		}
 
 		// set joypads states
+
 		foreach (int joyId in joypadIds)
 		{
 			var joyName = Input.GetJoyName(joyId);
@@ -373,6 +427,8 @@ public partial class InputManager : Service
 				LoggerManager.LogDebug($"Adding joypad as ID {joyId}", "", joyGuid, joyName);
 
 				this.Emit<InputStateJoypadAvailable>(e => e.JoypadGuid = joyGuid);
+
+				_triggerConfiguration = true;
 			}
 
 			joyState.Available = true;

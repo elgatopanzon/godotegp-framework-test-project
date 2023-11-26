@@ -39,6 +39,14 @@ public partial class InputActionConfig : VConfig
 		set { _controlDeadzone.Value = value; }
 	}
 
+	internal readonly VValue<int> _playerSlot;
+
+	public int Player
+	{
+		get { return _playerSlot.Value; }
+		set { _playerSlot.Value = value; }
+	}
+
 	public InputActionConfig()
 	{
 		_controlType = AddValidatedValue<ActionType>(this)
@@ -47,6 +55,10 @@ public partial class InputActionConfig : VConfig
 
 		_controlDeadzone = AddValidatedValue<double>(this)
 		    .Default(0.5)
+		    .ChangeEventsEnabled();
+
+		_playerSlot = AddValidatedValue<int>(this)
+		    .Default(0)
 		    .ChangeEventsEnabled();
 	}
 }
