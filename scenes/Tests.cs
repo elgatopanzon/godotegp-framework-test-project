@@ -117,6 +117,18 @@ public partial class Tests : Node2D
 		// {
 		// 	LoggerManager.LogDebug("Pressed");
 		// }
+
+		var s = "UITests.Mouse.Sprite".Node<Sprite2D>();
+		s.Position = new Vector2(ServiceRegistry.Get<InputManager>().MouseState.X, ServiceRegistry.Get<InputManager>().MouseState.Y);
+	}
+
+	public override void _Input(InputEvent @e)
+	{
+		var s2 = "UITests.Mouse.Sprite2".Node<Sprite2D>();
+		if (@e is InputEventMouseMotion em)
+		{
+			s2.Position = em.Position;
+		}
 	}
 
 	// general testing method hooked to the Test button

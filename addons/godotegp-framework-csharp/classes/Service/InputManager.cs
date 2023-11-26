@@ -47,8 +47,19 @@ public partial class InputManager : Service
 	private Dictionary<StringName, ActionInputState> _actionStates = new();
 	private MouseState _mouseState = new();
 
+	public Dictionary<StringName, ActionInputState> ActionStates {
+		get { return _actionStates; }
+	}
+	public MouseState MouseState {
+		get { return _mouseState; }
+	}
+
 	private Dictionary<string, JoypadState> _joypadStates = new();
 	private Dictionary<int, string> _joypadGuidMappings = new();
+
+	public Dictionary<string, JoypadState> JoypadStates {
+		get { return _joypadStates; }
+	}
 
 	private Godot.Collections.Array<int> _connectedJoypadCount = Input.GetConnectedJoypads();
 

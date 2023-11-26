@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dyulet4ssd3y3"]
+[gd_scene load_steps=4 format=3 uid="uid://dyulet4ssd3y3"]
 
 [ext_resource type="Script" path="res://scenes/Tests.cs" id="1_hhdyv"]
 [ext_resource type="Script" path="res://scenes/TestsScriptInput.cs" id="2_kidjv"]
+[ext_resource type="Texture2D" uid="uid://0d01t7d3fydb" path="res://icon.svg" id="3_y3wdt"]
 
 [node name="Tests" type="Node2D"]
 script = ExtResource("1_hhdyv")
@@ -283,3 +284,12 @@ metadata/id = "UITests.Scripting.Name"
 layout_mode = 2
 text = "Run Script"
 metadata/id = "UITests.Scripting.Run"
+
+[node name="MousePositionTest" type="Sprite2D" parent="."]
+texture = ExtResource("3_y3wdt")
+metadata/id = "UITests.Mouse.Sprite"
+
+[node name="MousePositionTest2" type="Sprite2D" parent="."]
+modulate = Color(1, 0.580392, 0.580392, 1)
+texture = ExtResource("3_y3wdt")
+metadata/id = "UITests.Mouse.Sprite2"
