@@ -22,7 +22,7 @@ public partial class HStateMachine
 	private Dictionary<Type, HStateMachine> SubStates;
 	private Dictionary<int, HStateMachine> Transitions;
 	private HStateMachine DefaultSubState;
-	private HStateMachine CurrentSubState;
+	public HStateMachine CurrentSubState {get;}
 
 	public HStateMachine(object owner = null)
 	{
