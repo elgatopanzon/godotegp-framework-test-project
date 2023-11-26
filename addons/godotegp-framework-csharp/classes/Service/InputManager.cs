@@ -148,7 +148,6 @@ public partial class InputManager : Service
 
 		ResetInputActions();
 		SetupInputActions();
-		UpdateActionInputStates();
 
 		_inputState.Transition(LISTENING_STATE);
 	}
@@ -160,6 +159,9 @@ public partial class InputManager : Service
 	public void _State_Listening_OnEnter()
 	{
 		LoggerManager.LogDebug("Entering listening state");
+
+		// trigger initial input state update
+		UpdateInputState();
 	}
 	
 	public void _State_Listening_OnUpdate()
@@ -167,10 +169,8 @@ public partial class InputManager : Service
 		// we don't want to emit an event here, we just want to update the state
 		if (Input.IsAnythingPressed())
 		{
-			UpdateActionInputStates();
+			UpdateInputState();
 		}
-
-		UpdateMouseState();
 	}
 
 	public void _State_Processing_OnEnter()
@@ -182,8 +182,7 @@ public partial class InputManager : Service
 	{
 		LoggerManager.LogDebug("Updating processing state");
 
-		UpdateActionInputStates();
-		UpdateMouseState();
+		UpdateInputState();
 
 		LoggerManager.LogDebug("Action states", "", "state", _actionStates);
 		LoggerManager.LogDebug("Mouse state", "", "state", _mouseState);
@@ -197,6 +196,13 @@ public partial class InputManager : Service
 	/*************************************
 	*  Input action management methods  *
 	*************************************/
+
+	public void UpdateInputState()
+	{
+		UpdateActionInputStates();
+		UpdateMouseState();
+		UpdateJoypadState();
+	}
 	
 	public void ResetInputActions(bool eraseActions = true)
 	{
@@ -305,6 +311,19 @@ public partial class InputManager : Service
 		_mouseState.WheelRight = Input.IsMouseButtonPressed(MouseButton.WheelRight);
 	}
 
+	public void UpdateJoypadState()
+	{
+		var joypadIds = Input.GetConnectedJoypads();
+
+		LoggerManager.LogDebug("Connected joypad count", "", "joypadIds", joypadIds);
+
+		foreach (int joyId in joypadIds)
+		{
+			LoggerManager.LogDebug("joy", "", "name", Input.GetJoyName(joyId));
+			LoggerManager.LogDebug("joy", "", "guid", Input.GetJoyGuid(joyId));
+		}
+	}
+
 	/***********************************
 	*  Input action state management  *
 	***********************************/
@@ -334,6 +353,8 @@ public partial class InputManager : Service
 	
 	public void _On_InputEvent(InputEvent @e)
 	{
+		LoggerManager.LogDebug("Input event", "", "event", @e);
+
 		_inputState.Transition(PROCESSING_STATE, true);
 	}
 }
