@@ -141,7 +141,7 @@ public partial class HStateMachine
 			root = root.CurrentSubState;
 		}
 
-		throw new UnconsumedTransitionException($"Transition {trigger} was not consumed by any transition");
+		throw new UnconsumedTransitionException($"Transition {trigger} in state {CurrentSubState.GetType().Name} was not consumed by any transition");
 	}
 }
 
