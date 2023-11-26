@@ -377,8 +377,7 @@ public partial class InputManager : Service
 	{
 		var mousePosition = GetViewport().GetMousePosition();
 
-		_mouseState.X = mousePosition.X;
-		_mouseState.Y = mousePosition.Y;
+		_mouseState.Position = mousePosition;
 
 		// TODO: figure out why this takes 14ms??
 		// var mouseVelocity = Input.GetLastMouseVelocity();
@@ -418,7 +417,6 @@ public partial class InputManager : Service
 		}
 
 		// set joypads states
-
 		foreach (int joyId in joypadIds)
 		{
 			var joyName = Input.GetJoyName(joyId);
@@ -561,32 +559,18 @@ public class ActionInputState
 
 public class MouseState 
 {
-	private float _x;
-	public float X
+	private Vector2 _position;
+	public Vector2 Position
 	{
-		get { return _x; }
-		set { _x = value; }
+		get { return _position; }
+		set { _position = value; }
 	}
 
-	private float _y;
-	public float Y
+	private Vector2 _velocity;
+	public Vector2 Velocity
 	{
-		get { return _y; }
-		set { _y = value; }
-	}
-
-	private float _velocityX;
-	public float VelocityX
-	{
-		get { return _velocityX; }
-		set { _velocityX = value; }
-	}
-
-	private float _velocityY;
-	public float VelocityY
-	{
-		get { return _velocityY; }
-		set { _velocityY = value; }
+		get { return _velocity; }
+		set { _velocity = value; }
 	}
 
 	private bool _leftButtonPressed;

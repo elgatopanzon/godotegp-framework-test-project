@@ -119,7 +119,7 @@ public partial class Tests : Node2D
 		// }
 
 		var s = "UITests.Mouse.Sprite".Node<Sprite2D>();
-		s.Position = new Vector2(ServiceRegistry.Get<InputManager>().MouseState.X, ServiceRegistry.Get<InputManager>().MouseState.Y);
+		s.Position = ServiceRegistry.Get<InputManager>().MouseState.Position;
 	}
 
 	public override void _Input(InputEvent @e)
