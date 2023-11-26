@@ -385,11 +385,9 @@ public partial class InputManager : Service
 		_mouseState.WheelRight = Input.IsMouseButtonPressed(MouseButton.WheelRight);
 	}
 
-	public void UpdateJoypadState()
+	public void UpdateJoypadState(bool updateUnavailable = false)
 	{
 		var joypadIds = Input.GetConnectedJoypads();
-
-		LoggerManager.LogDebug("Connected joypad count", "", "joypadIds", joypadIds);
 
 		// set any existing joypads as unavailable
 		foreach (var joyState in _joypadStates)
@@ -399,6 +397,8 @@ public partial class InputManager : Service
 				joyState.Value.Available = false;
 
 				_joypadGuidMappings.Remove(joyState.Value.CurrentDeviceId);
+
+				LoggerManager.LogDebug($"Joypad {joyState.Value.Name} no longer available");
 
 				this.Emit<InputStateJoypadUnavailable>(e => e.JoypadGuid = joyState.Key);
 
@@ -424,7 +424,7 @@ public partial class InputManager : Service
 				joyState.CurrentDeviceId = joyId;
 				_joypadStates[joyGuid] = joyState;
 
-				LoggerManager.LogDebug($"Adding joypad as ID {joyId}", "", joyGuid, joyName);
+				LoggerManager.LogDebug($"Adding joypad {joyName} as ID {joyId}", "", joyGuid, joyName);
 
 				this.Emit<InputStateJoypadAvailable>(e => e.JoypadGuid = joyGuid);
 
@@ -498,6 +498,17 @@ public partial class InputManager : Service
 	
 	public void _On_InputEvent(InputEvent @e)
 	{
+		if (@e is InputEventMouseMotion)
+		{
+			UpdateMouseState();
+			return;
+		}
+		if (@e is InputEventJoypadMotion)
+		{
+			UpdateJoypadState();
+			return;
+		}
+
 		LoggerManager.LogDebug("Input event", "", "event", @e);
 
 		_processingInputEvent = true;
