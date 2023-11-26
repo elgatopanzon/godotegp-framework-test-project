@@ -319,6 +319,12 @@ public partial class InputManager : Service
 				{
 					int joyId = 0;
 
+					if (_connectedJoypadCount.Count == 0)
+					{
+						LoggerManager.LogWarning("No joypads, cannot map action!", "", "action", action.ToString());
+						continue;
+					}
+
 					// set joy id to the found guid
 					if (actionMapping.DeviceGuid.Length == 0)
 					{
