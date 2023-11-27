@@ -114,29 +114,17 @@ public partial class Tests : Node2D
 		var im = ServiceRegistry.Get<InputManager>();
 
 		im.SubscribeOwner<InputStateChanged>(e => {
-				if (e is InputStateChanged isc)
-				{
-					LoggerManager.LogDebug("Tests: Input state changed", "", "e", isc.ActionStates);
-				}
+				LoggerManager.LogDebug("Tests: Input state changed", "", "e", e.ActionStates);
 			});
 
 		im.SubscribeOwner<InputStateChanged>(e => {
-				if (e is InputStateChanged isc)
-				{
-					LoggerManager.LogDebug("Tests: DefaultAction is pressed", "", "e", isc.ActionStates);
-				}
+				LoggerManager.LogDebug("Tests: DefaultAction is pressed", "", "e", e.ActionStates);
 			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.Pressed));
 		im.SubscribeOwner<InputStateChanged>(e => {
-				if (e is InputStateChanged isc)
-				{
-					LoggerManager.LogDebug("Tests: DefaultAction is just pressed", "", "e", isc.ActionStates);
-				}
+				LoggerManager.LogDebug("Tests: DefaultAction is just pressed", "", "e", e.ActionStates);
 			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.JustPressed));
 		im.SubscribeOwner<InputStateChanged>(e => {
-				if (e is InputStateChanged isc)
-				{
-					LoggerManager.LogDebug("Tests: DefaultAction is just released", "", "e", isc.ActionStates);
-				}
+				LoggerManager.LogDebug("Tests: DefaultAction is just released", "", "e", e.ActionStates);
 			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.JustReleased));
 
 		im.SubscribeOwner<InputStateJoypadAvailable>(e => {
@@ -148,23 +136,14 @@ public partial class Tests : Node2D
 
 		// test joypad action strength for axis
 		im.SubscribeOwner<InputStateChanged>(e => {
-				if (e is InputStateChanged isc)
-				{
-					LoggerManager.LogDebug("Tests: AxisTestX", "", "e", isc.ActionStates["AxisTestX"]);
-				}
+				LoggerManager.LogDebug("Tests: AxisTestX", "", "e", e.ActionStates["AxisTestX"]);
 			}).Filters(new InputStateAction(StringNames.Get("AxisTestX")));
 		im.SubscribeOwner<InputStateChanged>(e => {
-				if (e is InputStateChanged isc)
-				{
-					LoggerManager.LogDebug("Tests: AxisTestY", "", "e", isc.ActionStates["AxisTestY"]);
-				}
+				LoggerManager.LogDebug("Tests: AxisTestY", "", "e", e.ActionStates["AxisTestY"]);
 			}).Filters(new InputStateAction(StringNames.Get("AxisTestY")));
 
 		im.SubscribeOwner<InputStateChanged>(e => {
-				if (e is InputStateChanged isc)
-				{
-					LoggerManager.LogDebug("Tests: TriggerTest", "", "e", isc.ActionStates["TriggerTest"]);
-				}
+				LoggerManager.LogDebug("Tests: TriggerTest", "", "e", e.ActionStates["TriggerTest"]);
 			}).Filters(new InputStateAction(StringNames.Get("TriggerTest")));
 	}
 
@@ -458,11 +437,8 @@ public partial class Tests : Node2D
 
 			ServiceRegistry.Get<EventManager>().Unsubscribe("UITests.Scripting.Output");
 			ServiceRegistry.Get<ScriptService>().SubscribeOwner<ScriptOutput>((e) => {
-					if (e is ScriptOutput o)
-					{
-						"UITests.Scripting.Output".Node<TextEdit>().Text += o.Result.Output+"\n";
-						"UITests.Scripting.Output".Node<TextEdit>().ScrollVertical = 9999990;
-					}
+					"UITests.Scripting.Output".Node<TextEdit>().Text += e.Result.Output+"\n";
+					"UITests.Scripting.Output".Node<TextEdit>().ScrollVertical = 9999990;
 				}, isHighPriority: true, groupName: "UITests.Scripting.Output");
 
 			ServiceRegistry.Get<ScriptService>().RegisterFunctionCallback(ScriptCbFunctionTest, "cbfunctiontest");

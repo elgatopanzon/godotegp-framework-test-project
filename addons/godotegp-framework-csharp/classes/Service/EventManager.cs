@@ -227,7 +227,7 @@ public partial class EventManager : Service
 					{
 						LoggerManager.LogDebug($"Broadcasting {(broadcastHighPriority ? "high-priority" : "deferred")} event", "", "broadcast", new Dictionary<string, object> {{ "eventType", eventObj.GetType().Name }, { "subscriberType", eventSubscription.Subscriber.GetType().Name }, { "highPriority", broadcastHighPriority } });
 
-						eventSubscription.CallbackMethod(eventObj);
+						eventSubscription.RunCallback(eventObj);
 
 						eventConsumed = true;
 

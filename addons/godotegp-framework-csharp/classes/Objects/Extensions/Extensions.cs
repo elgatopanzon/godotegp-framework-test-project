@@ -81,7 +81,7 @@ public static partial class ObjectExtensions
 
 public static partial class EventManagerObjectExtensions
 {
-	public static EventSubscription<T> Subscribe<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "") where T : Event
+	public static EventSubscription<T> Subscribe<T>(this object obj, Action<T> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "") where T : Event
 	{
 		EventSubscription<T> subscription = new EventSubscription<T>(obj, callbackMethod, isHighPriority, oneshot, eventFilters, groupName);
 		ServiceRegistry.Get<EventManager>().Subscribe(subscription);
@@ -89,7 +89,7 @@ public static partial class EventManagerObjectExtensions
 		return subscription;
 	}
 
-	public static EventSubscription<T> SubscribeOwner<T>(this object obj, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "") where T : Event
+	public static EventSubscription<T> SubscribeOwner<T>(this object obj, Action<T> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "") where T : Event
 	{
 		EventSubscription<T> subscription = obj.Subscribe<T>(callbackMethod, isHighPriority, oneshot, eventFilters, groupName);
 		subscription.Owner(obj);
