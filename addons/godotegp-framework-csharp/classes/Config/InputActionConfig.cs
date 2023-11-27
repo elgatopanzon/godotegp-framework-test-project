@@ -14,7 +14,7 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
-public enum ActionType
+public enum InputActionType
 {
 	Button = 0,
 	Trigger = 1,
@@ -23,9 +23,9 @@ public enum ActionType
 
 public partial class InputActionConfig : VConfig
 {
-	internal readonly VValue<ActionType> _controlType;
+	internal readonly VValue<InputActionType> _controlType;
 
-	public ActionType ControlType
+	public InputActionType ControlType
 	{
 		get { return _controlType.Value; }
 		set { _controlType.Value = value; }
@@ -49,12 +49,12 @@ public partial class InputActionConfig : VConfig
 
 	public InputActionConfig()
 	{
-		_controlType = AddValidatedValue<ActionType>(this)
-		    .Default(ActionType.Button)
+		_controlType = AddValidatedValue<InputActionType>(this)
+		    .Default(InputActionType.Button)
 		    .ChangeEventsEnabled();
 
 		_controlDeadzone = AddValidatedValue<double>(this)
-		    .Default(0.5)
+		    .Default(0.0)
 		    .ChangeEventsEnabled();
 
 		_playerSlot = AddValidatedValue<int>(this)

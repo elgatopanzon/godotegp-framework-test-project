@@ -113,6 +113,10 @@ public partial class InputStateAction : IFilter
 		{
 			if (e.ActionStates != null && e.ActionStates.ContainsKey(_action))
 			{
+				if (_state == State.Any)
+				{
+					return true;
+				}
 				if (_state == State.Pressed && e.ActionStates[_action].Pressed)
 				{
 					return true;

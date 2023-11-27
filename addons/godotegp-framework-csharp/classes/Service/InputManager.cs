@@ -63,6 +63,8 @@ public partial class InputManager : Service
 
 	private Godot.Collections.Array<int> _connectedJoypadCount = Input.GetConnectedJoypads();
 
+	private bool _emitJoypadStateEvents = false;
+
 	public InputManager()
 	{
 		// init default configs
@@ -256,6 +258,13 @@ public partial class InputManager : Service
 			{
 				ResetInputAction(action);
 
+				// reset events for + and - when the action is a joystick
+				if (_config.Actions[action].ControlType == InputActionType.Joystick)
+				{
+					ResetInputAction(action+"-");
+					ResetInputAction(action+"+");
+				}
+
 				if (eraseActions)
 				{
 					LoggerManager.LogDebug("Erasing input action", "", "action", action.ToString());
@@ -263,6 +272,16 @@ public partial class InputManager : Service
 					InputMap.EraseAction(action);
 
 					_actionStates.Remove(action);
+
+					// erase actions for + and - when the action is a joystick
+					if (_config.Actions[action].ControlType == InputActionType.Joystick)
+					{
+						InputMap.EraseAction(action+"-");
+						InputMap.EraseAction(action+"+");
+
+						_actionStates.Remove(action+"-");
+						_actionStates.Remove(action+"+");
+					}
 				}
 			}
 
@@ -292,6 +311,13 @@ public partial class InputManager : Service
 		{
 			LoggerManager.LogDebug("Adding input action", "", action.Key, action.Value);
 			InputMap.AddAction(action.Key, (float) action.Value.Deadzone);
+
+			// if the action is a joystick, create actions for both + and -
+			if (action.Value.ControlType == InputActionType.Joystick)
+			{
+				InputMap.AddAction(action.Key+"-", (float) action.Value.Deadzone);
+				InputMap.AddAction(action.Key+"+", (float) action.Value.Deadzone);
+			}
 
 			ConfigureActionMapping(action.Key);
 
@@ -360,7 +386,31 @@ public partial class InputManager : Service
 					e.Device = joyId;
 				}
 
-				InputMap.ActionAddEvent(action, e);
+				// add extra events for the + and - directions of this action
+				if (e is InputEventJoypadMotion ej && _config.Actions[action].ControlType == InputActionType.Joystick)
+				{
+					LoggerManager.LogDebug("Adding + and - axis events", "", "action", action.ToString());
+
+					InputEvent ejPlusMinus = actionMapping.ToInputEvent();
+					ejPlusMinus.Device = e.Device;
+
+					if (ejPlusMinus is InputEventJoypadMotion ejMinus)
+					{
+						ejMinus.AxisValue = -1;
+						InputMap.ActionAddEvent(action+"-", ejMinus);
+					}
+
+					ejPlusMinus = actionMapping.ToInputEvent();
+					ejPlusMinus.Device = e.Device;
+
+					if (ejPlusMinus is InputEventJoypadMotion ejPlus)
+					{
+						ejPlus.AxisValue = 1;
+						InputMap.ActionAddEvent(action+"+", ejPlus);
+					}
+				}
+				else
+					InputMap.ActionAddEvent(action, e);
 			}
 		}
 	}
@@ -376,6 +426,22 @@ public partial class InputManager : Service
 			_actionStates[actionName].Pressed = Input.IsActionPressed(actionName);
 			_actionStates[actionName].JustPressed = Input.IsActionJustPressed(actionName);
 			_actionStates[actionName].JustReleased = Input.IsActionJustReleased(actionName);
+
+			// set the strength value if it's an axis
+			if (actionConfig.ControlType == InputActionType.Joystick || actionConfig.ControlType == InputActionType.Trigger)
+			{
+				_emitJoypadStateEvents = true;
+
+				if (actionConfig.ControlType == InputActionType.Joystick)
+				{
+					// get combined action strength to produce axis strength
+					_actionStates[actionName].Strength = Input.GetAxis(actionName+"-", actionName+"+");
+				}
+				else if (actionConfig.ControlType == InputActionType.Trigger)
+				{
+					_actionStates[actionName].Strength = Input.GetActionStrength(actionName, true);
+				}
+			}
 		}
 	}
 
@@ -520,8 +586,13 @@ public partial class InputManager : Service
 		}
 		if (@e is InputEventJoypadMotion)
 		{
-			UpdateJoypadState();
-			return;
+			// if we don't care to emit inputstate events for joypad motion,
+			// then simply update the internal state and continue execution
+			if (!_emitJoypadStateEvents)
+			{
+				UpdateJoypadState();
+				return;
+			}
 		}
 
 		LoggerManager.LogDebug("Input event", "", "event", @e);
@@ -560,6 +631,13 @@ public class ActionInputState
 	{
 		get { return _actionConfig; }
 		set { _actionConfig = value; }
+	}
+
+	private float _strength;
+	public float Strength
+	{
+		get { return _strength; }
+		set { _strength = value; }
 	}
 }
 

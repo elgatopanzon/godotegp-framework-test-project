@@ -8,6 +8,18 @@
       "DefaultAction2": {
         "ControlType": 0,
         "Player": 1
+      },
+      "AxisTestX": {
+        "ControlType": 2,
+        "Player": 0
+      },
+      "AxisTestY": {
+        "ControlType": 2,
+        "Player": 0
+      },
+      "TriggerTest": {
+        "ControlType": 1,
+        "Player": 0
       }
     }
   }

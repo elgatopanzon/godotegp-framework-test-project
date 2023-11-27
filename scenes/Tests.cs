@@ -145,6 +145,27 @@ public partial class Tests : Node2D
 		im.SubscribeOwner<InputStateJoypadUnavailable>(e => {
 			LoggerManager.LogDebug("Tests: Input joypad unavailable");
 			});
+
+		// test joypad action strength for axis
+		im.SubscribeOwner<InputStateChanged>(e => {
+				if (e is InputStateChanged isc)
+				{
+					LoggerManager.LogDebug("Tests: AxisTestX", "", "e", isc.ActionStates["AxisTestX"]);
+				}
+			}).Filters(new InputStateAction(StringNames.Get("AxisTestX")));
+		im.SubscribeOwner<InputStateChanged>(e => {
+				if (e is InputStateChanged isc)
+				{
+					LoggerManager.LogDebug("Tests: AxisTestY", "", "e", isc.ActionStates["AxisTestY"]);
+				}
+			}).Filters(new InputStateAction(StringNames.Get("AxisTestY")));
+
+		im.SubscribeOwner<InputStateChanged>(e => {
+				if (e is InputStateChanged isc)
+				{
+					LoggerManager.LogDebug("Tests: TriggerTest", "", "e", isc.ActionStates["TriggerTest"]);
+				}
+			}).Filters(new InputStateAction(StringNames.Get("TriggerTest")));
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
