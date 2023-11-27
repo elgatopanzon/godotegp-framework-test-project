@@ -9,6 +9,7 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Objects.Extensions;
 using GodotEGP.Event.Events;
+using GodotEGP.Event.Filter;
 using GodotEGP.SaveData;
 
 using GodotEGP.Config;
@@ -108,6 +109,42 @@ public partial class Tests : Node2D
 		// InputMap.ActionAddEvent(StringNames.Get("inputtest1"), key);
         //
 		// LoggerManager.LogDebug("Key event", "", "e", key);
+
+		// test InputManager events
+		var im = ServiceRegistry.Get<InputManager>();
+
+		im.SubscribeOwner<InputStateChanged>(e => {
+				if (e is InputStateChanged isc)
+				{
+					LoggerManager.LogDebug("Tests: Input state changed", "", "e", isc.ActionStates);
+				}
+			});
+
+		im.SubscribeOwner<InputStateChanged>(e => {
+				if (e is InputStateChanged isc)
+				{
+					LoggerManager.LogDebug("Tests: DefaultAction is pressed", "", "e", isc.ActionStates);
+				}
+			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.Pressed));
+		im.SubscribeOwner<InputStateChanged>(e => {
+				if (e is InputStateChanged isc)
+				{
+					LoggerManager.LogDebug("Tests: DefaultAction is just pressed", "", "e", isc.ActionStates);
+				}
+			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.JustPressed));
+		im.SubscribeOwner<InputStateChanged>(e => {
+				if (e is InputStateChanged isc)
+				{
+					LoggerManager.LogDebug("Tests: DefaultAction is just released", "", "e", isc.ActionStates);
+				}
+			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.JustReleased));
+
+		im.SubscribeOwner<InputStateJoypadAvailable>(e => {
+			LoggerManager.LogDebug("Tests: Input joypad available");
+			});
+		im.SubscribeOwner<InputStateJoypadUnavailable>(e => {
+			LoggerManager.LogDebug("Tests: Input joypad unavailable");
+			});
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -82,3 +82,52 @@ public partial class OwnerObjectType : IFilter
 		return (matchEvent.Owner.GetType().IsSubclassOf(_matchType) || matchEvent.Owner.GetType().Equals(_matchType));
 	}
 }
+
+// inputmanager event filters
+public partial class InputStateAction : IFilter
+{
+	public enum State {
+		Any = 0,
+		Pressed = 1,
+		JustPressed = 2,
+		JustReleased = 3,
+	}
+
+	private StringName _action;
+	private State _state;
+
+	public InputStateAction(StringName action, State state)
+	{
+		_action = action;
+		_state = state;
+	}
+
+	public InputStateAction(StringName action)
+	{
+		_action = action;
+	}
+
+	public bool Match(IEvent matchEvent)
+	{
+		if (matchEvent is InputStateChanged e)
+		{
+			if (e.ActionStates != null && e.ActionStates.ContainsKey(_action))
+			{
+				if (_state == State.Pressed && e.ActionStates[_action].Pressed)
+				{
+					return true;
+				}
+				if (_state == State.JustPressed && e.ActionStates[_action].JustPressed)
+				{
+					return true;
+				}
+				if (_state == State.JustReleased && e.ActionStates[_action].JustReleased)
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+}
