@@ -1,50 +1,8 @@
 {
   "Resources": {
-    "Images": {
-      "icon": {
-        "Path": "res://icon.svg",
-        "Class": "Godot.CompressedTexture2D"
-      },
-      "square": {
-        "Path": "res://square.png",
-        "Class": "Godot.CompressedTexture2D"
-      }
-    },
-    "AudioEffects": {
-      "testfilter": {
-        "Class": "Godot.AudioEffectHighPassFilter",
-        "Config": {
-          "CutoffHz": 1000
-        }
-      }
-    },
-    "Scenes": {
-      "main": {
-        "Path": "res://scenes/Main.tscn",
-        "Class": "Godot.PackedScene"
-      },
-      "tests": {
-        "Path": "res://scenes/Tests.tscn",
-        "Class": "Godot.PackedScene"
-      }
-    },
-    "TransitionScenes": {
-      "base": {
-        "Path": "res://addons/godotegp-framework-csharp/scenes/ScreenTransition.tscn",
-        "Class": "Godot.PackedScene"
-      },
-      "fadeinoutwhite": {
-        "Path": "res://addons/godotegp-framework-csharp/scenes/FadeInOutWhite.tscn",
-        "Class": "Godot.PackedScene"
-      }
-    },
     "GameScripts": {
       "testscript": {
         "Path": "res://testscript.sh",
-        "Class": "GodotEGP.Resource.GameScript"
-      },
-      "testscript2": {
-        "Path": "res://testscript2.sh",
         "Class": "GodotEGP.Resource.GameScript"
       }
     }
