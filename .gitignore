@@ -1,5 +1,5 @@
 # Godot 4+ specific ignores
 .godot/
 
-# Managed by git-multi (sub repo ssh://git@gitlab.elgatopanzon.io:2224/godot/addons/godotegp-framework/addon-csharp.git) (commit HEAD) 
+# Managed by git-multi (sub repo git@github.com:elgatopanzon/godotegp-framework.git) (commit HEAD) 
 /addons/godotegp-framework-csharp 
