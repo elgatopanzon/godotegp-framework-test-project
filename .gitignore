@@ -2,4 +2,4 @@
 .godot/
 
 # Managed by git-multi (sub repo git@github.com:elgatopanzon/godotegp-framework.git) (commit HEAD) 
-/addons/godotegp-framework-csharp 
+/src/addons/godotegp-framework-csharp 

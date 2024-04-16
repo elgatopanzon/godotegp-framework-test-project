@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://74rfiynylpa2"]
+
+[ext_resource type="Texture2D" uid="uid://0d01t7d3fydb" path="res://icon.svg" id="1_l5rb5"]
+
+[node name="Main" type="Node2D"]
+
+[node name="RigidBody2D" type="RigidBody2D" parent="."]
+gravity_scale = 0.0
+linear_velocity = Vector2(40, 40)
+
+[node name="Sprite2D" type="Sprite2D" parent="RigidBody2D"]
+texture = ExtResource("1_l5rb5")
+centered = false
