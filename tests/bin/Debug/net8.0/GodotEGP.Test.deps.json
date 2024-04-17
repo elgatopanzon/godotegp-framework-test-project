@@ -18,26 +18,6 @@
         }
       },
       "coverlet.collector/6.0.0": {},
-      "Godot.SourceGenerators/4.2.1": {},
-      "GodotSharp/4.2.1": {
-        "runtime": {
-          "lib/net6.0/GodotSharp.dll": {
-            "assemblyVersion": "4.2.1.0",
-            "fileVersion": "4.2.1.0"
-          }
-        }
-      },
-      "GodotSharpEditor/4.2.1": {
-        "dependencies": {
-          "GodotSharp": "4.2.1"
-        },
-        "runtime": {
-          "lib/net6.0/GodotSharpEditor.dll": {
-            "assemblyVersion": "4.2.1.0",
-            "fileVersion": "4.2.1.0"
-          }
-        }
-      },
       "Microsoft.CodeCoverage/17.6.0": {
         "runtime": {
           "lib/netcoreapp3.1/Microsoft.VisualStudio.CodeCoverage.Shim.dll": {
@@ -157,7 +137,7 @@
       "Microsoft.TestPlatform.TestHost/17.6.0": {
         "dependencies": {
           "Microsoft.TestPlatform.ObjectModel": "17.6.0",
-          "Newtonsoft.Json": "13.0.3"
+          "Newtonsoft.Json": "13.0.1"
         },
         "runtime": {
           "lib/netcoreapp3.1/Microsoft.TestPlatform.CommunicationUtilities.dll": {
@@ -356,11 +336,11 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "Newtonsoft.Json/13.0.3": {
+      "Newtonsoft.Json/13.0.1": {
         "runtime": {
-          "lib/net6.0/Newtonsoft.Json.dll": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
             "assemblyVersion": "13.0.0.0",
-            "fileVersion": "13.0.3.27908"
+            "fileVersion": "13.0.1.25517"
           }
         }
       },
@@ -1039,18 +1019,7 @@
           }
         }
       },
-      "xunit.runner.visualstudio/2.4.5": {},
-      "Addon - godotegp-framework-csharp/1.0.0": {
-        "dependencies": {
-          "Godot.SourceGenerators": "4.2.1",
-          "GodotSharp": "4.2.1",
-          "GodotSharpEditor": "4.2.1",
-          "Newtonsoft.Json": "13.0.3"
-        },
-        "runtime": {
-          "Addon - godotegp-framework-csharp.dll": {}
-        }
-      }
+      "xunit.runner.visualstudio/2.4.5": {}
     }
   },
   "libraries": {
@@ -1065,27 +1034,6 @@
       "sha512": "sha512-tW3lsNS+dAEII6YGUX/VMoJjBS1QvsxqJeqLaJXub08y1FSjasFPtQ4UBUsudE9PNrzLjooClMsPtY2cZLdXpQ==",
       "path": "coverlet.collector/6.0.0",
       "hashPath": "coverlet.collector.6.0.0.nupkg.sha512"
-    },
-    "Godot.SourceGenerators/4.2.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-MdLFzDZEMUbXRLH4bLX8o9Blk76M7Op76RyobZ1zyKgcIkgPqG+p53jgLFLSHpBGFKKaW3kB0w6om+wYauwHbw==",
-      "path": "godot.sourcegenerators/4.2.1",
-      "hashPath": "godot.sourcegenerators.4.2.1.nupkg.sha512"
-    },
-    "GodotSharp/4.2.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-6a/GML0jXcwT6LxDBtRx+hpPBUFGAmK7GVb/ehKP53nx0AHA+Yc//B7anXY4U4WCMB+ckgsouWpd8rAeupNfbw==",
-      "path": "godotsharp/4.2.1",
-      "hashPath": "godotsharp.4.2.1.nupkg.sha512"
-    },
-    "GodotSharpEditor/4.2.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-wibPQq4Gj43T/zlhwogJRnRSxfvfIqGCvnPEz1nSp6aPx4CTu1gZW7gDYx/MRQ9LX2SwKh4N6QXkFp7PhB33Tw==",
-      "path": "godotsharpeditor/4.2.1",
-      "hashPath": "godotsharpeditor.4.2.1.nupkg.sha512"
     },
     "Microsoft.CodeCoverage/17.6.0": {
       "type": "package",
@@ -1143,12 +1091,12 @@
       "path": "netstandard.library/1.6.1",
       "hashPath": "netstandard.library.1.6.1.nupkg.sha512"
     },
-    "Newtonsoft.Json/13.0.3": {
+    "Newtonsoft.Json/13.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
-      "path": "newtonsoft.json/13.0.3",
-      "hashPath": "newtonsoft.json.13.0.3.nupkg.sha512"
+      "sha512": "sha512-ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A==",
+      "path": "newtonsoft.json/13.0.1",
+      "hashPath": "newtonsoft.json.13.0.1.nupkg.sha512"
     },
     "NuGet.Frameworks/5.11.0": {
       "type": "package",
@@ -1702,11 +1650,6 @@
       "sha512": "sha512-OwHamvBdUKgqsXfBzWiCW/O98BTx81UKzx2bieIOQI7CZFE5NEQZGi8PBQGIKawDW96xeRffiNf20SjfC0x9hw==",
       "path": "xunit.runner.visualstudio/2.4.5",
       "hashPath": "xunit.runner.visualstudio.2.4.5.nupkg.sha512"
-    },
-    "Addon - godotegp-framework-csharp/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     }
   }
 }

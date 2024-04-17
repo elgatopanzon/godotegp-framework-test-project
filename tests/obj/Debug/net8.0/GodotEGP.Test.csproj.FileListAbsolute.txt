@@ -1,6 +1,13 @@
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.csproj.AssemblyReference.cache
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.GeneratedMSBuildEditorConfig.editorconfig
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.AssemblyInfoInputs.cache
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.AssemblyInfo.cs
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.csproj.CoreCompileInputs.cache
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.sourcelink.json
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/xunit.runner.reporters.netcoreapp10.dll
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/xunit.runner.utility.netcoreapp10.dll
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/GodotEGP.Test
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/GodotEGP.Test.deps.json
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/GodotEGP.Test.runtimeconfig.json
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/GodotEGP.Test.dll
@@ -85,20 +92,18 @@
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/zh-Hant/Microsoft.TestPlatform.CommunicationUtilities.resources.dll
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/zh-Hant/Microsoft.TestPlatform.CrossPlatEngine.resources.dll
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/zh-Hant/Microsoft.VisualStudio.TestPlatform.Common.resources.dll
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.csproj.AssemblyReference.cache
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.GeneratedMSBuildEditorConfig.editorconfig
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.AssemblyInfoInputs.cache
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.AssemblyInfo.cs
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.csproj.CoreCompileInputs.cache
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.sourcelink.json
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.MvcApplicationPartsAssemblyInfo.cache
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/staticwebassets.build.json
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/staticwebassets.development.json
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/staticwebassets/msbuild.GodotEGP.Test.Microsoft.AspNetCore.StaticWebAssets.props
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/staticwebassets/msbuild.build.GodotEGP.Test.props
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.GodotEGP.Test.props
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.GodotEGP.Test.props
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/staticwebassets.pack.json
+/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/scopedcss/bundle/GodotEGP.Test.styles.css
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.csproj.CopyComplete
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.dll
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/refint/GodotEGP.Test.dll
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.pdb
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/GodotEGP.Test.genruntimeconfig.cache
 /home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/obj/Debug/net8.0/ref/GodotEGP.Test.dll
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/CoverletSourceRootsMapping_GodotEGP.Test
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/GodotSharp.dll
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/GodotSharpEditor.dll
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/Addon - godotegp-framework-csharp.dll
-/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/bin/Debug/net8.0/Addon - godotegp-framework-csharp.pdb

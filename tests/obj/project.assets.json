@@ -1,46 +1,11 @@
 {
   "version": 3,
   "targets": {
-    "net8.0": {
+    "net6.0": {
       "coverlet.collector/6.0.0": {
         "type": "package",
         "build": {
           "build/netstandard1.0/coverlet.collector.targets": {}
-        }
-      },
-      "Godot.SourceGenerators/4.2.1": {
-        "type": "package",
-        "build": {
-          "build/_._": {}
-        }
-      },
-      "GodotSharp/4.2.1": {
-        "type": "package",
-        "compile": {
-          "lib/net6.0/GodotSharp.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net6.0/GodotSharp.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "GodotSharpEditor/4.2.1": {
-        "type": "package",
-        "dependencies": {
-          "GodotSharp": "4.2.1"
-        },
-        "compile": {
-          "lib/net6.0/GodotSharpEditor.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net6.0/GodotSharpEditor.dll": {
-            "related": ".xml"
-          }
         }
       },
       "Microsoft.CodeCoverage/17.6.0": {
@@ -406,15 +371,15 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "Newtonsoft.Json/13.0.3": {
+      "Newtonsoft.Json/13.0.1": {
         "type": "package",
         "compile": {
-          "lib/net6.0/Newtonsoft.Json.dll": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/Newtonsoft.Json.dll": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
             "related": ".xml"
           }
         }
@@ -1747,22 +1712,6 @@
         "build": {
           "build/netcoreapp3.1/xunit.runner.visualstudio.props": {}
         }
-      },
-      "Addon - godotegp-framework-csharp/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v6.0",
-        "dependencies": {
-          "Godot.SourceGenerators": "4.2.1",
-          "GodotSharp": "4.2.1",
-          "GodotSharpEditor": "4.2.1",
-          "Newtonsoft.Json": "13.0.3"
-        },
-        "compile": {
-          "bin/placeholder/Addon - godotegp-framework-csharp.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/Addon - godotegp-framework-csharp.dll": {}
-        }
       }
     }
   },
@@ -1818,45 +1767,6 @@
         "coverlet-icon.png",
         "coverlet.collector.6.0.0.nupkg.sha512",
         "coverlet.collector.nuspec"
-      ]
-    },
-    "Godot.SourceGenerators/4.2.1": {
-      "sha512": "MdLFzDZEMUbXRLH4bLX8o9Blk76M7Op76RyobZ1zyKgcIkgPqG+p53jgLFLSHpBGFKKaW3kB0w6om+wYauwHbw==",
-      "type": "package",
-      "path": "godot.sourcegenerators/4.2.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "analyzers/dotnet/cs/Godot.SourceGenerators.dll",
-        "build/Godot.SourceGenerators.props",
-        "godot.sourcegenerators.4.2.1.nupkg.sha512",
-        "godot.sourcegenerators.nuspec"
-      ]
-    },
-    "GodotSharp/4.2.1": {
-      "sha512": "6a/GML0jXcwT6LxDBtRx+hpPBUFGAmK7GVb/ehKP53nx0AHA+Yc//B7anXY4U4WCMB+ckgsouWpd8rAeupNfbw==",
-      "type": "package",
-      "path": "godotsharp/4.2.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "godotsharp.4.2.1.nupkg.sha512",
-        "godotsharp.nuspec",
-        "lib/net6.0/GodotSharp.dll",
-        "lib/net6.0/GodotSharp.xml"
-      ]
-    },
-    "GodotSharpEditor/4.2.1": {
-      "sha512": "wibPQq4Gj43T/zlhwogJRnRSxfvfIqGCvnPEz1nSp6aPx4CTu1gZW7gDYx/MRQ9LX2SwKh4N6QXkFp7PhB33Tw==",
-      "type": "package",
-      "path": "godotsharpeditor/4.2.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "godotsharpeditor.4.2.1.nupkg.sha512",
-        "godotsharpeditor.nuspec",
-        "lib/net6.0/GodotSharpEditor.dll",
-        "lib/net6.0/GodotSharpEditor.xml"
       ]
     },
     "Microsoft.CodeCoverage/17.6.0": {
@@ -2199,15 +2109,14 @@
         "netstandard.library.nuspec"
       ]
     },
-    "Newtonsoft.Json/13.0.3": {
-      "sha512": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
+    "Newtonsoft.Json/13.0.1": {
+      "sha512": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A==",
       "type": "package",
-      "path": "newtonsoft.json/13.0.3",
+      "path": "newtonsoft.json/13.0.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
-        "README.md",
         "lib/net20/Newtonsoft.Json.dll",
         "lib/net20/Newtonsoft.Json.xml",
         "lib/net35/Newtonsoft.Json.dll",
@@ -2216,15 +2125,13 @@
         "lib/net40/Newtonsoft.Json.xml",
         "lib/net45/Newtonsoft.Json.dll",
         "lib/net45/Newtonsoft.Json.xml",
-        "lib/net6.0/Newtonsoft.Json.dll",
-        "lib/net6.0/Newtonsoft.Json.xml",
         "lib/netstandard1.0/Newtonsoft.Json.dll",
         "lib/netstandard1.0/Newtonsoft.Json.xml",
         "lib/netstandard1.3/Newtonsoft.Json.dll",
         "lib/netstandard1.3/Newtonsoft.Json.xml",
         "lib/netstandard2.0/Newtonsoft.Json.dll",
         "lib/netstandard2.0/Newtonsoft.Json.xml",
-        "newtonsoft.json.13.0.3.nupkg.sha512",
+        "newtonsoft.json.13.0.1.nupkg.sha512",
         "newtonsoft.json.nuspec",
         "packageIcon.png"
       ]
@@ -5600,16 +5507,10 @@
         "xunit.runner.visualstudio.2.4.5.nupkg.sha512",
         "xunit.runner.visualstudio.nuspec"
       ]
-    },
-    "Addon - godotegp-framework-csharp/1.0.0": {
-      "type": "project",
-      "path": "../src/Addon - godotegp-framework-csharp.csproj",
-      "msbuildProject": "../src/Addon - godotegp-framework-csharp.csproj"
     }
   },
   "projectFileDependencyGroups": {
-    "net8.0": [
-      "Addon - godotegp-framework-csharp >= 1.0.0",
+    "net6.0": [
       "Microsoft.NET.Test.Sdk >= 17.6.0",
       "coverlet.collector >= 6.0.0",
       "xunit >= 2.4.2",
@@ -5632,19 +5533,15 @@
         "/home/laz/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
-        "net8.0"
+        "net6.0"
       ],
       "sources": {
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net8.0": {
-          "targetAlias": "net8.0",
-          "projectReferences": {
-            "/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/src/Addon - godotegp-framework-csharp.csproj": {
-              "projectPath": "/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/src/Addon - godotegp-framework-csharp.csproj"
-            }
-          }
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "projectReferences": {}
         }
       },
       "warningProperties": {
@@ -5654,8 +5551,8 @@
       }
     },
     "frameworks": {
-      "net8.0": {
-        "targetAlias": "net8.0",
+      "net6.0": {
+        "targetAlias": "net6.0",
         "dependencies": {
           "Microsoft.NET.Test.Sdk": {
             "target": "Package",
@@ -5692,15 +5589,22 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[8.0.1, 8.0.1]"
+            "version": "[6.0.26, 6.0.26]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.linux-x64",
+            "version": "[6.0.26, 6.0.26]"
           }
         ],
         "frameworkReferences": {
+          "Microsoft.AspNetCore.App": {
+            "privateAssets": "none"
+          },
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.101/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.101/RuntimeIdentifierGraph.json"
       }
     }
   }
