@@ -9,11 +9,11 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Objects.Extensions;
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 using GodotEGP.SaveData;
 
 using GodotEGP.Config;
-using GodotEGP.Data.Operation;
+using GodotEGP.DAL.Operations;
 using GodotEGP.DataBind;
 
 using GodotEGP.Scripting;
@@ -63,7 +63,7 @@ public partial class Tests : Node2D
 		// AddChild(db);
 
 		var sdm = ServiceRegistry.Get<SaveDataManager>();
-		sdm.Bind<Dictionary<string, GodotEGP.Config.Object>>(sdm.GetSaves,
+		sdm.Bind<Dictionary<string, GodotEGP.Config.ConfigObject>>(sdm.GetSaves,
 				(v) => "UITests.DataBinding.Label".Node<Label>().Text = v.Count.ToString()
 			);
 
@@ -119,13 +119,13 @@ public partial class Tests : Node2D
 
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: DefaultAction is pressed", "", "e", e.ActionStates);
-			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.Pressed));
+			}).Filters(new InputStateActionFilter(StringNames.Get("DefaultAction"), InputStateActionFilter.State.Pressed));
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: DefaultAction is just pressed", "", "e", e.ActionStates);
-			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.JustPressed));
+			}).Filters(new InputStateActionFilter(StringNames.Get("DefaultAction"), InputStateActionFilter.State.JustPressed));
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: DefaultAction is just released", "", "e", e.ActionStates);
-			}).Filters(new InputStateAction(StringNames.Get("DefaultAction"), InputStateAction.State.JustReleased));
+			}).Filters(new InputStateActionFilter(StringNames.Get("DefaultAction"), InputStateActionFilter.State.JustReleased));
 
 		im.SubscribeOwner<InputStateJoypadAvailable>(e => {
 			LoggerManager.LogDebug("Tests: Input joypad available");
@@ -137,14 +137,14 @@ public partial class Tests : Node2D
 		// test joypad action strength for axis
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: AxisTestX", "", "e", e.ActionStates["AxisTestX"]);
-			}).Filters(new InputStateAction(StringNames.Get("AxisTestX")));
+			}).Filters(new InputStateActionFilter(StringNames.Get("AxisTestX")));
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: AxisTestY", "", "e", e.ActionStates["AxisTestY"]);
-			}).Filters(new InputStateAction(StringNames.Get("AxisTestY")));
+			}).Filters(new InputStateActionFilter(StringNames.Get("AxisTestY")));
 
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: TriggerTest", "", "e", e.ActionStates["TriggerTest"]);
-			}).Filters(new InputStateAction(StringNames.Get("TriggerTest")));
+			}).Filters(new InputStateActionFilter(StringNames.Get("TriggerTest")));
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -225,7 +225,7 @@ public partial class Tests : Node2D
 
 		if (ServiceRegistry.Get<SaveDataManager>().GetReady())
 		{
-			if (ServiceRegistry.Get<SaveDataManager>().Get(saveName).RawValue is Data sd)
+			if (ServiceRegistry.Get<SaveDataManager>().Get(saveName).RawValue is SaveDataBase sd)
 			{
 				sd.Loaded = true;
 			}

@@ -3,7 +3,7 @@
     "GameScripts": {
       "testscript": {
         "Path": "res://testscript.sh",
-        "Class": "GodotEGP.Resource.GameScript"
+        "Class": "GodotEGP.Resource.Resources.GameScript"
       }
     }
   }
