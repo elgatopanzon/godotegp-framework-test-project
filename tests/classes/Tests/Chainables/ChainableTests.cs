@@ -4,7 +4,7 @@
  * @created     : Friday Mar 29, 2024 15:40:05 CST
  */
 
-namespace GodotEGP.Test;
+namespace GodotEGP.Tests.Chainables;
 
 using GodotEGP.Logging;
 using GodotEGP.Chainables;

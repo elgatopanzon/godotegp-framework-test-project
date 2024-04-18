@@ -4,7 +4,7 @@
  * @created     : Friday Apr 05, 2024 15:21:36 CST
  */
 
-namespace GodotEGP.Test;
+namespace GodotEGP.Tests.Chainables;
 
 using Godot;
 using GodotEGP.Objects.Extensions;

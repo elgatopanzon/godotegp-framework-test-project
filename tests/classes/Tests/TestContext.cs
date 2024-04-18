@@ -4,7 +4,7 @@
  * @created     : Thursday Apr 04, 2024 01:40:46 CST
  */
 
-namespace GodotEGP.Test;
+namespace GodotEGP.Tests;
 
 using GodotEGPNonGame.ServiceWorkers;
 
