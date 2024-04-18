@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "iJ7tRclmqrjYCdypqkm7I5OBo/+CcpPaJ4t5/apYz5CD2VdVgEwgCu26jPACVibuFx05Q4q9C7dQrexL/zp/aQ==",
+  "dgSpecHash": "336MKA58DFCbcx/SzInt0zMJE7upDMe1bBn59xFF3cca57v58JTZggglVoWEAWD7wRGoyDXsDk1O3uysGbt9Tg==",
   "success": true,
   "projectFilePath": "/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/GodotEGP.Test.csproj",
   "expectedPackageFiles": [
+    "/home/laz/.nuget/packages/castle.core/5.1.1/castle.core.5.1.1.nupkg.sha512",
     "/home/laz/.nuget/packages/coverlet.collector/6.0.0/coverlet.collector.6.0.0.nupkg.sha512",
     "/home/laz/.nuget/packages/microsoft.codecoverage/17.6.0/microsoft.codecoverage.17.6.0.nupkg.sha512",
     "/home/laz/.nuget/packages/microsoft.net.test.sdk/17.6.0/microsoft.net.test.sdk.17.6.0.nupkg.sha512",
@@ -12,6 +13,7 @@
     "/home/laz/.nuget/packages/microsoft.testplatform.objectmodel/17.6.0/microsoft.testplatform.objectmodel.17.6.0.nupkg.sha512",
     "/home/laz/.nuget/packages/microsoft.testplatform.testhost/17.6.0/microsoft.testplatform.testhost.17.6.0.nupkg.sha512",
     "/home/laz/.nuget/packages/microsoft.win32.primitives/4.3.0/microsoft.win32.primitives.4.3.0.nupkg.sha512",
+    "/home/laz/.nuget/packages/moq/4.20.70/moq.4.20.70.nupkg.sha512",
     "/home/laz/.nuget/packages/netstandard.library/1.6.1/netstandard.library.1.6.1.nupkg.sha512",
     "/home/laz/.nuget/packages/newtonsoft.json/13.0.1/newtonsoft.json.13.0.1.nupkg.sha512",
     "/home/laz/.nuget/packages/nuget.frameworks/5.11.0/nuget.frameworks.5.11.0.nupkg.sha512",
@@ -38,6 +40,7 @@
     "/home/laz/.nuget/packages/system.console/4.3.0/system.console.4.3.0.nupkg.sha512",
     "/home/laz/.nuget/packages/system.diagnostics.debug/4.3.0/system.diagnostics.debug.4.3.0.nupkg.sha512",
     "/home/laz/.nuget/packages/system.diagnostics.diagnosticsource/4.3.0/system.diagnostics.diagnosticsource.4.3.0.nupkg.sha512",
+    "/home/laz/.nuget/packages/system.diagnostics.eventlog/6.0.0/system.diagnostics.eventlog.6.0.0.nupkg.sha512",
     "/home/laz/.nuget/packages/system.diagnostics.tools/4.3.0/system.diagnostics.tools.4.3.0.nupkg.sha512",
     "/home/laz/.nuget/packages/system.diagnostics.tracing/4.3.0/system.diagnostics.tracing.4.3.0.nupkg.sha512",
     "/home/laz/.nuget/packages/system.globalization/4.3.0/system.globalization.4.3.0.nupkg.sha512",
