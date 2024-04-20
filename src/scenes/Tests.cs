@@ -137,14 +137,14 @@ public partial class Tests : Node2D
 		// test joypad action strength for axis
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: AxisTestX", "", "e", e.ActionStates["AxisTestX"]);
-			}).Filters(new InputStateActionFilter(StringNames.Get("AxisTestX")));
+			}).Filters(new InputStateActionFilter(StringNames.Get("AxisTestX"), InputStateActionFilter.State.Pressed));
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: AxisTestY", "", "e", e.ActionStates["AxisTestY"]);
-			}).Filters(new InputStateActionFilter(StringNames.Get("AxisTestY")));
+			}).Filters(new InputStateActionFilter(StringNames.Get("AxisTestY"), InputStateActionFilter.State.Pressed));
 
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: TriggerTest", "", "e", e.ActionStates["TriggerTest"]);
-			}).Filters(new InputStateActionFilter(StringNames.Get("TriggerTest")));
+			}).Filters(new InputStateActionFilter(StringNames.Get("TriggerTest"), InputStateActionFilter.State.Pressed));
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
