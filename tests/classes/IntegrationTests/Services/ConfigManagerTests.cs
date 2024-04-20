@@ -23,6 +23,7 @@ public partial class ConfigManagerTests : TestContext
 	{
 		// setup configmanager service
 		ConfigManager configManager = new ConfigManager();
+		configManager.UseGlobalConfig = false;
 
 		var filepath = nameof(ConfigManagerTests_auto_discovery_and_loading);
 		var testConfigClass = "GodotEGP.Tests.Services.ConfigObjectTest";
