@@ -13,7 +13,7 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
-using GodotEGP.DAL.Operator;
+using GodotEGP.DAL.Operators;
 using GodotEGP.DAL.Endpoints;
 using GodotEGP.SaveData;
 
