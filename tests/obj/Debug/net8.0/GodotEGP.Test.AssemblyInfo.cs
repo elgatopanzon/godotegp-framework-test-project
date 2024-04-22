@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GodotEGP.Test")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4470a0a786a2b81a4ca477cec32e3e12d6d3f64d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+585b8c257a64fad14176867bd407a6c25ce495c5")]
 [assembly: System.Reflection.AssemblyProductAttribute("GodotEGP.Test")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GodotEGP.Test")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
