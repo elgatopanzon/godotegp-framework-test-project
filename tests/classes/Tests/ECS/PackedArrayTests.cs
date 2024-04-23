@@ -177,6 +177,7 @@ public struct TestStruct
 public partial class PackedArrayTestsBenchmark
 {
 	private int _maxItems = 32;
+	private int _maxItemsBigMultiplier = 100;
 	private PackedArray<TestStruct> _parr;
 	private PackedArrayDictBacked<TestStruct> _parrDict;
 	private List<TestStruct> _list;
@@ -201,8 +202,8 @@ public partial class PackedArrayTestsBenchmark
 			});
 		}
 
-		_parrBig = new PackedArray<TestStruct>(_maxItems * 10);
-		for (int i = 0; i < _maxItems * 10; i++)
+		_parrBig = new PackedArray<TestStruct>(_maxItems * _maxItemsBigMultiplier);
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
 		{
 			_parrBig.Add(new TestStruct() {
 				TestInt = i,
@@ -217,8 +218,8 @@ public partial class PackedArrayTestsBenchmark
 			});
 		}
 
-		_parrDictBig = new PackedArrayDictBacked<TestStruct>(_maxItems * 10);
-		for (int i = 0; i < _maxItems * 10; i++)
+		_parrDictBig = new PackedArrayDictBacked<TestStruct>(_maxItems * _maxItemsBigMultiplier);
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
 		{
 			_parrDictBig.Add(new TestStruct() {
 				TestInt = i,
@@ -236,8 +237,8 @@ public partial class PackedArrayTestsBenchmark
 			});
 		}
 
-		_listBig = new List<TestStruct>(_maxItems * 10);
-		for (int i = 0; i < _maxItems * 10; i++)
+		_listBig = new List<TestStruct>(_maxItems * _maxItemsBigMultiplier);
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
 		{
 			_listBig.Add(new TestStruct() {
 				TestInt = i,
