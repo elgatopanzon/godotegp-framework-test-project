@@ -38,16 +38,16 @@ public partial class MiscBenchmarks : TestContext
 
 public partial class MiscBenchmarks_BitwiseLong2Int
 {
-	private long _testLong = 12345678910111213;
-	private long _testInt1 = 1576189421;
-	private long _testInt2 = 2874452;
+	private ulong _testLong = 12345678910111213;
+	private uint _testInt1 = 1576189421;
+	private uint _testInt2 = 2874452;
 
 	[Fact]
 	[Benchmark]
 	public void LongTo2Ints()
 	{
-		int int1 = (int)(_testLong & uint.MaxValue);	
-		int int2 = (int)(_testLong >> 32);	
+		uint int1 = (uint)(_testLong);	
+		uint int2 = (uint)(_testLong >> 32);	
 
 		LoggerManager.LogDebug("long to 2 ints", "", "long", _testLong);
 		LoggerManager.LogDebug("long to 2 ints", "", "int1", int1);
@@ -58,7 +58,7 @@ public partial class MiscBenchmarks_BitwiseLong2Int
 	[Benchmark]
 	public void TwoIntsToLong()
 	{
-		long longCombined = (_testInt2 << 32) | _testInt1;
+		ulong longCombined = (_testInt2 << 32) | _testInt1;
 
 		LoggerManager.LogDebug("2 ints to long", "", "int1", _testInt1);
 		LoggerManager.LogDebug("2 ints to long", "", "int2", _testInt2);
