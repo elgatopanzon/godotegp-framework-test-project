@@ -94,6 +94,6 @@ public struct ExplicitLayoutLong2Ints
 	[FieldOffset(0)]
 	public uint Int1;
 
-	[FieldOffset(32)]
+	[FieldOffset(4)]
 	public uint Int2;
 }
