@@ -145,6 +145,21 @@ public partial class Tests : Node2D
 		im.SubscribeOwner<InputStateChanged>(e => {
 				LoggerManager.LogDebug("Tests: TriggerTest", "", "e", e.ActionStates["TriggerTest"]);
 			}).Filters(new InputStateActionFilter(StringNames.Get("TriggerTest"), InputStateActionFilter.State.Pressed));
+
+		var scene = ResourceLoader.Load<PackedScene>("res://scenes/Main.tscn").GetState();
+		LoggerManager.LogDebug("packed scene node count", "", "nodeCount", scene.GetNodeCount());
+		for (int i = 0; i < scene.GetNodeCount(); i++)
+		{
+			LoggerManager.LogDebug("packed scene node", "", i.ToString(), scene.GetNodeIndex(i));
+			LoggerManager.LogDebug("packed scene node groups", "", "nodeGroups", scene.GetNodeGroups(i));
+			LoggerManager.LogDebug("packed scene node type", "", "nodeType", scene.GetNodeType(i).ToString());
+			LoggerManager.LogDebug("packed scene node prop count", "", "nodePropCount", scene.GetNodePropertyCount(i));
+
+			for (int ii = 0; ii < scene.GetNodePropertyCount(i); ii++)
+			{
+				LoggerManager.LogDebug("packed scene node prop", "", scene.GetNodePropertyName(i, ii), scene.GetNodePropertyValue(i, ii).ToString());
+			}
+		}
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
