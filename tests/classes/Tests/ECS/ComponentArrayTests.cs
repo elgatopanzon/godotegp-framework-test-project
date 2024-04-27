@@ -16,6 +16,8 @@ using GodotEGP.Config;
 using GodotEGP.ECS;
 using GodotEGP.ECS.Exceptions;
 
+using GodotEGP.Tests.Collections;
+
 public partial class ComponentArrayTests : TestContext
 {
 	[Fact]

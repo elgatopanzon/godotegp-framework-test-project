@@ -4,7 +4,7 @@
  * @created     : Saturday Apr 20, 2024 20:10:52 CST
  */
 
-namespace GodotEGP.Tests.ECS;
+namespace GodotEGP.Tests.Collections;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -12,6 +12,7 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
+using GodotEGP.Collections;
 
 using GodotEGP.ECS;
 
