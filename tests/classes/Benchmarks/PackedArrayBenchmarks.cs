@@ -396,7 +396,7 @@ public partial class PackedArrayBenchmarkBase
 {
 	protected int _maxItems = 32;
 	protected int _maxItemsBigMultiplier = 3200;
-	protected int _insertTestAmount = 10;
+	protected int _insertTestAmount = 32;
 	protected PackedArray<TestStruct> _parr;
 	protected PackedArrayDictBacked<TestStruct> _parrDict;
 	protected PackedArrayDictionary<TestStruct> _parrDictionary;
@@ -416,10 +416,22 @@ public partial class PackedArrayBenchmarkBase
 	protected PackedArrayDictionary<TestStruct> _parrDictionaryBigEmpty;
 	protected List<TestStruct> _listBigEmpty;
 
+	protected PackedDictionary<int, TestStruct> _pdict;
+	protected PackedDictionary<int, TestStruct> _pdictBig;
+	protected PackedDictionary<int, TestStruct> _pdictEmpty;
+	protected PackedDictionary<int, TestStruct> _pdictBigEmpty;
+
+	protected Dictionary<int, TestStruct> _dict;
+	protected Dictionary<int, TestStruct> _dictBig;
+	protected Dictionary<int, TestStruct> _dictEmpty;
+	protected Dictionary<int, TestStruct> _dictBigEmpty;
+
 	[IterationSetup]
 	public void Setup()
 	{
 		PArray_Setup();
+		PDict_Setup();
+		Dict_Setup();
 		List_Setup();
 	}
 
@@ -473,9 +485,6 @@ public partial class PackedArrayBenchmarkBase
 			});
 		}
 
-
-		_insertTestAmount = _maxItems;
-
 		_parrEmpty = new PackedArray<TestStruct>(_maxItems);
 		// for (int i = 0; i < _maxItems - _insertTestAmount; i++)
 		// {
@@ -523,6 +532,50 @@ public partial class PackedArrayBenchmarkBase
 		// 		TestInt = i,
 		// 	});
 		// }
+	}
+
+	public void PDict_Setup()
+	{
+		_pdict = new PackedDictionary<int, TestStruct>();
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_pdict.Add(i, new TestStruct() {
+				TestInt = i,
+			});
+		}
+
+		_pdictBig = new PackedDictionary<int, TestStruct>();
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_pdictBig.Add(i, new TestStruct() {
+				TestInt = i,
+			});
+		}
+
+		_pdictEmpty = new PackedDictionary<int, TestStruct>();
+		_pdictBigEmpty = new PackedDictionary<int, TestStruct>();
+	}
+
+	public void Dict_Setup()
+	{
+		_dict = new Dictionary<int, TestStruct>();
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_dict.Add(i, new TestStruct() {
+				TestInt = i,
+			});
+		}
+
+		_dictBig = new Dictionary<int, TestStruct>();
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_dictBig.Add(i, new TestStruct() {
+				TestInt = i,
+			});
+		}
+
+		_dictEmpty = new Dictionary<int, TestStruct>();
+		_dictBigEmpty = new Dictionary<int, TestStruct>();
 	}
 
 	public void List_Setup()
@@ -573,6 +626,18 @@ public partial class PackedArrayBenchmark_Access : PackedArrayBenchmarkBase
 	{
 		var v = _list[16];
 	}
+
+	[Benchmark]
+	public void PDict_Small_Access()
+	{
+		var v = _pdict[16];
+	}
+
+	[Benchmark]
+	public void Dict_Small_Access()
+	{
+		var v = _dict[16];
+	}
 }
 
 public partial class PackedArrayBenchmark_RemoveAt : PackedArrayBenchmarkBase
@@ -599,6 +664,18 @@ public partial class PackedArrayBenchmark_RemoveAt : PackedArrayBenchmarkBase
 	public void List_Small_RemoveAt()
 	{
 		_list.RemoveAt(2);
+	}
+
+	[Benchmark]
+	public void PDict_Small_RemoveAt()
+	{
+		_pdict.Remove(_maxItems - 10);
+	}
+
+	[Benchmark]
+	public void Dict_Small_RemoveAt()
+	{
+		_dict.Remove(_maxItems - 10);
 	}
 }
 
@@ -637,6 +714,24 @@ public partial class PackedArrayBenchmark_Insert : PackedArrayBenchmarkBase
 		for (int i = 0; i < _insertTestAmount; i++)
 		{
 			_listEmpty.Insert(i, new TestStruct());
+		}
+	}
+
+	[Benchmark]
+	public void PDict_Small_Insert()
+	{
+		for (int i = 0; i < _insertTestAmount; i++)
+		{
+			_pdictEmpty.Add(i, new TestStruct());
+		}
+	}
+
+	[Benchmark]
+	public void Dict_Small_Insert()
+	{
+		for (int i = 0; i < _insertTestAmount; i++)
+		{
+			_dictEmpty.Add(i, new TestStruct());
 		}
 	}
 }
@@ -712,6 +807,46 @@ public partial class PackedArrayBenchmark_Iteration : PackedArrayBenchmarkBase
 			counter++;
 		}
 	}
+
+	[Benchmark]
+	public void PDict_Small_Iteration_Unordered_Keys()
+	{
+		int counter = 0;
+		foreach (var entry in _pdict.Keys)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
+	public void PDict_Small_Iteration_Unordered_Values()
+	{
+		int counter = 0;
+		foreach (var entry in _pdict.Values)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
+	public void Dict_Small_Iteration_Unordered_Keys()
+	{
+		int counter = 0;
+		foreach (var entry in _dict.Keys)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
+	public void Dict_Small_Iteration_Unordered_Values()
+	{
+		int counter = 0;
+		foreach (var entry in _dict.Values)
+		{
+			counter++;
+		}
+	}
 }
 
 public partial class PackedArrayBenchmark_Big_Access : PackedArrayBenchmarkBase
@@ -738,6 +873,18 @@ public partial class PackedArrayBenchmark_Big_Access : PackedArrayBenchmarkBase
 	public void List_Big_Access()
 	{
 		var v = _listBig[_maxItemsBigMultiplier - 1];
+	}
+
+	[Benchmark]
+	public void PDict_Big_Access()
+	{
+		var v = _pdictBig[_maxItemsBigMultiplier - 1];
+	}
+
+	[Benchmark]
+	public void Dict_Big_Access()
+	{
+		var v = _dictBig[_maxItemsBigMultiplier - 1];
 	}
 }
 
@@ -766,6 +913,18 @@ public partial class PackedArrayBenchmark_Big_RemoveAt : PackedArrayBenchmarkBas
 	{
 		_listBig.RemoveAt(2);
 	}
+
+	[Benchmark]
+	public void PDict_Big_RemoveAt()
+	{
+		_pdictBig.Remove((_maxItems * _maxItemsBigMultiplier) - 10);
+	}
+
+	[Benchmark]
+	public void Dict_Big_RemoveAt()
+	{
+		_dictBig.Remove((_maxItems * _maxItemsBigMultiplier) - 10);
+	}
 }
 
 public partial class PackedArrayBenchmark_Big_Insert : PackedArrayBenchmarkBase
@@ -773,7 +932,7 @@ public partial class PackedArrayBenchmark_Big_Insert : PackedArrayBenchmarkBase
 	[Benchmark(Baseline = true)]
 	public void PArray_Big_Insert()
 	{
-		for (int i = 0; i < _insertTestAmount * _maxItemsBigMultiplier; i++)
+		for (int i = 0; i < (_insertTestAmount * _maxItemsBigMultiplier); i++)
 		{
 			_parrBigEmpty.Insert(i, new TestStruct());
 		}
@@ -782,7 +941,7 @@ public partial class PackedArrayBenchmark_Big_Insert : PackedArrayBenchmarkBase
 	[Benchmark]
 	public void PArrayDictBackedIndex_Big_Insert()
 	{
-		for (int i = 0; i < _insertTestAmount * _maxItemsBigMultiplier; i++)
+		for (int i = 0; i < (_insertTestAmount * _maxItemsBigMultiplier); i++)
 		{
 			_parrDictBigEmpty.Insert(i, new TestStruct());
 		}
@@ -791,7 +950,7 @@ public partial class PackedArrayBenchmark_Big_Insert : PackedArrayBenchmarkBase
 	[Benchmark]
 	public void PArrayDictBackedData_Big_Insert()
 	{
-		for (int i = 0; i < _insertTestAmount * _maxItemsBigMultiplier; i++)
+		for (int i = 0; i < (_insertTestAmount * _maxItemsBigMultiplier); i++)
 		{
 			_parrDictionaryBigEmpty.Insert(i, new TestStruct());
 		}
@@ -800,9 +959,27 @@ public partial class PackedArrayBenchmark_Big_Insert : PackedArrayBenchmarkBase
 	[Benchmark]
 	public void List_Big_Insert()
 	{
-		for (int i = 0; i < _insertTestAmount * _maxItemsBigMultiplier; i++)
+		for (int i = 0; i < (_insertTestAmount * _maxItemsBigMultiplier); i++)
 		{
 			_listBigEmpty.Insert(i, new TestStruct());
+		}
+	}
+
+	[Benchmark]
+	public void PDict_Big_Insert()
+	{
+		for (int i = 0; i < _insertTestAmount * _maxItemsBigMultiplier; i++)
+		{
+			_pdictBigEmpty.Insert(i, new TestStruct());
+		}
+	}
+
+	[Benchmark]
+	public void Dict_Big_Insert()
+	{
+		for (int i = 0; i < _insertTestAmount * _maxItemsBigMultiplier; i++)
+		{
+			_dictBigEmpty.Add(i, new TestStruct());
 		}
 	}
 }
@@ -874,6 +1051,46 @@ public partial class PackedArrayBenchmark_Big_Iteration : PackedArrayBenchmarkBa
 	{
 		int counter = 0;
 		foreach (var entry in _listBig)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
+	public void PDict_Big_Iteration_Unordered_Keys()
+	{
+		int counter = 0;
+		foreach (var entry in _pdictBig.Keys)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
+	public void PDict_Big_Iteration_Unordered_Values()
+	{
+		int counter = 0;
+		foreach (var entry in _pdictBig.Values)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
+	public void Dict_Big_Iteration_Unordered_Keys()
+	{
+		int counter = 0;
+		foreach (var entry in _dictBig.Keys)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
+	public void Dict_Big_Iteration_Unordered_Values()
+	{
+		int counter = 0;
+		foreach (var entry in _dictBig.Values)
 		{
 			counter++;
 		}
