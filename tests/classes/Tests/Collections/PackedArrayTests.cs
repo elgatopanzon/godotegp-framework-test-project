@@ -66,6 +66,42 @@ public partial class PackedArrayTests : TestContext
 	}
 
 	[Fact]
+	public void PackedArrayTests_test_removing_value()
+	{
+		PackedArray<int> arr = new(10);
+
+		List<int> values = new() { 11, 22, 33, 44, 55, 66, 77, 88, 99, 1010 };
+
+		// add values to the array
+		foreach (var val in values)
+		{
+			arr.Add(val);
+		}
+
+		// remove some of the items from both
+		arr.Remove(66);
+		values.Remove(66);
+
+		arr.Remove(99);
+		values.Remove(99);
+
+		arr.Remove(11);
+		values.Remove(11);
+
+		// verify the order
+		int counter = 0;
+		foreach (var val in arr.OrderedArray)
+		{
+			LoggerManager.LogDebug("Array original value", "", counter.ToString(), values[counter]);
+			LoggerManager.LogDebug("Array actual value", "", counter.ToString(), val);
+
+			Assert.Equal(values[counter], val);
+
+			counter++;
+		}
+	}
+
+	[Fact]
 	public void PackedArrayTests_stresstest_vs_list()
 	{
 		int maxItems = 32;
