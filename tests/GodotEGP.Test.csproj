@@ -23,6 +23,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-
+<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	<Exec Command="sudo setcap 'cap_sys_nice=eip' $(TargetDir)$(AssemblyName)"/>
+</Target>
 </Project>
-
