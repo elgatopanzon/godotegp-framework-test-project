@@ -425,7 +425,7 @@ public partial class PackedArrayBenchmarkBase
 
 	public void PArray_Setup()
 	{
-		_parr = new PackedArray<TestStruct>(_maxItems);
+		_parr = new PackedArray<TestStruct>();
 		for (int i = 0; i < _maxItems; i++)
 		{
 			_parr.Add(new TestStruct() {
@@ -433,7 +433,7 @@ public partial class PackedArrayBenchmarkBase
 			});
 		}
 
-		_parrBig = new PackedArray<TestStruct>(_maxItems * _maxItemsBigMultiplier);
+		_parrBig = new PackedArray<TestStruct>();
 		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
 		{
 			_parrBig.Add(new TestStruct() {
