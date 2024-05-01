@@ -88,6 +88,12 @@ public partial class PackedArrayTests : TestContext
 		arr.Remove(11);
 		values.Remove(11);
 
+		arr.Remove(88);
+		values.Remove(88);
+
+		arr.Remove(1010);
+		values.Remove(1010);
+
 		// verify the order
 		int counter = 0;
 		foreach (var val in arr.OrderedArray)
