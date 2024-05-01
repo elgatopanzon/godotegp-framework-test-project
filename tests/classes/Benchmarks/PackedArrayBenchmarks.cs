@@ -466,7 +466,7 @@ public partial class PackedArrayBenchmark_Iteration : PackedArrayBenchmarkBase
 	public void PArray_Small_Iteration_Unordered()
 	{
 		int counter = 0;
-		foreach (var entry in _parr.Array)
+		foreach (var entry in _parr.Span)
 		{
 			counter++;
 		}
@@ -760,7 +760,7 @@ public partial class PackedArrayBenchmark_Big_Iteration : PackedArrayBenchmarkBa
 	public void PArray_Big_Iteration_Unordered()
 	{
 		int counter = 0;
-		foreach (var entry in _parrBig.Array)
+		foreach (var entry in _parrBig.Span)
 		{
 			counter++;
 		}
