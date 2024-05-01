@@ -62,20 +62,24 @@ public partial class PackedArrayBenchmarkBase
 	protected int _maxItems = 32;
 	protected int _maxItemsBigMultiplier = 3200;
 	protected int _insertTestAmount = 32;
+	protected TestStruct[] _arr;
 	protected PackedArray<TestStruct> _parr;
 	protected PackedArrayDictBacked<TestStruct> _parrDict;
 	protected PackedArrayDictionary<TestStruct> _parrDictionary;
 	protected List<TestStruct> _list;
+	protected TestStruct[] _arrBig;
 	protected PackedArray<TestStruct> _parrBig;
 	protected PackedArrayDictBacked<TestStruct> _parrDictBig;
 	protected PackedArrayDictionary<TestStruct> _parrDictionaryBig;
 	protected List<TestStruct> _listBig;
 
 
+	protected TestStruct[] _arrEmpty;
 	protected PackedArray<TestStruct> _parrEmpty;
 	protected PackedArrayDictBacked<TestStruct> _parrDictEmpty;
 	protected PackedArrayDictionary<TestStruct> _parrDictionaryEmpty;
 	protected List<TestStruct> _listEmpty;
+	protected TestStruct[] _arrBigEmpty;
 	protected PackedArray<TestStruct> _parrBigEmpty;
 	protected PackedArrayDictBacked<TestStruct> _parrDictBigEmpty;
 	protected PackedArrayDictionary<TestStruct> _parrDictionaryBigEmpty;
@@ -94,10 +98,19 @@ public partial class PackedArrayBenchmarkBase
 	[IterationSetup]
 	public void Setup()
 	{
+		Array_Setup();
 		PArray_Setup();
 		PDict_Setup();
 		Dict_Setup();
 		List_Setup();
+	}
+
+	public void Array_Setup()
+	{
+		_arr = new TestStruct[_maxItems];
+		_arrBig = new TestStruct[_maxItems * _maxItemsBigMultiplier];
+		_arrEmpty = new TestStruct[_maxItems];
+		_arrBigEmpty = new TestStruct[_maxItems * _maxItemsBigMultiplier];
 	}
 
 	public void PArray_Setup()
@@ -269,39 +282,66 @@ public partial class PackedArrayBenchmarkBase
 public partial class PackedArrayBenchmark_Access : PackedArrayBenchmarkBase
 {
 	[Benchmark(Baseline = true)]
+	public void Array_Small_Access()
+	{
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_arrEmpty[i] = _arr[i];
+		}
+	}
+
+	[Benchmark]
 	public void PArray_Small_Access()
 	{
-		var v = _parr[16];
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_parrEmpty[i] = _parr[i];
+		}
 	}
 
 	[Benchmark]
 	public void PArrayDictBackedIndex_Small_Access()
 	{
-		var v = _parrDict[16];
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_parrDictEmpty[i] = _parrDict[i];
+		}
 	}
 
 	[Benchmark]
 	public void PArrayDictBackedData_Small_Access()
 	{
-		var v = _parrDictionary[16];
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_parrDictionaryEmpty[i] = _parrDictionary[i];
+		}
 	}
 
 	[Benchmark]
 	public void List_Small_Access()
 	{
-		var v = _list[16];
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_listEmpty.Add(_list[i]);
+		}
 	}
 
 	[Benchmark]
 	public void PDict_Small_Access()
 	{
-		var v = _pdict[16];
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_pdictEmpty.Insert(i, _pdict[i]);
+		}
 	}
 
 	[Benchmark]
 	public void Dict_Small_Access()
 	{
-		var v = _dict[16];
+		for (int i = 0; i < _maxItems; i++)
+		{
+			_dictEmpty[i] = _dict[i];
+		}
 	}
 }
 
@@ -347,6 +387,15 @@ public partial class PackedArrayBenchmark_RemoveAt : PackedArrayBenchmarkBase
 public partial class PackedArrayBenchmark_Insert : PackedArrayBenchmarkBase
 {
 	[Benchmark(Baseline = true)]
+	public void Array_Small_Insert()
+	{
+		for (int i = 0; i < _insertTestAmount; i++)
+		{
+			_arr[i] = new TestStruct();
+		}
+	}
+
+	[Benchmark]
 	public void PArray_Small_Insert()
 	{
 		for (int i = 0; i < _insertTestAmount; i++)
@@ -403,7 +452,17 @@ public partial class PackedArrayBenchmark_Insert : PackedArrayBenchmarkBase
 
 public partial class PackedArrayBenchmark_Iteration : PackedArrayBenchmarkBase
 {
-	[Benchmark(Baseline = true)]
+	[Benchmark]
+	public void Array_Small_Iteration_Unordered()
+	{
+		int counter = 0;
+		foreach (var entry in _arr)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
 	public void PArray_Small_Iteration_Unordered()
 	{
 		int counter = 0;
@@ -517,39 +576,66 @@ public partial class PackedArrayBenchmark_Iteration : PackedArrayBenchmarkBase
 public partial class PackedArrayBenchmark_Big_Access : PackedArrayBenchmarkBase
 {
 	[Benchmark(Baseline = true)]
+	public void Array_Big_Access()
+	{
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_arrBigEmpty[i] = _arrBig[i];
+		}
+	}
+
+	[Benchmark]
 	public void PArray_Big_Access()
 	{
-		var v = _parrBig[_maxItemsBigMultiplier - 1];
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_parrBigEmpty[i] = _parrBig[i];
+		}
 	}
 
 	[Benchmark]
 	public void PArrayDictBackedIndex_Big_Access()
 	{
-		var v = _parrDictBig[_maxItemsBigMultiplier - 1];
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_parrDictBigEmpty[i] = _parrDictBig[i];
+		}
 	}
 
 	[Benchmark]
 	public void PArrayDictBackedData_Big_Access()
 	{
-		var v = _parrDictionaryBig[_maxItemsBigMultiplier - 1];
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_parrDictionaryBigEmpty[i] = _parrDictionaryBig[i];
+		}
 	}
 
 	[Benchmark]
 	public void List_Big_Access()
 	{
-		var v = _listBig[_maxItemsBigMultiplier - 1];
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_listBigEmpty.Add(_listBig[i]);
+		}
 	}
 
 	[Benchmark]
 	public void PDict_Big_Access()
 	{
-		var v = _pdictBig[_maxItemsBigMultiplier - 1];
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_pdictBigEmpty.Add(i, _pdictBig[i]);
+		}
 	}
 
 	[Benchmark]
 	public void Dict_Big_Access()
 	{
-		var v = _dictBig[_maxItemsBigMultiplier - 1];
+		for (int i = 0; i < _maxItems * _maxItemsBigMultiplier; i++)
+		{
+			_dictBigEmpty[i] = _dictBig[i];
+		}
 	}
 }
 
@@ -595,6 +681,15 @@ public partial class PackedArrayBenchmark_Big_RemoveAt : PackedArrayBenchmarkBas
 public partial class PackedArrayBenchmark_Big_Insert : PackedArrayBenchmarkBase
 {
 	[Benchmark(Baseline = true)]
+	public void Array_Big_Insert()
+	{
+		for (int i = 0; i < _insertTestAmount; i++)
+		{
+			_arrBig[i] = new TestStruct();
+		}
+	}
+
+	[Benchmark]
 	public void PArray_Big_Insert()
 	{
 		for (int i = 0; i < (_insertTestAmount * _maxItemsBigMultiplier); i++)
@@ -652,6 +747,16 @@ public partial class PackedArrayBenchmark_Big_Insert : PackedArrayBenchmarkBase
 public partial class PackedArrayBenchmark_Big_Iteration : PackedArrayBenchmarkBase
 {
 	[Benchmark(Baseline = true)]
+	public void Array_Big_Iteration_Unordered()
+	{
+		int counter = 0;
+		foreach (var entry in _arrBig)
+		{
+			counter++;
+		}
+	}
+
+	[Benchmark]
 	public void PArray_Big_Iteration_Unordered()
 	{
 		int counter = 0;
