@@ -41,7 +41,7 @@ public partial class ECSTests : TestContext
 
 		LoggerManager.LogDebug("Entity1 archetype after remove", "", "archetype", archetype);
 
-		Assert.Empty(archetype);
+		Assert.Empty(archetype.Array);
 	}
 
 	[Fact]
@@ -130,7 +130,7 @@ public partial class ECSTests : TestContext
 
 		LoggerManager.LogDebug("Entity1 archetype after remove", "", "archetype", archetype);
 
-		Assert.Empty(archetype);
+		Assert.Empty(archetype.Array);
 	}
 
 	[Fact]
@@ -163,7 +163,7 @@ public partial class ECSTests : TestContext
 
 		LoggerManager.LogDebug("Entity1 archetype after remove", "", "archetype", archetype);
 
-		Assert.Empty(archetype);
+		Assert.Empty(archetype.Array);
 	}
 }
 
