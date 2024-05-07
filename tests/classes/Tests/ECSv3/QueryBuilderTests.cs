@@ -421,6 +421,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// create a query
 		Query query = QueryBuilder.Create()
 			.Has(_ecs.Id<EcsComponent>()) // include data components
+			.IsNot(_ecs.Id<EcsComponentConfig>()) // include data components
 			.IsNot(_entities["TestData2"])
 			.Build();
 
