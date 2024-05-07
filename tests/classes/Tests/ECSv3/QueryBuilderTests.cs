@@ -18,6 +18,8 @@ using GodotEGP.ECSv3;
 using GodotEGP.ECSv3.Components;
 using GodotEGP.ECSv3.Queries;
 
+using System.Text.RegularExpressions;
+
 public partial class QueryBuilderTestsContext : TestContext
 {
 	protected ECS _ecs;
@@ -451,6 +453,27 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		Assert.Equal(1, res.Entities.Count);
 		Assert.Contains(_entities["TestData2"], res.Entities.Array);
+	}
+
+	[Fact]
+	public void QueryBuilderTests_query_name_matches()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.NameMatches(new Regex("TestData"))
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(3, res.Entities.Count);
+		Assert.Contains(_entities["TestData"], res.Entities.Array);
+		Assert.Contains(_entities["TestData2"], res.Entities.Array);
+		Assert.Contains(_entities["TestData3"], res.Entities.Array);
 	}
 	
 	[Fact]
