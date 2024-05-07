@@ -707,4 +707,40 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		Assert.Contains(_entities["e8"], res.Entities.Array);
 		Assert.Contains(_entities["e9"], res.Entities.Array);
 	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_not_target_has()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.NotPairTargetHas(_entities["TestTag"], 0, _entities["TestData"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(23, res.Entities.Count);
+	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_not_source_has()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.NotPairSourceHas(_entities["TestTag2"], 0, _entities["TestTag3"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(23, res.Entities.Count);
+	}
 }
