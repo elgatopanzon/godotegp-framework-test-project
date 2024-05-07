@@ -135,6 +135,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 	{
 		// create a query
 		Query query = QueryBuilder.Create()
+			.Not(_ecs.Id<EcsTag>()) // exclude all components
 			.Not(_ecs.Id<EcsComponent>()) // exclude all components
 			.Not(_entities["TestTag2"]) // exclude all with TestTag2
 			.Build();
@@ -372,6 +373,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		Query query = QueryBuilder.Create()
 			.Not(_ecs.Id<EcsComponent>()) // exclude all components
+			.Not(_ecs.Id<EcsTag>()) // exclude all components
 			.Not(hasTestData3NotTestTag2)
 			.Build();
 
