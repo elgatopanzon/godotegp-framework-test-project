@@ -66,9 +66,18 @@ public partial class QueryBuilderTestsContext : TestContext
 		_entities["e7"].Add<TestTag4>();
 
 		_entities["e8"].Set<TestData3>(new TestData3());
+		_entities["e8"].Set<TestTag3, TestData3>(new TestData3());
 
 		_entities["e9"].Set<TestData3>(new TestData3());
 		_entities["e9"].Add<TestTag3>();
+
+		_entities["e9"].Set<TestTag3, TestData>(new TestData());
+		_entities["e9"].Set<TestTag3, TestData2>(new TestData2());
+		_entities["e9"].Set<TestTag3, TestData3>(new TestData3());
+		_entities["e9"].Set<TestTag2, TestData>(new TestData());
+
+		_entities["e9"].Add<TestTag>(_entities["e5"]);
+		_entities["e9"].Add<TestTag>(_entities["e4"]);
 	}
 }
 
@@ -516,5 +525,121 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		Assert.Equal(1, res.Entities.Count);
 		Assert.Contains(_entities["e2"], res.Entities.Array);
+	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_has_pair_source()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.HasPairSource(_entities["TestTag3"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(2, res.Entities.Count);
+		Assert.Contains(_entities["e8"], res.Entities.Array);
+		Assert.Contains(_entities["e9"], res.Entities.Array);
+	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_has_pair_target()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.HasPairTarget(_entities["TestData3"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(2, res.Entities.Count);
+		Assert.Contains(_entities["e8"], res.Entities.Array);
+		Assert.Contains(_entities["e9"], res.Entities.Array);
+	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_has_pair_full()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.HasPair(_entities["TestTag3"], _entities["TestData"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(1, res.Entities.Count);
+		Assert.Contains(_entities["e9"], res.Entities.Array);
+	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_not_has_pair_source()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.NotPairSource(_entities["TestTag2"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(24, res.Entities.Count);
+		Assert.Contains(_entities["e8"], res.Entities.Array);
+	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_not_has_pair_target()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.NotPairTarget(_entities["TestData"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(24, res.Entities.Count);
+		Assert.Contains(_entities["e8"], res.Entities.Array);
+	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_not_has_pair_full()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.NotPair(_entities["TestTag3"], _entities["TestData"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(24, res.Entities.Count);
+		Assert.Contains(_entities["e8"], res.Entities.Array);
 	}
 }
