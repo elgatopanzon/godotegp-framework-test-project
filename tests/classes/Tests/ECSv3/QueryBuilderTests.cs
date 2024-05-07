@@ -67,6 +67,7 @@ public partial class QueryBuilderTestsContext : TestContext
 
 		_entities["e8"].Set<TestData3>(new TestData3());
 		_entities["e8"].Set<TestTag3, TestData3>(new TestData3());
+		_entities["e8"].Set<TestTag4, TestData3>(new TestData3());
 
 		_entities["e9"].Set<TestData3>(new TestData3());
 		_entities["e9"].Add<TestTag3>();
@@ -75,9 +76,12 @@ public partial class QueryBuilderTestsContext : TestContext
 		_entities["e9"].Set<TestTag3, TestData2>(new TestData2());
 		_entities["e9"].Set<TestTag3, TestData3>(new TestData3());
 		_entities["e9"].Set<TestTag2, TestData>(new TestData());
+		// _entities["e9"].Add<TestTag2, TestTag4>();
 
 		_entities["e9"].Add<TestTag>(_entities["e5"]);
 		_entities["e9"].Add<TestTag>(_entities["e4"]);
+
+		_entities["TestTag4"].Add<TestTag3>();
 	}
 }
 
@@ -663,11 +667,11 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 	}
 
 	// [Fact]
-	// public void QueryBuilderTests_query_pair_owner_has()
+	// public void QueryBuilderTests_query_pair_source_has()
 	// {
 	// 	// create a query
 	// 	Query query = QueryBuilder.Create()
-	// 		.PairOwnerHas(_entities["TestTag3"], 0, _entities["TestTag"])
+	// 		.PairSourceHas(_entities["TestTag4"], 0, _entities["TestTag3"])
 	// 		.Build();
     //
 	// 	// run the query and get results
@@ -678,6 +682,26 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 	// 	LoggerManager.LogDebug("Query result", "", "res", handles);
     //
 	// 	Assert.Equal(1, res.Entities.Count);
-	// 	Assert.Contains(_entities["e9"], res.Entities.Array);
+	// 	Assert.Contains(_entities["e4"], res.Entities.Array);
 	// }
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_owner_has()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.PairOwnerHas(_entities["TestTag3"], 0, _entities["TestData3"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(2, res.Entities.Count);
+		Assert.Contains(_entities["e8"], res.Entities.Array);
+		Assert.Contains(_entities["e9"], res.Entities.Array);
+	}
 }
