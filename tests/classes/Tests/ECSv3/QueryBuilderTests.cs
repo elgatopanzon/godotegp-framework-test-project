@@ -642,4 +642,42 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		Assert.Equal(24, res.Entities.Count);
 		Assert.Contains(_entities["e8"], res.Entities.Array);
 	}
+
+	[Fact]
+	public void QueryBuilderTests_query_pair_target_has()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.PairTargetHas(_entities["TestTag"], 0, _entities["TestData2"])
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(1, res.Entities.Count);
+		Assert.Contains(_entities["e4"], res.Entities.Array);
+	}
+
+	// [Fact]
+	// public void QueryBuilderTests_query_pair_owner_has()
+	// {
+	// 	// create a query
+	// 	Query query = QueryBuilder.Create()
+	// 		.PairOwnerHas(_entities["TestTag3"], 0, _entities["TestTag"])
+	// 		.Build();
+    //
+	// 	// run the query and get results
+	// 	QueryResult res = _ecs.Query(query);
+    //
+	// 	ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+    //
+	// 	LoggerManager.LogDebug("Query result", "", "res", handles);
+    //
+	// 	Assert.Equal(1, res.Entities.Count);
+	// 	Assert.Contains(_entities["e9"], res.Entities.Array);
+	// }
 }
