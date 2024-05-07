@@ -471,4 +471,24 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		Assert.Contains(_entities["e2"], res.Entities.Array);
 		Assert.Contains(_entities["e6"], res.Entities.Array);
 	}
+
+	[Fact]
+	public void QueryBuilderTests_query_wildcard()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.Has(_entities["TestTag"])
+			.Has(0) // matches basically any other component
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(1, res.Entities.Count);
+		Assert.Contains(_entities["e2"], res.Entities.Array);
+	}
 }
