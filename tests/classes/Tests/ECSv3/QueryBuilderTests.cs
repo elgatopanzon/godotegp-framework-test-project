@@ -450,4 +450,25 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		Assert.Equal(1, res.Entities.Count);
 		Assert.Contains(_entities["TestData2"], res.Entities.Array);
 	}
+	
+	[Fact]
+	public void QueryBuilderTests_query_inand()
+	{
+		// create a query
+		Query query = QueryBuilder.Create()
+			.InAnd(_ecs.GetEntityArchetype(_entities["e1"]))
+			.Build();
+
+		// run the query and get results
+		QueryResult res = _ecs.Query(query);
+
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+
+		Assert.Equal(3, res.Entities.Count);
+		Assert.Contains(_entities["e1"], res.Entities.Array);
+		Assert.Contains(_entities["e2"], res.Entities.Array);
+		Assert.Contains(_entities["e6"], res.Entities.Array);
+	}
 }
