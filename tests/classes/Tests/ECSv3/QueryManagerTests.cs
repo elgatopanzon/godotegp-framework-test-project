@@ -80,5 +80,65 @@ public partial class QueryManagerTests : TestContext
 		Assert.Equal(1, res.Entities.Count);
 		Assert.Contains(q1.Entity, res.Entities.ArraySegment);
 	}
+
+	[Fact]
+	public void QueryManagerTests_test_query_cached_results()
+	{
+		ECS ecs = new ECS();
+
+		// create a test entity
+		EntityHandle e1 = ecs.Create("test entity");
+		e1.Add<TestTag>();
+
+		// create a query matching the entity
+		Query query = ecs.CreateQuery()
+			.Has(ecs.Id<TestTag>())
+			.Build();
+
+		EntityHandle q1 = ecs.RegisterQuery(query, "test query");
+
+		LoggerManager.LogDebug("Query entity id", "", "entity", q1);
+
+		// run the query
+		QueryResult res = ecs.Query("test query");
+		ArraySegment<EntityHandle> handles = ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
+
+		LoggerManager.LogDebug("Query result", "", "res", handles);
+		LoggerManager.LogDebug("Query result hash", "", "hash", res.GetHashCode());
+
+		QueryResult result = ecs.QueryResults("test query");
+
+		LoggerManager.LogDebug("Query result obtained hash", "", "hash", result.GetHashCode());
+
+		Assert.Equal(1, res.Entities.Count);
+		Assert.Contains(e1.Entity, res.Entities.ArraySegment);
+
+		// disable automatic query updating
+		ecs.Config.KeepQueryResultsUpdated = false;
+
+		// remove the testtag from the entity
+		// the query results shouldn't update
+		e1.Remove<TestTag>();
+
+		// get the results without running the query
+		QueryResult resultAfter = ecs.QueryResults("test query");
+
+		LoggerManager.LogDebug("Query result after", "", "res", resultAfter);
+
+		// verify the results still contain the outdated entity
+		Assert.Equal(1, resultAfter.Entities.Count);
+		Assert.Contains(e1.Entity, resultAfter.Entities.ArraySegment);
+
+		// manually update the query results for the entity
+		ecs.Config.KeepQueryResultsUpdated = true;
+		ecs._updateQueryResults(e1.Entity);
+
+		LoggerManager.LogDebug("Query result after update", "", "res", resultAfter);
+
+		// verify query results are empty
+		QueryResult resultAfterUpdate = ecs.QueryResults("test query");
+
+		Assert.Equal(0, resultAfterUpdate.Entities.Count);
+	}
 }
 
