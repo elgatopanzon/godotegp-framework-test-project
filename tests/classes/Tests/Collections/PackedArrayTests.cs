@@ -170,7 +170,7 @@ public partial class PackedArrayTests : TestContext
 
 		watch = System.Diagnostics.Stopwatch.StartNew();
 		int counter = 0;
-		foreach (var entry in parr.Array)
+		foreach (var entry in parr.ArraySegment)
 		{
 			counter++;
 		}

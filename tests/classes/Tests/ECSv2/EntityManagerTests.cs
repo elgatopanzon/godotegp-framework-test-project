@@ -88,7 +88,7 @@ public partial class EntityManagerTests : TestContext
 
 		LoggerManager.LogDebug("Archetype", "", "archetype", archetype);
 
-		Assert.Empty(archetype.Array);
+		Assert.Empty(archetype.ArraySegment);
 	}
 }
 

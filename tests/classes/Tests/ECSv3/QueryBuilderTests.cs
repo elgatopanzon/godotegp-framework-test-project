@@ -102,9 +102,9 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		LoggerManager.LogDebug("Query result", "", "res", res);
 
 		Assert.Equal(3, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -119,10 +119,10 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		LoggerManager.LogDebug("Query result", "", "res", res.Entities.Array);
+		LoggerManager.LogDebug("Query result", "", "res", res.Entities.ArraySegment);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -137,13 +137,13 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		LoggerManager.LogDebug("Query result", "", "res", res.Entities.Array);
+		LoggerManager.LogDebug("Query result", "", "res", res.Entities.ArraySegment);
 
 		Assert.Equal(4, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
-		Assert.Contains(_entities["e3"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e3"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -159,18 +159,18 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(7, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e4"], res.Entities.Array);
-		Assert.Contains(_entities["e5"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
-		Assert.Contains(_entities["e7"], res.Entities.Array);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
-		Assert.Contains(_entities["e9"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e4"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e5"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e7"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e9"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -186,11 +186,11 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		LoggerManager.LogDebug("Query result", "", "res", res.Entities.Array);
+		LoggerManager.LogDebug("Query result", "", "res", res.Entities.ArraySegment);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -205,11 +205,11 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		LoggerManager.LogDebug("Query result", "", "res", res.Entities.Array);
+		LoggerManager.LogDebug("Query result", "", "res", res.Entities.ArraySegment);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -227,17 +227,17 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(3, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
-		Assert.DoesNotContain(_entities["e3"], res.Entities.Array);
-		Assert.DoesNotContain(_entities["e4"], res.Entities.Array);
-		Assert.DoesNotContain(_entities["e5"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
+		Assert.DoesNotContain(_entities["e3"], res.Entities.ArraySegment);
+		Assert.DoesNotContain(_entities["e4"], res.Entities.ArraySegment);
+		Assert.DoesNotContain(_entities["e5"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -260,12 +260,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -289,15 +289,15 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(4, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
-		Assert.Contains(_entities["e3"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e3"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -320,13 +320,13 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -346,12 +346,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(_entities["e9"], res.Entities.Array);
+		Assert.Contains(_entities["e9"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -370,12 +370,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -396,18 +396,18 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(7, res.Entities.Count);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
-		Assert.Contains(_entities["e3"], res.Entities.Array);
-		Assert.Contains(_entities["e4"], res.Entities.Array);
-		Assert.Contains(_entities["e5"], res.Entities.Array);
-		Assert.Contains(_entities["e7"], res.Entities.Array);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
-		Assert.Contains(_entities["e9"], res.Entities.Array);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e3"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e4"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e5"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e7"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e9"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -421,12 +421,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(_entities["e5"], res.Entities.Array);
+		Assert.Contains(_entities["e5"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -442,13 +442,13 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["TestData"], res.Entities.Array);
-		Assert.Contains(_entities["TestData3"], res.Entities.Array);
+		Assert.Contains(_entities["TestData"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["TestData3"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -462,12 +462,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(_entities["TestData2"], res.Entities.Array);
+		Assert.Contains(_entities["TestData2"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -481,14 +481,14 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(3, res.Entities.Count);
-		Assert.Contains(_entities["TestData"], res.Entities.Array);
-		Assert.Contains(_entities["TestData2"], res.Entities.Array);
-		Assert.Contains(_entities["TestData3"], res.Entities.Array);
+		Assert.Contains(_entities["TestData"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["TestData2"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["TestData3"], res.Entities.ArraySegment);
 	}
 	
 	[Fact]
@@ -502,14 +502,14 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(3, res.Entities.Count);
-		Assert.Contains(_entities["e1"], res.Entities.Array);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
-		Assert.Contains(_entities["e6"], res.Entities.Array);
+		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e6"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -524,12 +524,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(_entities["e2"], res.Entities.Array);
+		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -543,13 +543,13 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
-		Assert.Contains(_entities["e9"], res.Entities.Array);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e9"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -563,13 +563,13 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
-		Assert.Contains(_entities["e9"], res.Entities.Array);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e9"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -583,12 +583,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(_entities["e9"], res.Entities.Array);
+		Assert.Contains(_entities["e9"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -602,12 +602,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(24, res.Entities.Count);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -621,12 +621,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(24, res.Entities.Count);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -640,12 +640,12 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(24, res.Entities.Count);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -659,13 +659,13 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["e4"], res.Entities.Array);
-		Assert.Contains(_entities["e5"], res.Entities.Array);
+		Assert.Contains(_entities["e4"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e5"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -679,13 +679,13 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["TestTag"], res.Entities.Array);
-		Assert.Contains(_entities["TestTag2"], res.Entities.Array);
+		Assert.Contains(_entities["TestTag"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["TestTag2"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -699,13 +699,13 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(2, res.Entities.Count);
-		Assert.Contains(_entities["e8"], res.Entities.Array);
-		Assert.Contains(_entities["e9"], res.Entities.Array);
+		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
+		Assert.Contains(_entities["e9"], res.Entities.ArraySegment);
 	}
 
 	[Fact]
@@ -719,7 +719,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
@@ -737,7 +737,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// run the query and get results
 		QueryResult res = _ecs.Query(query);
 
-		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.Array.ToArray()).Array;
+		ArraySegment<EntityHandle> handles = _ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 

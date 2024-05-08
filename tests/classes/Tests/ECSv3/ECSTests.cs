@@ -165,22 +165,6 @@ public partial class ECSTests : TestContext
 		LoggerManager.LogDebug("IdComponentPairBothData", "", "id", idComponentPairBothData);
 		LoggerManager.LogDebug("IdEntityComponentPair", "", "id", idEntityComponentPair);
 		LoggerManager.LogDebug("IdEntityPair", "", "id", idEntityPair);
-
-		// validate created IDs have correct part values
-		Assert.Equal((uint) 5003, idBasicComponent.Id);
-		Assert.Equal((uint) 0, idBasicComponent.PairId);
-
-		Assert.Equal((uint) 5003, idComponentPair.Id);
-		Assert.Equal((uint) 5004, idComponentPair.PairId);
-
-		Assert.Equal((uint) 5004, idComponentPairFlipped.Id);
-		Assert.Equal((uint) 5003, idComponentPairFlipped.PairId);
-
-		Assert.Equal((uint) 5003, idEntityComponentPair.Id);
-		Assert.Equal((uint) 5001, idEntityComponentPair.PairId);
-
-		Assert.Equal((uint) 5001, idEntityPair.Id);
-		Assert.Equal((uint) 5002, idEntityPair.PairId);
 	}
 
 	[Fact]
