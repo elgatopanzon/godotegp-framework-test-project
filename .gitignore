@@ -486,6 +486,10 @@ $RECYCLE.BIN/
 # Godot 4+ specific ignores
 .godot/
 
+# traces
+**.nettrace
+**.speedscope.json
+
 /tests/obj
 /tests/bin
 
