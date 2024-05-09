@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Addon - godotegp-framework-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotEGP.Test", "tests\GodotEGP.Test.csproj", "{E381F0B3-F517-4DFB-A329-EDFB9A8DB938}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotEGP.Benchmark", "benchmarks\GodotEGP.Benchmark.csproj", "{6DAD9D16-3BFD-4514-8580-99789EBDAA2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotEGP.Profiling", "profiling\GodotEGP.Profiling.csproj", "{EBE71F65-78A3-4D25-A16D-D38E3F4DD956}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +33,17 @@ Global
 		{E381F0B3-F517-4DFB-A329-EDFB9A8DB938}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
 		{E381F0B3-F517-4DFB-A329-EDFB9A8DB938}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
 		{E381F0B3-F517-4DFB-A329-EDFB9A8DB938}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
+		{6DAD9D16-3BFD-4514-8580-99789EBDAA2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DAD9D16-3BFD-4514-8580-99789EBDAA2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DAD9D16-3BFD-4514-8580-99789EBDAA2D}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DAD9D16-3BFD-4514-8580-99789EBDAA2D}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{6DAD9D16-3BFD-4514-8580-99789EBDAA2D}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DAD9D16-3BFD-4514-8580-99789EBDAA2D}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
+		{EBE71F65-78A3-4D25-A16D-D38E3F4DD956}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBE71F65-78A3-4D25-A16D-D38E3F4DD956}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBE71F65-78A3-4D25-A16D-D38E3F4DD956}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBE71F65-78A3-4D25-A16D-D38E3F4DD956}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{EBE71F65-78A3-4D25-A16D-D38E3F4DD956}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBE71F65-78A3-4D25-A16D-D38E3F4DD956}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
