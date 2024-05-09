@@ -4,7 +4,7 @@
  * @created     : Saturday Apr 20, 2024 20:10:52 CST
  */
 
-namespace GodotEGP.Benchmarks.ECS;
+namespace GodotEGP.Benchmarks.Collections;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -17,10 +17,9 @@ using GodotEGP.Collections;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
-using GodotEGP.Tests;
 using GodotEGP.ECS;
 
-public partial class PackedArrayBenchmarks : TestContext
+public partial class PackedArrayBenchmarks
 {
 #if (!DEBUG)
 	[Fact]

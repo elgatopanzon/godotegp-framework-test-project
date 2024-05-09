@@ -4,7 +4,7 @@
  * @created     : Thursday Apr 25, 2024 19:33:14 CST
  */
 
-namespace GodotEGP.Tests.Benchmarks;
+namespace GodotEGP.Benchmarks;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -19,7 +19,7 @@ using BenchmarkDotNet.Running;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-public partial class MiscBenchmarks : TestContext
+public partial class MiscBenchmarks
 {
 #if (!DEBUG)
 	[Fact]
