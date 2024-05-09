@@ -43,6 +43,7 @@ public partial class QueryBuilderTestsContext : TestContext
 		for (int i = 0; i < 10; i++)
 		{
 			_entities.Add($"e{i+1}", _ecs.Create($"e{i+1}"));
+			_entities[$"e{i+1}"].Add<TestEntity>();
 		}
 
 		// add components to entities
@@ -153,6 +154,8 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		Query query = QueryBuilder.Create()
 			.Not(_ecs.Id<EcsTag>()) // exclude all components
 			.Not(_ecs.Id<EcsComponent>()) // exclude all components
+			.Not(_ecs.Id<EcsProcessPhase>()) // exclude all components
+			.Not(_ecs.Id<EcsQuery>()) // exclude all components
 			.Not(_entities["TestTag2"]) // exclude all with TestTag2
 			.Build();
 
@@ -163,7 +166,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
-		Assert.Equal(7, res.Entities.Count);
+		Assert.Equal(8, res.Entities.Count);
 		Assert.Contains(_entities["e1"], res.Entities.ArraySegment);
 		Assert.Contains(_entities["e4"], res.Entities.ArraySegment);
 		Assert.Contains(_entities["e5"], res.Entities.ArraySegment);
@@ -387,10 +390,15 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 			.Not(_entities["TestTag2"])
 			.Build();
 
-		Query query = QueryBuilder.Create()
+		Query query2 = QueryBuilder.Create()
 			.Not(_ecs.Id<EcsComponent>()) // exclude all components
 			.Not(_ecs.Id<EcsTag>()) // exclude all components
 			.Not(hasTestData3NotTestTag2)
+			.Build();
+
+		Query query = QueryBuilder.Create()
+			.Not(query2)
+			.Has(QueryBuilder.Create().Has(_ecs.Id<TestEntity>()).Build())
 			.Build();
 
 		// run the query and get results
@@ -400,7 +408,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
-		Assert.Equal(7, res.Entities.Count);
+		Assert.Equal(8, res.Entities.Count);
 		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
 		Assert.Contains(_entities["e3"], res.Entities.ArraySegment);
 		Assert.Contains(_entities["e4"], res.Entities.ArraySegment);
@@ -528,7 +536,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
-		Assert.Equal(1, res.Entities.Count);
+		Assert.Equal(3, res.Entities.Count);
 		Assert.Contains(_entities["e2"], res.Entities.ArraySegment);
 	}
 
@@ -596,7 +604,8 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 	{
 		// create a query
 		Query query = QueryBuilder.Create()
-			.NotPairSource(_entities["TestTag2"])
+			.Has(QueryBuilder.Create().NotPairSource(_entities["TestTag2"]).Build())
+			.Has(QueryBuilder.Create().Has(_ecs.Id<TestEntity>()).Build())
 			.Build();
 
 		// run the query and get results
@@ -606,7 +615,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
-		Assert.Equal(24, res.Entities.Count);
+		Assert.Equal(9, res.Entities.Count);
 		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
 	}
 
@@ -615,7 +624,8 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 	{
 		// create a query
 		Query query = QueryBuilder.Create()
-			.NotPairTarget(_entities["TestData"])
+			.Has(QueryBuilder.Create().NotPairTarget(_entities["TestData"]).Build())
+			.Has(QueryBuilder.Create().Has(_ecs.Id<TestEntity>()).Build())
 			.Build();
 
 		// run the query and get results
@@ -625,7 +635,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
-		Assert.Equal(24, res.Entities.Count);
+		Assert.Equal(9, res.Entities.Count);
 		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
 	}
 
@@ -634,7 +644,8 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 	{
 		// create a query
 		Query query = QueryBuilder.Create()
-			.NotPair(_entities["TestTag3"], _entities["TestData"])
+			.Has(QueryBuilder.Create().NotPair(_entities["TestTag3"], _entities["TestData"]).Build())
+			.Has(QueryBuilder.Create().Has(_ecs.Id<TestEntity>()).Build())
 			.Build();
 
 		// run the query and get results
@@ -644,7 +655,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
-		Assert.Equal(24, res.Entities.Count);
+		Assert.Equal(9, res.Entities.Count);
 		Assert.Contains(_entities["e8"], res.Entities.ArraySegment);
 	}
 
@@ -713,6 +724,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 	{
 		// create a query
 		Query query = QueryBuilder.Create()
+			.Has(_ecs.Id<TestEntity>())
 			.NotPairTargetHas(_entities["TestTag"], 0, _entities["TestData"])
 			.Build();
 
@@ -723,7 +735,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
-		Assert.Equal(23, res.Entities.Count);
+		Assert.Equal(8, res.Entities.Count);
 	}
 
 	[Fact]
@@ -732,6 +744,8 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// create a query
 		Query query = QueryBuilder.Create()
 			.NotPairSourceHas(_entities["TestTag2"], 0, _entities["TestTag3"])
+			.Not(_ecs.Id<EcsQuery>()) // exclude all components
+			.Not(_ecs.Id<EcsProcessPhase>()) // exclude all components
 			.Build();
 
 		// run the query and get results
@@ -741,6 +755,8 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
-		Assert.Equal(23, res.Entities.Count);
+		Assert.Equal(26, res.Entities.Count);
 	}
 }
+
+public struct TestEntity : ITag {}
