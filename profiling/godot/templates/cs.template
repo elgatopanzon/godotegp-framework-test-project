@@ -4,7 +4,7 @@
  * @created     : {{TIMESTAMP}}
  */
 
-namespace GodotEGP.Tests.{{FILEP}};
+namespace GodotEGP.Profiling.Godot.{{FILEP}};
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -13,11 +13,6 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
-public partial class {{CAMEL_CLASS}} : TestContext
+public partial class {{CAMEL_CLASS}} : Node
 {
-	[Fact]
-	public void {{CAMEL_CLASS}}_Test()
-	{
-		{{CURSOR}}
-	}
 }
