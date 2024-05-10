@@ -30,15 +30,20 @@ public partial class ECSv3 : Node2D
 	private DateTime _lastFrameCount = DateTime.Now;
 	private PackedArray<int> _fpsSamples = new();
 
-	private ulong _entities = 65000;
+	private ulong _entities = 128;
+	private double _deltaTime;
 
 	public override void _Ready()
 	{
-		LoggerManager.LogInfo("Ready!");
+		LoggerManager.LogDebug("Ready!");
 
 		var args = OS.GetCmdlineArgs();
 
-		LoggerManager.LogInfo("Args", "", "args", args);
+		LoggerManager.LogDebug("Args", "", "args", args);
+
+		LoggerManager.Instance.SetConfig(new LoggerConfig() {
+			LogLevel = Logging.Message.LogLevel.Info,
+			});
 
 		_profile = new ECSv3Profile_Update_6(_entities, false);
 	    _active = true;
@@ -46,11 +51,16 @@ public partial class ECSv3 : Node2D
 
 	public override void _Process(double deltaTime)
 	{
+		if (LoggerManager.Instance.Config.LogLevel != Logging.Message.LogLevel.Info)
+		{
+			LoggerManager.Instance.Config.LogLevel = Logging.Message.LogLevel.Info;
+		}
 		if (_active)
 		{
 			DateTime timeNow = DateTime.Now;
+			_deltaTime = (timeNow.Ticks - _lastUpdate.Ticks) / 10000000f;
 
-			LoggerManager.LogError("Updating ECS main thread");
+			LoggerManager.LogDebug("Updating ECS main thread");
 			_profile.Update(deltaTime);
 
 			_lastUpdate = timeNow;
@@ -64,7 +74,7 @@ public partial class ECSv3 : Node2D
 				_frames = 0;
 				_fpsSamples.Add(_fps);
 
-				Console.WriteLine($"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / _entities}ms)");
+				LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({_deltaTime * 1000}ms) ({_deltaTime * 1000000}us) ({_deltaTime * 1000000000}ns)] cpe:{(_deltaTime * 1000) / _entities}ms)");
 
 				_lastFrameCount = timeNow;
 				_lastUpdate = _lastFrameCount;
