@@ -493,9 +493,12 @@ $RECYCLE.BIN/
 /tests/obj
 /tests/bin
 
+/**/build
+
 # Managed by git-multi (sub repo git@github.com:elgatopanzon/godotegp-framework.git) (commit HEAD) 
 /src/addons/godotegp-framework-csharp 
 
+/profiling/*/addons/godotegp-framework-csharp
 /profiling/*/libs/godotegp-framework
 /profiling/*/libs/godotegp-framework-nongame
 /benchmarks/libs/godotegp-framework
