@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://0v12jedte50q"]
 
 [ext_resource type="Script" path="res://scenes/ECSv3.cs" id="1_xgxjn"]
-[ext_resource type="Texture2D" uid="uid://0d01t7d3fydb" path="res://icon.svg" id="2_6ekqh"]
+[ext_resource type="Texture2D" uid="uid://b2t5yiiugdh05" path="res://icon.svg" id="2_6ekqh"]
 
 [node name="EcSv3" type="Node2D"]
 script = ExtResource("1_xgxjn")

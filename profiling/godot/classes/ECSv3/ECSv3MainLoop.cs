@@ -20,7 +20,7 @@ using System;
 using System.Linq;
 
 [GlobalClass]
-public partial class ECSv3MainLoop : MainLoop
+public partial class ECSv3MainLoop : SceneTree
 {
 	private ProfileBase _profile;
 	private bool _active = false;
@@ -80,7 +80,7 @@ public partial class ECSv3MainLoop : MainLoop
 			}
 		}
 
-    	return false;
+    	return Input.GetMouseButtonMask() != 0 || Input.IsKeyPressed(Key.Escape);
     }
 
     private void _Finalize()

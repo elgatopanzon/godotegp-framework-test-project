@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scenes/Tests.cs" id="1_hhdyv"]
 [ext_resource type="Script" path="res://scenes/TestsScriptInput.cs" id="2_kidjv"]
-[ext_resource type="Texture2D" uid="uid://0d01t7d3fydb" path="res://icon.svg" id="3_y3wdt"]
+[ext_resource type="Texture2D" uid="uid://b2t5yiiugdh05" path="res://icon.svg" id="3_y3wdt"]
 
 [node name="Tests" type="Node2D"]
 script = ExtResource("1_hhdyv")
