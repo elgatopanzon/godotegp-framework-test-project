@@ -4,7 +4,7 @@
  * @created     : {{TIMESTAMP}}
  */
 
-namespace GodotEGP.Profiling.G.{{FILEP}};
+namespace GodotEGP.Profiling.CLI.{{FILEP}};
 
 using Godot;
 using GodotEGP.Objects.Extensions;

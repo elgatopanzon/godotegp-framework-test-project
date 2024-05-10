@@ -10,11 +10,40 @@ config_version=5
 
 [application]
 
-config/name="GodotEGP Framework Profiling"
-run/main_scene="res://scenes/Main.tscn"
-config/features=PackedStringArray("4.2", "Forward Plus")
+config/name="GodotEGP Profiling"
+run/main_scene="res://scenes/ECSv3.tscn"
+config/features=PackedStringArray("4.2", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Main="*res://addons/godotegp-framework-csharp/classes/Main.cs"
+
+[display]
+
+window/size/viewport_width=2400
+window/size/viewport_height=1200
+window/stretch/mode="viewport"
+window/stretch/aspect="keep_width"
+window/stretch/scale=2.0
+window/vsync/vsync_mode=0
 
 [dotnet]
 
-project/assembly_name="GodotEGP Framework Profiling"
+project/assembly_name="GodotEGP Profiling"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godotegp-framework-csharp/plugin.cfg")
+
+[network]
+
+limits/packet_peer_stream/max_buffer_po2=32
+limits/debugger/max_chars_per_second=3276800
+limits/debugger/max_queued_messages=200048
+limits/webrtc/max_channel_in_buffer_kb=128
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

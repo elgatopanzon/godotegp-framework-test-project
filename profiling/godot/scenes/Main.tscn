@@ -1,3 +1,15 @@
-[gd_scene format=3 uid="uid://c05k8vg4rihsq"]
+[gd_scene load_steps=3 format=3 uid="uid://74rfiynylpa2"]
+
+[ext_resource type="Script" path="res://scenes/TestScript.cs" id="1_i1jlm"]
+[ext_resource type="Texture2D" uid="uid://0d01t7d3fydb" path="res://icon.svg" id="1_l5rb5"]
 
 [node name="Main" type="Node2D"]
+
+[node name="TestScript" type="RigidBody2D" parent="."]
+gravity_scale = 0.0
+linear_velocity = Vector2(40, 40)
+script = ExtResource("1_i1jlm")
+
+[node name="Sprite2D" type="Sprite2D" parent="TestScript"]
+texture = ExtResource("1_l5rb5")
+centered = false
