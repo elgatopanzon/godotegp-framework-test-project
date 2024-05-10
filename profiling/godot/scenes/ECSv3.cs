@@ -58,9 +58,9 @@ public partial class ECSv3 : Node2D
 		if (_active)
 		{
 			DateTime timeNow = DateTime.Now;
-			_deltaTime = (timeNow.Ticks - _lastUpdate.Ticks) / 10000000f;
+			// _deltaTime = (timeNow.Ticks - _lastUpdate.Ticks) / 10000000f;
 
-			LoggerManager.LogDebug("Updating ECS main thread");
+			// LoggerManager.LogDebug("Updating ECS main thread");
 			_profile.Update(deltaTime);
 
 			_lastUpdate = timeNow;
@@ -74,7 +74,7 @@ public partial class ECSv3 : Node2D
 				_frames = 0;
 				_fpsSamples.Add(_fps);
 
-				LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({_deltaTime * 1000}ms) ({_deltaTime * 1000000}us) ({_deltaTime * 1000000000}ns)] cpe:{(_deltaTime * 1000) / _entities}ms)");
+				LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / _entities}ms)");
 
 				_lastFrameCount = timeNow;
 				_lastUpdate = _lastFrameCount;
