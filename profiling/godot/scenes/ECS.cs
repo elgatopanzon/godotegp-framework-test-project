@@ -1,10 +1,10 @@
 /**
  * @author      : ElGatoPanzon (contact@elgatopanzon.io) Copyright (c) ElGatoPanzon
- * @file        : ECSv3
- * @created     : Thursday May 09, 2024 18:29:43 CST
+ * @file        : ECS
+ * @created     : Friday May 10, 2024 16:56:04 CST
  */
 
-namespace GodotEGP.Profiling.G.ECSv3;
+namespace GodotEGP.Profiling.G.ECS;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -14,11 +14,11 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 using GodotEGP.Collections;
 
-using GodotEGP.Profiling.CLI.ECSv3;
+using GodotEGP.Profiling.CLI.ECS;
 using System;
 using System.Linq;
 
-public partial class ECSv3 : Node2D
+public partial class ECS : Node2D
 {
 	private ProfileBase _profile;
 	private bool _active = false;
@@ -30,7 +30,7 @@ public partial class ECSv3 : Node2D
 	private DateTime _lastFrameCount = DateTime.Now;
 	private PackedArray<int> _fpsSamples = new();
 
-	private ulong _entities = 9000;
+	private int _entities = 16000;
 	private double _deltaTime;
 
 	public override void _Ready()
@@ -45,7 +45,7 @@ public partial class ECSv3 : Node2D
 			LogLevel = Logging.Message.LogLevel.Info,
 			});
 
-		_profile = new ECSv3Profile_Update_6(_entities, false);
+		_profile = new ECSProfile_Update_6(_entities, false);
 	    _active = true;
 	}
 
