@@ -26,4 +26,7 @@
 <Target Name="PostBuild" AfterTargets="PostBuildEvent">
 	<Exec Command="sudo setcap 'cap_sys_nice=eip' $(TargetDir)$(AssemblyName)"/>
 </Target>
+<PropertyGroup>
+	<DefineConstants>$(DefineConstants)$(FeatureFlags.Replace("#",";"))</DefineConstants>
+</PropertyGroup>
 </Project>
