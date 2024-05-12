@@ -50,12 +50,12 @@ public partial class ProfileBase : ProfilingContext
 		_ecs = new ECS();
 
 		// register components
-		_ecs.RegisterComponent<Position>();
-		_ecs.RegisterComponent<Velocity>();
-		_ecs.RegisterComponent<DataComponent>();
-		_ecs.RegisterComponent<Health>();
-		_ecs.RegisterComponent<Damage>();
-		_ecs.RegisterComponent<Sprite>();
+		Position.Id = (int) _ecs.RegisterComponent<Position>().Entity.Id;
+		Velocity.Id = (int) _ecs.RegisterComponent<Velocity>().Entity.Id;
+		DataComponent.Id = (int) _ecs.RegisterComponent<DataComponent>().Entity.Id;
+		Health.Id = (int) _ecs.RegisterComponent<Health>().Entity.Id;
+		Damage.Id = (int) _ecs.RegisterComponent<Damage>().Entity.Id;
+		Sprite.Id = (int) _ecs.RegisterComponent<Sprite>().Entity.Id;
 
 		// register systems with queries
 		_ecs.RegisterSystem<MovementSystem, OnUpdatePhase>(_ecs.CreateQuery()
@@ -142,7 +142,7 @@ public partial class ProfileBase : ProfilingContext
 				fps = frames;
 				fpsSamples.Add(fps);
 
-				LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / Entities}ms)");
+				LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / Entities)}ns)");
 
 				frames = 0;
 

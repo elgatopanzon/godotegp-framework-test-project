@@ -20,18 +20,21 @@ using GodotEGP.ECSv3.Components;
 
 public struct Position : IComponentData
 {
+	public static int Id { get; set; }
 	public double X;
 	public double Y;
 }
 
 public struct Velocity : IComponentData
 {
+	public static int Id { get; set; }
 	public double X;
 	public double Y;
 }
 
 public struct DataComponent : IComponentData
 {
+	public static int Id { get; set; }
 	public int Type;
 	public int RandomInt;
 	public double RandomDouble;
@@ -45,6 +48,7 @@ public struct DataComponent : IComponentData
 
 public struct Health : IComponentData
 {
+	public static int Id { get; set; }
 	public int Hp;
 	public int HpMax;
 	public int Status;
@@ -52,11 +56,13 @@ public struct Health : IComponentData
 
 public struct Damage : IComponentData
 {
+	public static int Id { get; set; }
 	public int Attack;
 	public int Defense;
 }
 
 public struct Sprite : IComponentData
 {
+	public static int Id { get; set; }
 	public CharBuffer<Buffer16<char>> SpriteId;
 }

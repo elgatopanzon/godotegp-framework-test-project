@@ -67,6 +67,13 @@ public struct DamageSystem : ISystem
 		ref Damage damage = ref core.Get<Damage>(entity);
 		ref Health health = ref core.Get<Health>(entity);
 
+		if (health.Status == 0)
+		{
+			ref Position position = ref core.Get<Position>(entity);
+			damage.Attack = Math.Max(1, Convert.ToInt32(position.X * 10));
+			damage.Defense = Math.Max(1, Convert.ToInt32(position.Y * 10));
+		}
+
 		int total = damage.Attack - damage.Defense;
 		if (health.Hp > 0 && total > 0)
 		{

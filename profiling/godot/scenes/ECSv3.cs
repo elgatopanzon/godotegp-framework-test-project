@@ -30,7 +30,7 @@ public partial class ECSv3 : Node2D
 	private DateTime _lastFrameCount = DateTime.Now;
 	private PackedArray<int> _fpsSamples = new();
 
-	private ulong _entities = 9000;
+	private ulong _entities = 1000;
 	private double _deltaTime;
 
 	public override void _Ready()
@@ -74,7 +74,7 @@ public partial class ECSv3 : Node2D
 				_frames = 0;
 				_fpsSamples.Add(_fps);
 
-				LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / _entities}ms)");
+				LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / _entities)}ns)");
 
 				_lastFrameCount = timeNow;
 				_lastUpdate = _lastFrameCount;
