@@ -21,8 +21,8 @@ public partial class MovementSystem : SystemBase
 	{
 		foreach (int entity in _entities)
 		{
-			ref Position position = ref _ecs.GetComponent<Position>(entity);
-			ref Velocity velocity = ref _ecs.GetComponent<Velocity>(entity);
+			ref Position position = ref _ecs.GetComponent<Position>(0, entity);
+			ref Velocity velocity = ref _ecs.GetComponent<Velocity>(1, entity);
 
 			position.X += (velocity.X * deltaTime);
 			position.Y += (velocity.Y * deltaTime);
@@ -36,7 +36,7 @@ public partial class HealthSystem : SystemBase
 	{
 		foreach (int entity in _entities)
 		{
-			ref Health health = ref _ecs.GetComponent<Health>(entity);
+			ref Health health = ref _ecs.GetComponent<Health>(3, entity);
 			if (health.Hp <= 0 && health.Status != 0) 
 			{
       			health.Hp = 0;
@@ -66,8 +66,8 @@ public partial class DamageSystem : SystemBase
 	{
 		foreach (int entity in _entities)
 		{
-			ref Damage damage = ref _ecs.GetComponent<Damage>(entity);
-			ref Health health = ref _ecs.GetComponent<Health>(entity);
+			ref Damage damage = ref _ecs.GetComponent<Damage>(4, entity);
+			ref Health health = ref _ecs.GetComponent<Health>(3, entity);
 
 			int total = damage.Attack - damage.Defense;
 			if (health.Hp > 0 && total > 0)
@@ -84,7 +84,7 @@ public partial class DataSystem : SystemBase
 	{
 		foreach (int entity in _entities)
 		{
-			ref DataComponent data = ref _ecs.GetComponent<DataComponent>(entity);
+			ref DataComponent data = ref _ecs.GetComponent<DataComponent>(2, entity);
 			data.RandomInt = (int) data.RNG.Randi();
 			data.RandomDouble = (double) data.RNG.Randf();
 		}
@@ -98,9 +98,9 @@ public partial class DirectionSystem : SystemBase
 	{
 		foreach (int entity in _entities)
 		{
-			ref Position position = ref _ecs.GetComponent<Position>(entity);
-			ref Velocity velocity = ref _ecs.GetComponent<Velocity>(entity);
-			ref DataComponent data = ref _ecs.GetComponent<DataComponent>(entity);
+			ref Position position = ref _ecs.GetComponent<Position>(0, entity);
+			ref Velocity velocity = ref _ecs.GetComponent<Velocity>(1, entity);
+			ref DataComponent data = ref _ecs.GetComponent<DataComponent>(2, entity);
 
 			if (data.RandomInt % 10 == 0)
 			{
@@ -125,9 +125,9 @@ public partial class SpriteSystem : SystemBase
 	{
 		foreach (int entity in _entities)
 		{
-			ref Damage damage = ref _ecs.GetComponent<Damage>(entity);
-			ref Health health = ref _ecs.GetComponent<Health>(entity);
-			ref Sprite sprite = ref _ecs.GetComponent<Sprite>(entity);
+			ref Damage damage = ref _ecs.GetComponent<Damage>(4, entity);
+			ref Health health = ref _ecs.GetComponent<Health>(3, entity);
+			ref Sprite sprite = ref _ecs.GetComponent<Sprite>(5, entity);
 
 			switch (health.Status)
 			{
