@@ -51,34 +51,27 @@ public partial class ECS : Node2D
 
 	public override void _Process(double deltaTime)
 	{
-		if (LoggerManager.Instance.Config.LogLevel != Logging.Message.LogLevel.Info)
+		DateTime timeNow = DateTime.Now;
+		_deltaTime = (timeNow.Ticks - _lastUpdate.Ticks) / 10000000f;
+
+		// LoggerManager.LogDebug("Updating ECS main thread");
+		_profile.Update(deltaTime);
+
+		_lastUpdate = timeNow;
+
+		_frames++;
+
+		if ((timeNow - _lastFrameCount).TotalSeconds >= 1)
 		{
-			LoggerManager.Instance.Config.LogLevel = Logging.Message.LogLevel.Info;
-		}
-		if (_active)
-		{
-			DateTime timeNow = DateTime.Now;
-			_deltaTime = (timeNow.Ticks - _lastUpdate.Ticks) / 10000000f;
+			_fps = _frames;
 
-			// LoggerManager.LogDebug("Updating ECS main thread");
-			_profile.Update(deltaTime);
+			_frames = 0;
+			_fpsSamples.Add(_fps);
 
-			_lastUpdate = timeNow;
+			LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / _entities)}ns)");
 
-			_frames++;
-
-			if ((timeNow - _lastFrameCount).TotalSeconds >= 1)
-			{
-				_fps = _frames;
-
-				_frames = 0;
-				_fpsSamples.Add(_fps);
-
-				LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / _entities)}ns)");
-
-				_lastFrameCount = timeNow;
-				_lastUpdate = _lastFrameCount;
-			}
+			_lastFrameCount = timeNow;
+			_lastUpdate = _lastFrameCount;
 		}
 	}
 }

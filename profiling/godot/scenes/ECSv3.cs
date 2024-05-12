@@ -17,6 +17,7 @@ using GodotEGP.Collections;
 using GodotEGP.Profiling.CLI.ECSv3;
 using System;
 using System.Linq;
+using System.Diagnostics;
 
 public partial class ECSv3 : Node2D
 {
@@ -26,12 +27,14 @@ public partial class ECSv3 : Node2D
 	private int _frames;
 	private int _fps;
 
-	private DateTime _lastUpdate = DateTime.Now;
-	private DateTime _lastFrameCount = DateTime.Now;
+	private TimeSpan _lastUpdate;
+	private TimeSpan _lastFrameCount = new TimeSpan();
 	private PackedArray<int> _fpsSamples = new();
 
 	private ulong _entities = 1000;
 	private double _deltaTime;
+
+	private Stopwatch _stopwatch;
 
 	public override void _Ready()
 	{
@@ -47,38 +50,34 @@ public partial class ECSv3 : Node2D
 
 		_profile = new ECSv3Profile_Update_6(_entities, false);
 	    _active = true;
+
+	    _stopwatch = new();
+	    _stopwatch.Start();
 	}
 
 	public override void _Process(double deltaTime)
 	{
-		if (LoggerManager.Instance.Config.LogLevel != Logging.Message.LogLevel.Info)
+		// DateTime timeNow = DateTime.Now;
+		// _deltaTime = (timeNow.Ticks - _lastUpdate.Ticks) / 10000000f;
+
+		// LoggerManager.LogDebug("Updating ECS main thread");
+		_profile.Update(deltaTime);
+
+		_lastUpdate = _stopwatch.Elapsed;
+
+		_frames++;
+
+		if ((_lastUpdate - _lastFrameCount).TotalSeconds >= 1)
 		{
-			LoggerManager.Instance.Config.LogLevel = Logging.Message.LogLevel.Info;
-		}
-		if (_active)
-		{
-			DateTime timeNow = DateTime.Now;
-			// _deltaTime = (timeNow.Ticks - _lastUpdate.Ticks) / 10000000f;
+			_fps = _frames;
 
-			// LoggerManager.LogDebug("Updating ECS main thread");
-			_profile.Update(deltaTime);
+			_frames = 0;
+			_fpsSamples.Add(_fps);
 
-			_lastUpdate = timeNow;
+			LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / _entities)}ns)");
 
-			_frames++;
-
-			if ((timeNow - _lastFrameCount).TotalSeconds >= 1)
-			{
-				_fps = _frames;
-
-				_frames = 0;
-				_fpsSamples.Add(_fps);
-
-				LoggerManager.LogInfo("FPS", "", "fps", $"ECS {_fps} @ {_entities}e (avg:{Convert.ToInt32(_fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / _entities)}ns)");
-
-				_lastFrameCount = timeNow;
-				_lastUpdate = _lastFrameCount;
-			}
+			_lastFrameCount = _lastUpdate;
+			_lastUpdate = _lastFrameCount;
 		}
 	}
 }
