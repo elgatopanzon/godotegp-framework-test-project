@@ -29,10 +29,10 @@ public partial class IndexMapTests : TestContext
 		map.Set(2, val);
 		map.Set(123, val);
 
-		Assert.Equal(val, map.Get(0));
-		Assert.Equal(val, map.Get(1));
-		Assert.Equal(val, map.Get(2));
-		Assert.Equal(val, map.Get(123));
+		Assert.Equal(val, map[0]);
+		Assert.Equal(val, map[1]);
+		Assert.Equal(val, map[2]);
+		Assert.Equal(val, map[123]);
 	}
 
 	[Fact]
@@ -44,8 +44,8 @@ public partial class IndexMapTests : TestContext
 
 		map.Set(123, val);
 
-		Assert.Equal(val, map.Get(123));
-		Assert.Throws<IndexOutOfRangeException>(() => map.Get(120));
+		Assert.Equal(val, map[123]);
+		Assert.Throws<IndexOutOfRangeException>(() => map[120]);
 	}
 
 	[Fact]
@@ -57,7 +57,7 @@ public partial class IndexMapTests : TestContext
 
 		map.Set(38787687, val);
 
-		Assert.Equal(val, map.Get(38787687));
+		Assert.Equal(val, map[38787687]);
 	}
 
 	[Fact]
@@ -73,9 +73,9 @@ public partial class IndexMapTests : TestContext
 		map.Set(456, val2);
 		map.Set(789, val3);
 
-		Assert.Equal(val1, map.Get(123));
-		Assert.Equal(val2, map.Get(456));
-		Assert.Equal(val3, map.Get(789));
+		Assert.Equal(val1, map[123]);
+		Assert.Equal(val2, map[456]);
+		Assert.Equal(val3, map[789]);
 	}
 
 	[Fact]
@@ -100,8 +100,8 @@ public partial class IndexMapTests : TestContext
 		res = map.Unset(1234);
 		Assert.False(res);
 
-		Assert.Equal(val1, map.Get(123));
-		Assert.Equal(val3, map.Get(789));
+		Assert.Equal(val1, map[123]);
+		Assert.Equal(val3, map[789]);
 	}
 
 	[Fact]
@@ -133,10 +133,10 @@ public partial class IndexMapTests : TestContext
 		map.Unset(123);
 		map.Set(123, val1);
 
-		Assert.Equal(val1, map.Get(123));
-		Assert.Equal(val4, map.Get(456));
-		Assert.Equal(val5, map.Get(457));
-		Assert.Equal(val6, map.Get(1010));
+		Assert.Equal(val1, map[123]);
+		Assert.Equal(val4, map[456]);
+		Assert.Equal(val5, map[457]);
+		Assert.Equal(val6, map[1010]);
 	}
 }
 
