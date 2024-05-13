@@ -63,7 +63,7 @@ public partial class ComponentManagerTests : TestContext
 		componentManager.AddComponent(100, component);
 
 		// get the array and get the component directly
-		var fetchedComponent = componentManager.GetComponentArray<TestComponent1>().Array.Get(100);
+		var fetchedComponent = componentManager.GetComponentArray<TestComponent1>().Array[100];
 
 		Assert.Equal(123, fetchedComponent.TestInt1);
 	}
