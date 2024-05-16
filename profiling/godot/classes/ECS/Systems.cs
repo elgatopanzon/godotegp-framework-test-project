@@ -68,6 +68,14 @@ public partial class DamageSystem : SystemBase
 		{
 			ref Damage damage = ref _ecs.GetComponent<Damage>(4, entity);
 			ref Health health = ref _ecs.GetComponent<Health>(3, entity);
+			ref DataComponent dataComponent = ref _ecs.GetComponent<DataComponent>(2, entity);
+
+			if (damage.Attack == 0 || damage.Defense == 0)
+			{
+				damage.Attack = dataComponent.RNG.RandiRange(10, 40);
+				damage.Defense = dataComponent.RNG.RandiRange(10, 40);
+				health.HpMax = dataComponent.RNG.RandiRange(100, 200);
+			}
 
 			int total = damage.Attack - damage.Defense;
 			if (health.Hp > 0 && total > 0)
