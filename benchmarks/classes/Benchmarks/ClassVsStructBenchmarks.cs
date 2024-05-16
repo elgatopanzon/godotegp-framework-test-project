@@ -520,7 +520,7 @@ public partial class ClassVsStructBenchmarksBase
 				_entitiesPositionBase[i] = i;
 				_entitiesRenderable[i] = i;
 
-				_entitiesOop[i] = new NonRenderableActor2();
+				_entitiesOop[i] = new RobotActor();
 				c = 0;
 			}
 			else
@@ -593,7 +593,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 		for (int fps = 0; fps < _fpsCount; fps++)
 		{
 			// MovementSystem
-			for (int i = 0; i < _entitiesPositionBaseCount; i++)
+			foreach (var i in _entitiesPositionBase.Span)
 			{
 				ref Position position = ref _positionStruct[i];
 				Velocity velocity = _velocityStruct[i];
@@ -603,7 +603,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			}
 
 			// HealthSystem
-			for (int i = 0; i < _entitiesRenderableCount; i++)
+			foreach (var i in _entitiesRenderable.Span)
 			{
 				ref Health health = ref _healthStruct[i];
 				if (health.Hp <= 0 && health.Status != 0) 
@@ -628,7 +628,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
     		}
 
     		// DamageSystem
-			for (int i = 0; i < _entitiesRenderableCount; i++)
+			foreach (var i in _entitiesRenderable.Span)
 			{
     			ref Damage damage = ref _damageStruct[i];
 				ref Health health = ref _healthStruct[i];
@@ -650,7 +650,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			}
 
     		// DataSystem
-			for (int i = 0; i < _entitiesPositionBaseCount; i++)
+			foreach (var i in _entitiesPositionBase.Span)
 			{
 				ref DataComponent data = ref _dataStruct[i];
 				data.RandomInt = data.RNG.Randi();
@@ -658,7 +658,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			}
 
     		// DirectionSystem
-			for (int i = 0; i < _entitiesPositionBaseCount; i++)
+			foreach (var i in _entitiesPositionBase.Span)
 			{
 				Position position = _positionStruct[i];
 				ref Velocity velocity = ref _velocityStruct[i];
@@ -680,7 +680,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			}
 
     		// SpriteSystem
-			for (int i = 0; i < _entitiesRenderableCount; i++)
+			foreach (var i in _entitiesRenderable.Span)
 			{
 				Health health = _healthStruct[i];
 				ref Sprite sprite = ref _spriteStruct[i];
@@ -708,7 +708,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			}
 
     		// DebugSpeedSystem
-			for (int i = 0; i < _entitiesNonRenderable1Count; i++)
+			foreach (var i in _entitiesNonRenderable1.Span)
 			{
 				ref DebugSpeed debugSpeed = ref _debugSpeedStruct[i];
 				Position position = _positionStruct[i];
@@ -718,7 +718,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			}
 
     		// DebugDataSystem
-			for (int i = 0; i < _entitiesNonRenderable2Count; i++)
+			foreach (var i in _entitiesNonRenderable2.Span)
 			{
 				ref DebugData debugData = ref _debugDataStruct[i];
 				DataComponent dataComponent = _dataStruct[i];
@@ -727,7 +727,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			}
 
 			// RobotVelocitySystem
-			for (int i = 0; i < _entitiesRobotsCount; i++)
+			foreach (var i in _entitiesRobots.Span)
 			{
 				ref Velocity velocity = ref _velocityStruct[i];
 				DataComponent dataComponent = _dataStruct[i];
