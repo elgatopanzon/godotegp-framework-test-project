@@ -4,7 +4,7 @@
  * @created     : Wednesday May 15, 2024 22:17:07 CST
  */
 
-namespace GodotEGP.Benchmarks.Benchmarks;
+namespace GodotEGP.Benchmarks.ClassVsStruct;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -15,7 +15,6 @@ using GodotEGP.Config;
 
 using GodotEGP.Random;
 using GodotEGP.Collections;
-using GodotEGP.ECSv4.Components;
 
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
@@ -35,23 +34,20 @@ public partial class ClassVsStructBenchmarks
 *  Struct components  *
 ***********************/
 
-public struct Position : IComponentData
+public struct Position
 {
-	public static int Id { get; set; }
 	public double X;
 	public double Y;
 }
 
-public struct Velocity : IComponentData
+public struct Velocity
 {
-	public static int Id { get; set; }
 	public double X;
 	public double Y;
 }
 
-public struct DataComponent : IComponentData
+public struct DataComponent
 {
-	public static int Id { get; set; }
 	public int Type;
 	public int RandomInt;
 	public double RandomDouble;
@@ -63,53 +59,113 @@ public struct DataComponent : IComponentData
 	}
 }
 
-public struct Health : IComponentData
+public struct Health
 {
-	public static int Id { get; set; }
 	public int Hp;
 	public int HpMax;
 	public int Status;
 }
 
-public struct Damage : IComponentData
+public struct Damage
 {
-	public static int Id { get; set; }
 	public int Attack;
 	public int Defense;
 }
 
-public struct Sprite : IComponentData
+public struct Sprite
 {
-	public static int Id { get; set; }
 	public CharBuffer<Buffer16<char>> SpriteId;
 }
 
-public struct DebugSpeed : IComponentData
+public struct DebugSpeed
 {
-	public static int Id { get; set; }
 	public CharBuffer<Buffer128<char>> SpeedText;
 }
 
-public struct DebugData : IComponentData
+public struct DebugData
 {
-	public static int Id { get; set; }
 	public CharBuffer<Buffer128<char>> DataText;
 }
 
-public struct Robot : IComponent { public static int Id { get; set; } }
+public struct Robot {}
+
 
 /***********************************
 *  OOP entity class + components  *
 ***********************************/
 
+/****************
+*  Interfaces  *
+****************/
 public interface IActor
 {
 	public void Update();
+	public DataComponentOOP DataComponent { get; }
 }
+
+public interface IVelocity 
+{
+	public void Update(IData dataComponent, IPosition position);
+	public double X { get; set; }
+	public double Y { get; set; }
+}
+public interface IPosition 
+{
+	public void Update(IVelocity velocity);
+	public double X { get; set; }
+	public double Y { get; set; }
+}
+public interface IHealth 
+{
+	public int Hp { get; set; }
+	public int HpMax { get; set; }
+	public int Status { get; set; }
+	public void Update();
+}
+
+public interface IData
+{
+	public int Type { get; set; }
+	public int RandomInt { get; set; }
+	public double RandomDouble { get; set; }
+	public NumberGenerator RNG { get; }
+	public void Update();
+}
+
+public interface IDamage
+{
+	public int Attack { get; set; }
+	public int Defense { get; set; }
+	public void Update(IHealth health, IData dataComponent);
+}
+
+public interface ISprite
+{
+	public CharBuffer<Buffer16<char>> SpriteId { get; set; }
+	public void Update(IHealth health);
+}
+
+public interface IDebugSpeed
+{
+	public CharBuffer<Buffer128<char>> SpeedText { get; set; }
+	public void Update(IPosition position, IVelocity velocity);
+}
+
+public interface IDebugData
+{
+	public CharBuffer<Buffer128<char>> DataText { get; set; }
+
+	public void Update(IData dataComponent);
+}
+
+
+/*************
+*  Classes  *
+*************/
 
 public class Actor : IActor
 {
-	public virtual DataComponentOOP DataComponent { get; set; } = new();
+	public virtual DataComponentOOP DataComponent { get; } = new();
 
 	public virtual void Update()
 	{
@@ -120,8 +176,8 @@ public class Actor : IActor
 
 public class MovableActor : Actor
 {
-	public virtual PositionOOP Position { get; set; } = new PositionOOP();
-	public virtual VelocityOOP Velocity { get; set; } = new VelocityOOP();
+	public virtual IPosition Position { get; } = new PositionOOP();
+	public virtual IVelocity Velocity { get; } = new VelocityOOP();
 
 	public override void Update()
 	{
@@ -136,8 +192,8 @@ public class MovableActor : Actor
 
 public class DamagableActor : MovableActor
 {
-	public virtual HealthOOP Health { get; set; } = new HealthOOP();
-	public virtual DamageOOP Damage { get; set; } = new DamageOOP();
+	public virtual IHealth Health { get; } = new HealthOOP();
+	public virtual IDamage Damage { get; } = new DamageOOP();
 
 	public override void Update()
 	{
@@ -152,7 +208,7 @@ public class DamagableActor : MovableActor
 
 public class NonRenderableActor : MovableActor
 {
-	public virtual DebugSpeedOOP DebugSpeed { get; set; } = new DebugSpeedOOP();
+	public virtual IDebugSpeed DebugSpeed { get; } = new DebugSpeedOOP();
 
 	public override void Update()
 	{
@@ -166,7 +222,7 @@ public class NonRenderableActor : MovableActor
 
 public class NonRenderableActor2 : MovableActor
 {
-	public virtual DebugDataOOP DebugData { get; set; } = new DebugDataOOP();
+	public virtual IDebugData DebugData { get; } = new DebugDataOOP();
 
 	public override void Update()
 	{
@@ -180,7 +236,7 @@ public class NonRenderableActor2 : MovableActor
 
 public class RenderableActor : DamagableActor
 {
-	public virtual SpriteOOP Sprite { get; set; } = new SpriteOOP();
+	public virtual ISprite Sprite { get; } = new SpriteOOP();
 
 	public override void Update()
 	{
@@ -194,7 +250,7 @@ public class RenderableActor : DamagableActor
 
 public class RobotActor : RenderableActor
 {
-	public override VelocityOOP Velocity { get; set; } = new RobotVelocityOOP();
+	public override IVelocity Velocity { get; } = new RobotVelocityOOP();
 	public override void Update()
 	{
 		// update the renderables
@@ -206,26 +262,24 @@ public class RobotActor : RenderableActor
 }
 
 
-public class PositionOOP : IComponentData
+public class PositionOOP : IPosition
 {
-	public static int Id { get; set; }
-	public double X;
-	public double Y;
+	public double X { get; set; }
+	public double Y { get; set; }
 	
-	public virtual void Update(VelocityOOP velocity)
+	public virtual void Update(IVelocity velocity)
 	{
 		X += (velocity.X * 0.0166);
 		Y += (velocity.Y * 0.0166);
 	}
 }
 
-public class VelocityOOP : IComponentData
+public class VelocityOOP : IVelocity
 {
-	public static int Id { get; set; }
-	public double X;
-	public double Y;
+	public double X { get; set; }
+	public double Y { get; set; }
 
-	public virtual void Update(DataComponentOOP dataComponent, PositionOOP position)
+	public virtual void Update(IData dataComponent, IPosition position)
 	{
 		if (dataComponent.RandomInt % 10 == 0)
 		{
@@ -243,12 +297,11 @@ public class VelocityOOP : IComponentData
 	}
 }
 
-public class DataComponentOOP : IComponentData
+public class DataComponentOOP : IData
 {
-	public static int Id { get; set; }
-	public int Type;
-	public int RandomInt;
-	public double RandomDouble;
+	public int Type { get; set; }
+	public int RandomInt { get; set; }
+	public double RandomDouble { get; set; }
 	public NumberGenerator RNG { get; } = new();
 
 	public DataComponentOOP()
@@ -263,12 +316,11 @@ public class DataComponentOOP : IComponentData
 	}
 }
 
-public class HealthOOP : IComponentData
+public class HealthOOP : IHealth
 {
-	public static int Id { get; set; }
-	public int Hp;
-	public int HpMax;
-	public int Status;
+	public int Hp { get; set; }
+	public int HpMax { get; set; }
+	public int Status { get; set; }
 
 	public virtual void Update()
 	{
@@ -294,13 +346,12 @@ public class HealthOOP : IComponentData
 	}
 }
 
-public class DamageOOP : IComponentData
+public class DamageOOP : IDamage
 {
-	public static int Id { get; set; }
-	public int Attack;
-	public int Defense;
+	public int Attack { get; set; }
+	public int Defense { get; set; }
 
-	public virtual void Update(HealthOOP health, DataComponentOOP dataComponent)
+	public virtual void Update(IHealth health, IData dataComponent)
 	{
 		if (Attack == 0 || Defense == 0)
 		{
@@ -318,12 +369,11 @@ public class DamageOOP : IComponentData
 	}
 }
 
-public class SpriteOOP : IComponentData
+public class SpriteOOP : ISprite
 {
-	public static int Id { get; set; }
-	public CharBuffer<Buffer16<char>> SpriteId;
+	public CharBuffer<Buffer16<char>> SpriteId { get; set; }
 
-	public virtual void Update(HealthOOP health)
+	public virtual void Update(IHealth health)
 	{
 		switch (health.Status)
 		{
@@ -347,23 +397,22 @@ public class SpriteOOP : IComponentData
 		}
 	}
 }
-public class DebugSpeedOOP : IComponentData
-{
-	public static int Id { get; set; }
-	public CharBuffer<Buffer128<char>> SpeedText;
 
-	public virtual void Update(PositionOOP position, VelocityOOP velocity)
+public class DebugSpeedOOP : IDebugSpeed
+{
+	public CharBuffer<Buffer128<char>> SpeedText { get; set; }
+
+	public virtual void Update(IPosition position, IVelocity velocity)
 	{
 		SpeedText = $"At position ({position.X}, {position.Y}) with velocity ({velocity.X}, {velocity.Y})";
 	}
 }
 
-public class DebugDataOOP : IComponentData
+public class DebugDataOOP : IDebugData
 {
-	public static int Id { get; set; }
-	public CharBuffer<Buffer128<char>> DataText;
+	public CharBuffer<Buffer128<char>> DataText { get; set; }
 
-	public virtual void Update(DataComponentOOP dataComponent)
+	public virtual void Update(IData dataComponent)
 	{
 		DataText = $"int: {dataComponent.RandomInt}, double: {dataComponent.RandomDouble}";
 	}
@@ -371,7 +420,9 @@ public class DebugDataOOP : IComponentData
 
 public class RobotVelocityOOP : VelocityOOP
 {
-	public override void Update(DataComponentOOP dataComponent, PositionOOP position)
+	// custom update function for robots to control velocity with different
+	// logic
+	public override void Update(IData dataComponent, IPosition position)
 	{
 		if (dataComponent.RandomDouble % 10 == 0)
 		{
@@ -395,7 +446,7 @@ public class RobotVelocityOOP : VelocityOOP
 
 public partial class ClassVsStructBenchmarksBase
 {
-	protected int _fpsCount = (60 * 100);
+	protected int _fpsCount = (60 * 1);
 	protected int _entityCount = 1000;
 	protected IndexMap<int> _entities;
 	protected IndexMap<int> _entitiesRenderable;
@@ -706,10 +757,8 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 		{
 			for (int i = 0; i < _entityCount; i++)
 			{
-				// update each entity with required components in same order
-				IActor e = _entitiesOop[i];
-
-				e.Update();
+				// update each actor
+				 _entitiesOop[i].Update();
 			}
 		}
 	}
