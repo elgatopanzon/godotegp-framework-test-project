@@ -553,7 +553,7 @@ public partial class ClassVsStructBenchmarksBase
 public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBase
 {
 	[Benchmark(Baseline = true)]
-	public void Structs_Update()
+	public void ArrayOfStructs_Update()
 	{
 		// MovementSystem
 		for (int i = 0; i < _entityCount; i++)
@@ -663,7 +663,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 	}
 
 	[Benchmark]
-	public void Classes_Update()
+	public void ArrayOfClasses_Update()
 	{
 		// MovementSystem
 		for (int i = 0; i < _entityCount; i++)
