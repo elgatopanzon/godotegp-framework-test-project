@@ -109,11 +109,6 @@ public partial class ProfileBase : ProfilingContext
 		for (ulong i = 0; i < Entities; i++)
 		{
 			EntityHandle e = _ecs.Create($"entity_{i+1}");
-			e.Set<Velocity>(new Velocity());
-		}
-		for (ulong i = 0; i < Entities; i++)
-		{
-			EntityHandle e = _ecs.Create($"entity_{i+1}");
 			e.Set<Health>(new Health());
 		}
 		for (ulong i = 0; i < Entities; i++)
