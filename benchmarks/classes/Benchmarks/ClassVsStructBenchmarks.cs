@@ -192,7 +192,16 @@ public struct DamageEC : IComponentData
 	{
 		HealthEC health = entity.Health;
 
+		if (Attack == 0 || Defense == 0)
+		{
+			Attack = entity.DataComponent.RNG.RandiRange(10, 40);
+			Defense = entity.DataComponent.RNG.RandiRange(10, 40);
+			health.HpMax = entity.DataComponent.RNG.RandiRange(100, 200);
+			entity.Health = health;
+		}
+
 		int total = Attack - Defense;
+
 		if (health.Hp > 0 && total > 0)
 		{
 			health.Hp = Math.Max(0, health.Hp - total);
@@ -290,15 +299,68 @@ public class SpriteClass : IComponentData
 *  OOP entity class + components  *
 ***********************************/
 
-public class EntityClass 
+public interface IActor
+{
+	public void Update();
+}
+
+public class Actor : IActor
+{
+	public DataComponentOOP DataComponent { get; set; } = new();
+
+	public virtual void Update()
+	{
+		DataComponent.Update();
+	}
+}
+
+
+public class MovableActor : Actor
 {
 	public PositionOOP Position { get; set; } = new PositionOOP();
 	public VelocityOOP Velocity { get; set; } = new VelocityOOP();
+
+	public override void Update()
+	{
+		// update the moving parts
+		Position.Update(Velocity);
+		Velocity.Update(DataComponent, Position);
+
+		// update the base
+		base.Update();
+	}
+}
+
+public class DamagableActor : MovableActor
+{
 	public HealthOOP Health { get; set; } = new HealthOOP();
 	public DamageOOP Damage { get; set; } = new DamageOOP();
-	public DataComponentOOP DataComponent { get; set; } = new DataComponentOOP();
-	public SpriteOOP Sprite { get; set; } = new SpriteOOP();
+
+	public override void Update()
+	{
+		// update the renderables
+		Health.Update();
+		Damage.Update(Health, DataComponent);
+
+		// update the base
+		base.Update();
+	}
 }
+
+public class RenderableActor : DamagableActor
+{
+	public SpriteOOP Sprite { get; set; } = new SpriteOOP();
+
+	public override void Update()
+	{
+		// update the renderables
+		Sprite.Update(this.Health);
+
+		// update the base
+		base.Update();
+	}
+}
+
 
 public class PositionOOP : IComponentData
 {
@@ -306,10 +368,10 @@ public class PositionOOP : IComponentData
 	public double X;
 	public double Y;
 	
-	public void Update(EntityClass entity)
+	public void Update(VelocityOOP velocity)
 	{
-		X += (entity.Velocity.X * 0.0166);
-		Y += (entity.Velocity.Y * 0.0166);
+		X += (velocity.X * 0.0166);
+		Y += (velocity.Y * 0.0166);
 	}
 }
 
@@ -319,19 +381,19 @@ public class VelocityOOP : IComponentData
 	public double X;
 	public double Y;
 
-	public void Update(EntityClass entity)
+	public void Update(DataComponentOOP dataComponent, PositionOOP position)
 	{
-		if (entity.DataComponent.RandomInt % 10 == 0)
+		if (dataComponent.RandomInt % 10 == 0)
 		{
-			if (entity.Position.X > entity.Position.Y)
+			if (position.X > position.Y)
 			{
-				X = entity.DataComponent.RNG.RandfRange(3, 19) - 10;
-				Y = entity.DataComponent.RNG.RandfRange(0, 5);
+				X = dataComponent.RNG.RandfRange(3, 19) - 10;
+				Y = dataComponent.RNG.RandfRange(0, 5);
 			}
 			else
 			{
-				X = entity.DataComponent.RNG.RandfRange(0, 5);
-				Y = entity.DataComponent.RNG.RandfRange(3, 19) - 10;
+				X = dataComponent.RNG.RandfRange(0, 5);
+				Y = dataComponent.RNG.RandfRange(3, 19) - 10;
 			}
 		}
 	}
@@ -350,7 +412,7 @@ public class DataComponentOOP : IComponentData
 		RNG.Randomize();
 	}
 
-	public void Update(EntityClass entity)
+	public void Update()
 	{
 		RandomInt = RNG.Randi();
 		RandomDouble = (double) RNG.Randf();
@@ -364,7 +426,7 @@ public class HealthOOP : IComponentData
 	public int HpMax;
 	public int Status;
 
-	public void Update(EntityClass entity)
+	public void Update()
 	{
 		if (Hp <= 0 && Status != 0) 
 		{
@@ -394,12 +456,20 @@ public class DamageOOP : IComponentData
 	public int Attack;
 	public int Defense;
 
-	public void Update(EntityClass entity)
+	public void Update(HealthOOP health, DataComponentOOP dataComponent)
 	{
-		int total = Attack - Defense;
-		if (entity.Health.Hp > 0 && total > 0)
+		if (Attack == 0 || Defense == 0)
 		{
-			entity.Health.Hp = Math.Max(0, entity.Health.Hp - total);
+			Attack = dataComponent.RNG.RandiRange(10, 40);
+			Defense = dataComponent.RNG.RandiRange(10, 40);
+			health.HpMax = dataComponent.RNG.RandiRange(100, 200);
+		}
+
+		int total = Attack - Defense;
+
+		if (health.Hp > 0 && total > 0)
+		{
+			health.Hp = Math.Max(0, health.Hp - total);
 		}
 	}
 }
@@ -409,9 +479,9 @@ public class SpriteOOP : IComponentData
 	public static int Id { get; set; }
 	public CharBuffer<Buffer16<char>> SpriteId;
 
-	public void Update(EntityClass entity)
+	public void Update(HealthOOP health)
 	{
-		switch (entity.Health.Status)
+		switch (health.Status)
 		{
 			case 0:
 				SpriteId = "_";
@@ -420,7 +490,7 @@ public class SpriteOOP : IComponentData
 				SpriteId = "/";
 				break;
 			case 2:
-				if (entity.Health.Hp == entity.Health.HpMax)
+				if (health.Hp == health.HpMax)
 				{
 					SpriteId = "+";
 				}
@@ -460,7 +530,7 @@ public partial class ClassVsStructBenchmarksBase
 {
 	protected int _entityCount = 1000;
 	protected int[] _entities;
-	protected EntityClass[] _entitiesOop;
+	protected IActor[] _entitiesOop;
 	protected EntityStruct[] _entitiesStructs;
 
 	// component arrays
@@ -495,11 +565,11 @@ public partial class ClassVsStructBenchmarksBase
 			_entities[i] = i;
 		}
 
-		_entitiesOop = new EntityClass[_entityCount];
+		_entitiesOop = new IActor[_entityCount];
 
 		for (int i = 0; i < _entityCount; i++)
 		{
-			_entitiesOop[i] = new();
+			_entitiesOop[i] = new RenderableActor();
 		}
 
 		_entitiesStructs = new EntityStruct[_entityCount];
@@ -555,109 +625,121 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 	[Benchmark(Baseline = true)]
 	public void ArrayOfStructs_Update()
 	{
-		// MovementSystem
-		for (int i = 0; i < _entityCount; i++)
+		for (int fps = 0; fps < 60; fps++)
 		{
-			ref Position position = ref _positionStruct[i];
-			ref Velocity velocity = ref _velocityStruct[i];
-
-			position.X += (velocity.X * 0.0166);
-			position.Y += (velocity.Y * 0.0166);
-		}
-
-		// HealthSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-			ref Health health = ref _healthStruct[i];
-			if (health.Hp <= 0 && health.Status != 0) 
+			// MovementSystem
+			for (int i = 0; i < _entityCount; i++)
 			{
-      			health.Hp = 0;
-      			health.Status = 0;
-    		} 
-			else if (health.Status == 0 && health.Hp == 0)
-    		{
-      			health.Hp = health.HpMax;
-      			health.Status = 1;
-    		} 
-    		else if (health.Hp >= health.HpMax && health.Status != 2)
-    		{
-      			health.Hp = health.HpMax;
-      			health.Status = 2;
-    		} 
-    		else 
-    		{
-      			health.Status = 2;
+				ref Position position = ref _positionStruct[i];
+				Velocity velocity = _velocityStruct[i];
+
+				position.X += (velocity.X * 0.0166);
+				position.Y += (velocity.Y * 0.0166);
+			}
+
+			// HealthSystem
+			for (int i = 0; i < _entityCount; i++)
+			{
+				ref Health health = ref _healthStruct[i];
+				if (health.Hp <= 0 && health.Status != 0) 
+				{
+      				health.Hp = 0;
+      				health.Status = 0;
+    			} 
+				else if (health.Status == 0 && health.Hp == 0)
+    			{
+      				health.Hp = health.HpMax;
+      				health.Status = 1;
+    			} 
+    			else if (health.Hp >= health.HpMax && health.Status != 2)
+    			{
+      				health.Hp = health.HpMax;
+      				health.Status = 2;
+    			} 
+    			else 
+    			{
+      				health.Status = 2;
+    			}
     		}
-    	}
 
-    	// DamageSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-    		ref Damage damage = ref _damageStruct[i];
-			ref Health health = ref _healthStruct[i];
-
-			int total = damage.Attack - damage.Defense;
-			if (health.Hp > 0 && total > 0)
+    		// DamageSystem
+			for (int i = 0; i < _entityCount; i++)
 			{
-				health.Hp = Math.Max(0, health.Hp - total);
-			}
-		}
+    			ref Damage damage = ref _damageStruct[i];
+				ref Health health = ref _healthStruct[i];
+				DataComponent dataComponent = _dataStruct[i];
 
-    	// DataSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-			ref DataComponent data = ref _dataStruct[i];
-			data.RandomInt = data.RNG.Randi();
-			data.RandomDouble = (double) data.RNG.Randf();
-		}
-
-    	// DirectionSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-			ref Position position = ref _positionStruct[i];
-			ref Velocity velocity = ref _velocityStruct[i];
-			ref DataComponent data = ref _dataStruct[i];
-
-			if (data.RandomInt % 10 == 0)
-			{
-				if (position.X > position.Y)
+				if (damage.Attack == 0 || damage.Defense == 0)
 				{
-					velocity.X = data.RNG.RandfRange(3, 19) - 10;
-					velocity.Y = data.RNG.RandfRange(0, 5);
+					damage.Attack = dataComponent.RNG.RandiRange(10, 40);
+					damage.Defense = dataComponent.RNG.RandiRange(10, 40);
+					health.HpMax = dataComponent.RNG.RandiRange(100, 200);
 				}
-				else
+
+
+				int total = damage.Attack - damage.Defense;
+				if (health.Hp > 0 && total > 0)
 				{
-					velocity.X = data.RNG.RandfRange(0, 5);
-					velocity.Y = data.RNG.RandfRange(3, 19) - 10;
+					health.Hp = Math.Max(0, health.Hp - total);
 				}
 			}
-		}
 
-    	// SpriteSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-			ref Health health = ref _healthStruct[i];
-			ref Sprite sprite = ref _spriteStruct[i];
-
-			switch (health.Status)
+    		// DataSystem
+			for (int i = 0; i < _entityCount; i++)
 			{
-				case 0:
-					sprite.SpriteId = "_";
-					break;
-				case 1:
-					sprite.SpriteId = "/";
-					break;
-				case 2:
-					if (health.Hp == health.HpMax)
+				ref DataComponent data = ref _dataStruct[i];
+				data.RandomInt = data.RNG.Randi();
+				data.RandomDouble = (double) data.RNG.Randf();
+			}
+
+    		// DirectionSystem
+			for (int i = 0; i < _entityCount; i++)
+			{
+				Position position = _positionStruct[i];
+				ref Velocity velocity = ref _velocityStruct[i];
+				DataComponent data = _dataStruct[i];
+
+				if (data.RandomInt % 10 == 0)
+				{
+					if (position.X > position.Y)
 					{
-						sprite.SpriteId = "+";
+						velocity.X = data.RNG.RandfRange(3, 19) - 10;
+						velocity.Y = data.RNG.RandfRange(0, 5);
 					}
-					else {
-						sprite.SpriteId = "|";
+					else
+					{
+						velocity.X = data.RNG.RandfRange(0, 5);
+						velocity.Y = data.RNG.RandfRange(3, 19) - 10;
 					}
-					break;
-				default:
-					break;
+				}
+			}
+
+    		// SpriteSystem
+			for (int i = 0; i < _entityCount; i++)
+			{
+				Health health = _healthStruct[i];
+				ref Sprite sprite = ref _spriteStruct[i];
+
+				switch (health.Status)
+				{
+					case 0:
+						sprite.SpriteId = "_";
+						break;
+					case 1:
+						sprite.SpriteId = "/";
+						break;
+					case 2:
+						if (health.Hp == health.HpMax)
+						{
+							sprite.SpriteId = "+";
+						}
+						else {
+							sprite.SpriteId = "|";
+						}
+						break;
+					default:
+						break;
+				}
 			}
 		}
 	}
@@ -665,109 +747,120 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 	[Benchmark]
 	public void ArrayOfClasses_Update()
 	{
-		// MovementSystem
-		for (int i = 0; i < _entityCount; i++)
+		for (int fps = 0; fps < 60; fps++)
 		{
-			PositionClass position = _positionClass[i];
-			VelocityClass velocity = _velocityClass[i];
-
-			position.X += (velocity.X * 0.0166);
-			position.Y += (velocity.Y * 0.0166);
-		}
-
-		// HealthSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-			HealthClass health = _healthClass[i];
-			if (health.Hp <= 0 && health.Status != 0) 
+			// MovementSystem
+			for (int i = 0; i < _entityCount; i++)
 			{
-      			health.Hp = 0;
-      			health.Status = 0;
-    		} 
-			else if (health.Status == 0 && health.Hp == 0)
-    		{
-      			health.Hp = health.HpMax;
-      			health.Status = 1;
-    		} 
-    		else if (health.Hp >= health.HpMax && health.Status != 2)
-    		{
-      			health.Hp = health.HpMax;
-      			health.Status = 2;
-    		} 
-    		else 
-    		{
-      			health.Status = 2;
+				PositionClass position = _positionClass[i];
+				VelocityClass velocity = _velocityClass[i];
+
+				position.X += (velocity.X * 0.0166);
+				position.Y += (velocity.Y * 0.0166);
+			}
+
+			// HealthSystem
+			for (int i = 0; i < _entityCount; i++)
+			{
+				HealthClass health = _healthClass[i];
+				if (health.Hp <= 0 && health.Status != 0) 
+				{
+      				health.Hp = 0;
+      				health.Status = 0;
+    			} 
+				else if (health.Status == 0 && health.Hp == 0)
+    			{
+      				health.Hp = health.HpMax;
+      				health.Status = 1;
+    			} 
+    			else if (health.Hp >= health.HpMax && health.Status != 2)
+    			{
+      				health.Hp = health.HpMax;
+      				health.Status = 2;
+    			} 
+    			else 
+    			{
+      				health.Status = 2;
+    			}
     		}
-    	}
 
-    	// DamageSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-    		DamageClass damage = _damageClass[i];
-			HealthClass health = _healthClass[i];
-
-			int total = damage.Attack - damage.Defense;
-			if (health.Hp > 0 && total > 0)
+    		// DamageSystem
+			for (int i = 0; i < _entityCount; i++)
 			{
-				health.Hp = Math.Max(0, health.Hp - total);
-			}
-		}
+    			DamageClass damage = _damageClass[i];
+				HealthClass health = _healthClass[i];
+				DataComponentClass dataComponent = _dataClass[i];
 
-    	// DataSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-			DataComponentClass data = _dataClass[i];
-			data.RandomInt = data.RNG.Randi();
-			data.RandomDouble = (double) data.RNG.Randf();
-		}
-
-    	// DirectionSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-			PositionClass position = _positionClass[i];
-			VelocityClass velocity = _velocityClass[i];
-			DataComponentClass data = _dataClass[i];
-
-			if (data.RandomInt % 10 == 0)
-			{
-				if (position.X > position.Y)
+				if (damage.Attack == 0 || damage.Defense == 0)
 				{
-					velocity.X = data.RNG.RandfRange(3, 19) - 10;
-					velocity.Y = data.RNG.RandfRange(0, 5);
+					damage.Attack = dataComponent.RNG.RandiRange(10, 40);
+					damage.Defense = dataComponent.RNG.RandiRange(10, 40);
+					health.HpMax = dataComponent.RNG.RandiRange(100, 200);
 				}
-				else
+
+				int total = damage.Attack - damage.Defense;
+				if (health.Hp > 0 && total > 0)
 				{
-					velocity.X = data.RNG.RandfRange(0, 5);
-					velocity.Y = data.RNG.RandfRange(3, 19) - 10;
+					health.Hp = Math.Max(0, health.Hp - total);
 				}
 			}
-		}
 
-    	// SpriteSystem
-		for (int i = 0; i < _entityCount; i++)
-		{
-			HealthClass health = _healthClass[i];
-			SpriteClass sprite = _spriteClass[i];
-
-			switch (health.Status)
+    		// DataSystem
+			for (int i = 0; i < _entityCount; i++)
 			{
-				case 0:
-					sprite.SpriteId = "_";
-					break;
-				case 1:
-					sprite.SpriteId = "/";
-					break;
-				case 2:
-					if (health.Hp == health.HpMax)
+				DataComponentClass data = _dataClass[i];
+				data.RandomInt = data.RNG.Randi();
+				data.RandomDouble = (double) data.RNG.Randf();
+			}
+
+    		// DirectionSystem
+			for (int i = 0; i < _entityCount; i++)
+			{
+				PositionClass position = _positionClass[i];
+				VelocityClass velocity = _velocityClass[i];
+				DataComponentClass data = _dataClass[i];
+
+				if (data.RandomInt % 10 == 0)
+				{
+					if (position.X > position.Y)
 					{
-						sprite.SpriteId = "+";
+						velocity.X = data.RNG.RandfRange(3, 19) - 10;
+						velocity.Y = data.RNG.RandfRange(0, 5);
 					}
-					else {
-						sprite.SpriteId = "|";
+					else
+					{
+						velocity.X = data.RNG.RandfRange(0, 5);
+						velocity.Y = data.RNG.RandfRange(3, 19) - 10;
 					}
-					break;
-				default:
-					break;
+				}
+			}
+
+    		// SpriteSystem
+			for (int i = 0; i < _entityCount; i++)
+			{
+				HealthClass health = _healthClass[i];
+				SpriteClass sprite = _spriteClass[i];
+
+				switch (health.Status)
+				{
+					case 0:
+						sprite.SpriteId = "_";
+						break;
+					case 1:
+						sprite.SpriteId = "/";
+						break;
+					case 2:
+						if (health.Hp == health.HpMax)
+						{
+							sprite.SpriteId = "+";
+						}
+						else {
+							sprite.SpriteId = "|";
+						}
+						break;
+					default:
+						break;
+				}
 			}
 		}
 	}
@@ -775,34 +868,35 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 	[Benchmark]
 	public void EntityStructs_Update()
 	{
-		for (int i = 0; i < _entityCount; i++)
+		for (int fps = 0; fps < 60; fps++)
 		{
-			// update each entity with required components in same order
-			ref EntityStruct e = ref _entitiesStructs[i];
+			for (int i = 0; i < _entityCount; i++)
+			{
+				// update each entity with required components in same order
+				ref EntityStruct e = ref _entitiesStructs[i];
 
-			e.Position.Update(e);
-			e.Velocity.Update(e);
-			e.Health.Update(e);
-			e.Damage.Update(e);
-			e.DataComponent.Update(e);
-			e.Sprite.Update(e);
+				e.Position.Update(e);
+				e.Velocity.Update(e);
+				e.Health.Update(e);
+				e.Damage.Update(e);
+				e.DataComponent.Update(e);
+				e.Sprite.Update(e);
+			}
 		}
 	}
 
 	[Benchmark]
 	public void ClassesOOP_Update()
 	{
-		for (int i = 0; i < _entityCount; i++)
+		for (int fps = 0; fps < 60; fps++)
 		{
-			// update each entity with required components in same order
-			EntityClass e = _entitiesOop[i];
+			for (int i = 0; i < _entityCount; i++)
+			{
+				// update each entity with required components in same order
+				IActor e = _entitiesOop[i];
 
-			e.Position.Update(e);
-			e.Velocity.Update(e);
-			e.Health.Update(e);
-			e.Damage.Update(e);
-			e.DataComponent.Update(e);
-			e.Sprite.Update(e);
+				e.Update();
+			}
 		}
 	}
 }
