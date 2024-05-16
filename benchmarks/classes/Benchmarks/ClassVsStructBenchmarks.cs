@@ -95,8 +95,10 @@ public struct PositionEC : IComponentData
 	public double X;
 	public double Y;
 
-	public void Update(VelocityEC velocity)
+	public void Update(EntityStruct entity)
 	{
+		VelocityEC velocity = entity.Velocity;
+
 		X += (velocity.X * 0.0166);
 		Y += (velocity.Y * 0.0166);
 	}
@@ -108,8 +110,11 @@ public struct VelocityEC : IComponentData
 	public double X;
 	public double Y;
 
-	public void Update(PositionEC position, DataComponentEC data)
+	public void Update(EntityStruct entity)
 	{
+		DataComponentEC data = entity.DataComponent;
+		PositionEC position = entity.Position;
+
 		if (data.RandomInt % 10 == 0)
 		{
 			if (position.X > position.Y)
@@ -139,7 +144,7 @@ public struct DataComponentEC : IComponentData
 		RNG.Randomize();
 	}
 
-	public void Update()
+	public void Update(EntityStruct entity)
 	{
 		RandomInt = RNG.Randi();
 		RandomDouble = (double) RNG.Randf();
@@ -153,7 +158,7 @@ public struct HealthEC : IComponentData
 	public int HpMax;
 	public int Status;
 
-	public void Update()
+	public void Update(EntityStruct entity)
 	{
 		if (Hp <= 0 && Status != 0) 
 		{
@@ -183,8 +188,10 @@ public struct DamageEC : IComponentData
 	public int Attack;
 	public int Defense;
 
-	public void Update(HealthEC health)
+	public void Update(EntityStruct entity)
 	{
+		HealthEC health = entity.Health;
+
 		int total = Attack - Defense;
 		if (health.Hp > 0 && total > 0)
 		{
@@ -198,8 +205,10 @@ public struct SpriteEC : IComponentData
 	public static int Id { get; set; }
 	public CharBuffer<Buffer16<char>> SpriteId;
 
-	public void Update(HealthEC health, DamageEC damage)
+	public void Update(EntityStruct entity)
 	{
+		HealthEC health = entity.Health;
+
 		switch (health.Status)
 		{
 			case 0:
@@ -297,10 +306,10 @@ public class PositionOOP : IComponentData
 	public double X;
 	public double Y;
 	
-	public void Update(VelocityOOP velocity)
+	public void Update(EntityClass entity)
 	{
-		X += (velocity.X * 0.0166);
-		Y += (velocity.Y * 0.0166);
+		X += (entity.Velocity.X * 0.0166);
+		Y += (entity.Velocity.Y * 0.0166);
 	}
 }
 
@@ -310,19 +319,19 @@ public class VelocityOOP : IComponentData
 	public double X;
 	public double Y;
 
-	public void Update(PositionOOP position, DataComponentOOP data)
+	public void Update(EntityClass entity)
 	{
-		if (data.RandomInt % 10 == 0)
+		if (entity.DataComponent.RandomInt % 10 == 0)
 		{
-			if (position.X > position.Y)
+			if (entity.Position.X > entity.Position.Y)
 			{
-				X = data.RNG.RandfRange(3, 19) - 10;
-				Y = data.RNG.RandfRange(0, 5);
+				X = entity.DataComponent.RNG.RandfRange(3, 19) - 10;
+				Y = entity.DataComponent.RNG.RandfRange(0, 5);
 			}
 			else
 			{
-				X = data.RNG.RandfRange(0, 5);
-				Y = data.RNG.RandfRange(3, 19) - 10;
+				X = entity.DataComponent.RNG.RandfRange(0, 5);
+				Y = entity.DataComponent.RNG.RandfRange(3, 19) - 10;
 			}
 		}
 	}
@@ -341,7 +350,7 @@ public class DataComponentOOP : IComponentData
 		RNG.Randomize();
 	}
 
-	public void Update()
+	public void Update(EntityClass entity)
 	{
 		RandomInt = RNG.Randi();
 		RandomDouble = (double) RNG.Randf();
@@ -355,7 +364,7 @@ public class HealthOOP : IComponentData
 	public int HpMax;
 	public int Status;
 
-	public void Update()
+	public void Update(EntityClass entity)
 	{
 		if (Hp <= 0 && Status != 0) 
 		{
@@ -385,12 +394,12 @@ public class DamageOOP : IComponentData
 	public int Attack;
 	public int Defense;
 
-	public void Update(HealthOOP health)
+	public void Update(EntityClass entity)
 	{
 		int total = Attack - Defense;
-		if (health.Hp > 0 && total > 0)
+		if (entity.Health.Hp > 0 && total > 0)
 		{
-			health.Hp = Math.Max(0, health.Hp - total);
+			entity.Health.Hp = Math.Max(0, entity.Health.Hp - total);
 		}
 	}
 }
@@ -400,9 +409,9 @@ public class SpriteOOP : IComponentData
 	public static int Id { get; set; }
 	public CharBuffer<Buffer16<char>> SpriteId;
 
-	public void Update(HealthOOP health, DamageOOP damage)
+	public void Update(EntityClass entity)
 	{
-		switch (health.Status)
+		switch (entity.Health.Status)
 		{
 			case 0:
 				SpriteId = "_";
@@ -411,7 +420,7 @@ public class SpriteOOP : IComponentData
 				SpriteId = "/";
 				break;
 			case 2:
-				if (health.Hp == health.HpMax)
+				if (entity.Health.Hp == entity.Health.HpMax)
 				{
 					SpriteId = "+";
 				}
@@ -627,7 +636,6 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
     	// SpriteSystem
 		for (int i = 0; i < _entityCount; i++)
 		{
-			ref Damage damage = ref _damageStruct[i];
 			ref Health health = ref _healthStruct[i];
 			ref Sprite sprite = ref _spriteStruct[i];
 
@@ -738,7 +746,6 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
     	// SpriteSystem
 		for (int i = 0; i < _entityCount; i++)
 		{
-			DamageClass damage = _damageClass[i];
 			HealthClass health = _healthClass[i];
 			SpriteClass sprite = _spriteClass[i];
 
@@ -773,12 +780,12 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			// update each entity with required components in same order
 			ref EntityStruct e = ref _entitiesStructs[i];
 
-			e.Position.Update(e.Velocity);
-			e.Velocity.Update(e.Position, e.DataComponent);
-			e.Health.Update();
-			e.Damage.Update(e.Health);
-			e.DataComponent.Update();
-			e.Sprite.Update(e.Health, e.Damage);
+			e.Position.Update(e);
+			e.Velocity.Update(e);
+			e.Health.Update(e);
+			e.Damage.Update(e);
+			e.DataComponent.Update(e);
+			e.Sprite.Update(e);
 		}
 	}
 
@@ -790,12 +797,12 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 			// update each entity with required components in same order
 			EntityClass e = _entitiesOop[i];
 
-			e.Position.Update(e.Velocity);
-			e.Velocity.Update(e.Position, e.DataComponent);
-			e.Health.Update();
-			e.Damage.Update(e.Health);
-			e.DataComponent.Update();
-			e.Sprite.Update(e.Health, e.Damage);
+			e.Position.Update(e);
+			e.Velocity.Update(e);
+			e.Health.Update(e);
+			e.Damage.Update(e);
+			e.DataComponent.Update(e);
+			e.Sprite.Update(e);
 		}
 	}
 }
