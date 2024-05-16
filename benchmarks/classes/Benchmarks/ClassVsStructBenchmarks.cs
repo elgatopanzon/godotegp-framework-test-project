@@ -96,6 +96,8 @@ public struct DebugData : IComponentData
 	public CharBuffer<Buffer128<char>> DataText;
 }
 
+public struct Robot : IComponent { public static int Id { get; set; } }
+
 /***********************************
 *  OOP entity class + components  *
 ***********************************/
@@ -107,7 +109,7 @@ public interface IActor
 
 public class Actor : IActor
 {
-	public DataComponentOOP DataComponent { get; set; } = new();
+	public virtual DataComponentOOP DataComponent { get; set; } = new();
 
 	public virtual void Update()
 	{
@@ -118,8 +120,8 @@ public class Actor : IActor
 
 public class MovableActor : Actor
 {
-	public PositionOOP Position { get; set; } = new PositionOOP();
-	public VelocityOOP Velocity { get; set; } = new VelocityOOP();
+	public virtual PositionOOP Position { get; set; } = new PositionOOP();
+	public virtual VelocityOOP Velocity { get; set; } = new VelocityOOP();
 
 	public override void Update()
 	{
@@ -134,8 +136,8 @@ public class MovableActor : Actor
 
 public class DamagableActor : MovableActor
 {
-	public HealthOOP Health { get; set; } = new HealthOOP();
-	public DamageOOP Damage { get; set; } = new DamageOOP();
+	public virtual HealthOOP Health { get; set; } = new HealthOOP();
+	public virtual DamageOOP Damage { get; set; } = new DamageOOP();
 
 	public override void Update()
 	{
@@ -150,7 +152,7 @@ public class DamagableActor : MovableActor
 
 public class NonRenderableActor : MovableActor
 {
-	public DebugSpeedOOP DebugSpeed { get; set; } = new DebugSpeedOOP();
+	public virtual DebugSpeedOOP DebugSpeed { get; set; } = new DebugSpeedOOP();
 
 	public override void Update()
 	{
@@ -164,7 +166,7 @@ public class NonRenderableActor : MovableActor
 
 public class NonRenderableActor2 : MovableActor
 {
-	public DebugDataOOP DebugData { get; set; } = new DebugDataOOP();
+	public virtual DebugDataOOP DebugData { get; set; } = new DebugDataOOP();
 
 	public override void Update()
 	{
@@ -178,8 +180,21 @@ public class NonRenderableActor2 : MovableActor
 
 public class RenderableActor : DamagableActor
 {
-	public SpriteOOP Sprite { get; set; } = new SpriteOOP();
+	public virtual SpriteOOP Sprite { get; set; } = new SpriteOOP();
 
+	public override void Update()
+	{
+		// update the renderables
+		Sprite.Update(this.Health);
+
+		// update the base
+		base.Update();
+	}
+}
+
+public class RobotActor : RenderableActor
+{
+	public override VelocityOOP Velocity { get; set; } = new RobotVelocityOOP();
 	public override void Update()
 	{
 		// update the renderables
@@ -197,7 +212,7 @@ public class PositionOOP : IComponentData
 	public double X;
 	public double Y;
 	
-	public void Update(VelocityOOP velocity)
+	public virtual void Update(VelocityOOP velocity)
 	{
 		X += (velocity.X * 0.0166);
 		Y += (velocity.Y * 0.0166);
@@ -210,7 +225,7 @@ public class VelocityOOP : IComponentData
 	public double X;
 	public double Y;
 
-	public void Update(DataComponentOOP dataComponent, PositionOOP position)
+	public virtual void Update(DataComponentOOP dataComponent, PositionOOP position)
 	{
 		if (dataComponent.RandomInt % 10 == 0)
 		{
@@ -241,7 +256,7 @@ public class DataComponentOOP : IComponentData
 		RNG.Randomize();
 	}
 
-	public void Update()
+	public virtual void Update()
 	{
 		RandomInt = RNG.Randi();
 		RandomDouble = (double) RNG.Randf();
@@ -255,7 +270,7 @@ public class HealthOOP : IComponentData
 	public int HpMax;
 	public int Status;
 
-	public void Update()
+	public virtual void Update()
 	{
 		if (Hp <= 0 && Status != 0) 
 		{
@@ -285,7 +300,7 @@ public class DamageOOP : IComponentData
 	public int Attack;
 	public int Defense;
 
-	public void Update(HealthOOP health, DataComponentOOP dataComponent)
+	public virtual void Update(HealthOOP health, DataComponentOOP dataComponent)
 	{
 		if (Attack == 0 || Defense == 0)
 		{
@@ -308,7 +323,7 @@ public class SpriteOOP : IComponentData
 	public static int Id { get; set; }
 	public CharBuffer<Buffer16<char>> SpriteId;
 
-	public void Update(HealthOOP health)
+	public virtual void Update(HealthOOP health)
 	{
 		switch (health.Status)
 		{
@@ -337,7 +352,7 @@ public class DebugSpeedOOP : IComponentData
 	public static int Id { get; set; }
 	public CharBuffer<Buffer128<char>> SpeedText;
 
-	public void Update(PositionOOP position, VelocityOOP velocity)
+	public virtual void Update(PositionOOP position, VelocityOOP velocity)
 	{
 		SpeedText = $"At position ({position.X}, {position.Y}) with velocity ({velocity.X}, {velocity.Y})";
 	}
@@ -348,9 +363,29 @@ public class DebugDataOOP : IComponentData
 	public static int Id { get; set; }
 	public CharBuffer<Buffer128<char>> DataText;
 
-	public void Update(DataComponentOOP dataComponent)
+	public virtual void Update(DataComponentOOP dataComponent)
 	{
 		DataText = $"int: {dataComponent.RandomInt}, double: {dataComponent.RandomDouble}";
+	}
+}
+
+public class RobotVelocityOOP : VelocityOOP
+{
+	public override void Update(DataComponentOOP dataComponent, PositionOOP position)
+	{
+		if (dataComponent.RandomDouble % 10 == 0)
+		{
+			if (position.X > position.Y)
+			{
+				X = dataComponent.RNG.RandfRange(6, 23) - 12;
+				Y = dataComponent.RNG.RandfRange(0, 8);
+			}
+			else
+			{
+				X = dataComponent.RNG.RandfRange(0, 8);
+				Y = dataComponent.RNG.RandfRange(6, 23) - 12;
+			}
+		}
 	}
 }
 
@@ -367,11 +402,13 @@ public partial class ClassVsStructBenchmarksBase
 	protected IndexMap<int> _entitiesPositionBase;
 	protected IndexMap<int> _entitiesNonRenderable1;
 	protected IndexMap<int> _entitiesNonRenderable2;
+	protected IndexMap<int> _entitiesRobots;
 
 	protected int _entitiesRenderableCount;
 	protected int _entitiesPositionBaseCount;
 	protected int _entitiesNonRenderable1Count;
 	protected int _entitiesNonRenderable2Count;
+	protected int _entitiesRobotsCount;
 
 	protected IActor[] _entitiesOop;
 
@@ -384,6 +421,7 @@ public partial class ClassVsStructBenchmarksBase
 	protected Sprite[] _spriteStruct;
 	protected DebugSpeed[] _debugSpeedStruct;
 	protected DebugData[] _debugDataStruct;
+	protected Robot[] _robotsStruct;
 
 	[IterationSetup]
 	public void Setup()
@@ -399,6 +437,7 @@ public partial class ClassVsStructBenchmarksBase
 		_entitiesPositionBase = new();
 		_entitiesNonRenderable1 = new();
 		_entitiesNonRenderable2 = new();
+		_entitiesRobots = new();
 
 		_entitiesOop = new IActor[_entityCount];
 
@@ -422,6 +461,15 @@ public partial class ClassVsStructBenchmarksBase
 				_entitiesPositionBase[i] = i;
 
 				_entitiesOop[i] = new NonRenderableActor2();
+			}
+			else if (c == 4)
+			{
+				// robot!
+				_entitiesRobots[i] = i;
+				_entitiesPositionBase[i] = i;
+				_entitiesRenderable[i] = i;
+
+				_entitiesOop[i] = new NonRenderableActor2();
 				c = 0;
 			}
 			else
@@ -436,6 +484,7 @@ public partial class ClassVsStructBenchmarksBase
 			_entitiesNonRenderable1Count = _entitiesNonRenderable1.Count;
 			_entitiesNonRenderable2Count = _entitiesNonRenderable2.Count;
 			_entitiesPositionBaseCount = _entitiesPositionBase.Count;
+			_entitiesRobotsCount = _entitiesRobots.Count;
 
 			c++;
 		}
@@ -444,6 +493,7 @@ public partial class ClassVsStructBenchmarksBase
 		Console.WriteLine($"Position base: {_entitiesPositionBaseCount}");
 		Console.WriteLine($"Non renderable 1: {_entitiesNonRenderable1Count}");
 		Console.WriteLine($"Non renderable 2: {_entitiesNonRenderable2Count}");
+		Console.WriteLine($"Robots: {_entitiesRobotsCount}");
 	}
 
 	public void CreateStructs()
@@ -456,6 +506,7 @@ public partial class ClassVsStructBenchmarksBase
 		_spriteStruct = new Sprite[_entityCount];
 		_debugSpeedStruct = new DebugSpeed[_entityCount];
 		_debugDataStruct = new DebugData[_entityCount];
+		_robotsStruct = new Robot[_entityCount];
 
 		for (int i = 0; i < _entityCount; i++)
 		{
@@ -469,13 +520,15 @@ public partial class ClassVsStructBenchmarksBase
 				_healthStruct[i] = new();
 				_damageStruct[i] = new();
 				_spriteStruct[i] = new();
-				_debugSpeedStruct[i] = new();
 			}
 			else if (_entitiesNonRenderable1.IndexOfData(i) != -1) {
 				_debugSpeedStruct[i] = new();
 			}
 			else if (_entitiesNonRenderable2.IndexOfData(i) != -1) {
 				_debugDataStruct[i] = new();
+			}
+			else if (_entitiesRobots.IndexOfData(i) != -1) {
+				_robotsStruct[i] = new();
 			}
 		}
 	}
@@ -620,6 +673,28 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 				DataComponent dataComponent = _dataStruct[i];
 
 				debugData.DataText = $"int: {dataComponent.RandomInt}, double: {dataComponent.RandomDouble}";
+			}
+
+			// RobotVelocitySystem
+			for (int i = 0; i < _entitiesRobotsCount; i++)
+			{
+				ref Velocity velocity = ref _velocityStruct[i];
+				DataComponent dataComponent = _dataStruct[i];
+				Position position = _positionStruct[i];
+
+				if (dataComponent.RandomDouble % 10 == 0)
+				{
+					if (position.X > position.Y)
+					{
+						velocity.X = dataComponent.RNG.RandfRange(6, 23) - 12;
+						velocity.Y = dataComponent.RNG.RandfRange(0, 8);
+					}
+					else
+					{
+						velocity.X = dataComponent.RNG.RandfRange(0, 8);
+						velocity.Y = dataComponent.RNG.RandfRange(6, 23) - 12;
+					}
+				}
 			}
 		}
 	}
