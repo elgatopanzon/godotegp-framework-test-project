@@ -40,12 +40,6 @@ public struct Position : IComponentData
 	public static int Id { get; set; }
 	public double X;
 	public double Y;
-
-	public void Update(Velocity velocity)
-	{
-		X += (velocity.X * 0.0166);
-		Y += (velocity.Y * 0.0166);
-	}
 }
 
 public struct Velocity : IComponentData
@@ -53,8 +47,68 @@ public struct Velocity : IComponentData
 	public static int Id { get; set; }
 	public double X;
 	public double Y;
+}
 
-	public void Update(Position position, DataComponent data)
+public struct DataComponent : IComponentData
+{
+	public static int Id { get; set; }
+	public int Type;
+	public int RandomInt;
+	public double RandomDouble;
+	public NumberGenerator RNG { get; } = new();
+
+	public DataComponent()
+	{
+		RNG.Randomize();
+	}
+}
+
+public struct Health : IComponentData
+{
+	public static int Id { get; set; }
+	public int Hp;
+	public int HpMax;
+	public int Status;
+}
+
+public struct Damage : IComponentData
+{
+	public static int Id { get; set; }
+	public int Attack;
+	public int Defense;
+}
+
+public struct Sprite : IComponentData
+{
+	public static int Id { get; set; }
+	public CharBuffer<Buffer16<char>> SpriteId;
+}
+
+
+/*************************************
+*  Struct components with Update()  *
+*************************************/
+
+public struct PositionEC : IComponentData
+{
+	public static int Id { get; set; }
+	public double X;
+	public double Y;
+
+	public void Update(VelocityEC velocity)
+	{
+		X += (velocity.X * 0.0166);
+		Y += (velocity.Y * 0.0166);
+	}
+}
+
+public struct VelocityEC : IComponentData
+{
+	public static int Id { get; set; }
+	public double X;
+	public double Y;
+
+	public void Update(PositionEC position, DataComponentEC data)
 	{
 		if (data.RandomInt % 10 == 0)
 		{
@@ -72,7 +126,7 @@ public struct Velocity : IComponentData
 	}
 }
 
-public struct DataComponent : IComponentData
+public struct DataComponentEC : IComponentData
 {
 	public static int Id { get; set; }
 	public int Type;
@@ -80,7 +134,7 @@ public struct DataComponent : IComponentData
 	public double RandomDouble;
 	public NumberGenerator RNG { get; } = new();
 
-	public DataComponent()
+	public DataComponentEC()
 	{
 		RNG.Randomize();
 	}
@@ -92,7 +146,7 @@ public struct DataComponent : IComponentData
 	}
 }
 
-public struct Health : IComponentData
+public struct HealthEC : IComponentData
 {
 	public static int Id { get; set; }
 	public int Hp;
@@ -123,13 +177,13 @@ public struct Health : IComponentData
 	}
 }
 
-public struct Damage : IComponentData
+public struct DamageEC : IComponentData
 {
 	public static int Id { get; set; }
 	public int Attack;
 	public int Defense;
 
-	public void Update(Health health)
+	public void Update(HealthEC health)
 	{
 		int total = Attack - Defense;
 		if (health.Hp > 0 && total > 0)
@@ -139,12 +193,12 @@ public struct Damage : IComponentData
 	}
 }
 
-public struct Sprite : IComponentData
+public struct SpriteEC : IComponentData
 {
 	public static int Id { get; set; }
 	public CharBuffer<Buffer16<char>> SpriteId;
 
-	public void Update(Health health, Damage damage)
+	public void Update(HealthEC health, DamageEC damage)
 	{
 		switch (health.Status)
 		{
@@ -168,7 +222,6 @@ public struct Sprite : IComponentData
 		}
 	}
 }
-
 
 /**********************
 *  Class components  *
@@ -377,16 +430,16 @@ public class SpriteOOP : IComponentData
 *  OOP entity class + struct components  *
 ******************************************/
 
-public struct EntityClassStruct 
+public struct EntityStruct 
 {
-	public Position Position { get; set; } = new Position();
-	public Velocity Velocity { get; set; } = new Velocity();
-	public Health Health { get; set; } = new Health();
-	public Damage Damage { get; set; } = new Damage();
-	public DataComponent DataComponent { get; set; } = new DataComponent();
-	public Sprite Sprite { get; set; } = new Sprite();
+	public PositionEC Position { get; set; } = new PositionEC();
+	public VelocityEC Velocity { get; set; } = new VelocityEC();
+	public HealthEC Health { get; set; } = new HealthEC();
+	public DamageEC Damage { get; set; } = new DamageEC();
+	public DataComponentEC DataComponent { get; set; } = new DataComponentEC();
+	public SpriteEC Sprite { get; set; } = new SpriteEC();
 
-	public EntityClassStruct() {}
+	public EntityStruct() {}
 }
 
 
@@ -396,10 +449,10 @@ public struct EntityClassStruct
 
 public partial class ClassVsStructBenchmarksBase
 {
-	protected int _entityCount = 100000;
+	protected int _entityCount = 1000;
 	protected int[] _entities;
 	protected EntityClass[] _entitiesOop;
-	protected EntityClassStruct[] _entitiesStructs;
+	protected EntityStruct[] _entitiesStructs;
 
 	// component arrays
 	protected Position[] _positionStruct;
@@ -440,7 +493,7 @@ public partial class ClassVsStructBenchmarksBase
 			_entitiesOop[i] = new();
 		}
 
-		_entitiesStructs = new EntityClassStruct[_entityCount];
+		_entitiesStructs = new EntityStruct[_entityCount];
 
 		for (int i = 0; i < _entityCount; i++)
 		{
@@ -718,7 +771,7 @@ public partial class ClassVsStructBenchmarks_Update : ClassVsStructBenchmarksBas
 		for (int i = 0; i < _entityCount; i++)
 		{
 			// update each entity with required components in same order
-			EntityClassStruct e = _entitiesStructs[i];
+			ref EntityStruct e = ref _entitiesStructs[i];
 
 			e.Position.Update(e.Velocity);
 			e.Velocity.Update(e.Position, e.DataComponent);
