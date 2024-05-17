@@ -472,6 +472,17 @@ public partial class PackedArrayBenchmark_Iteration : PackedArrayBenchmarkBase
 	}
 
 	[Benchmark]
+	public void PArray_Small_Iteration_TryNext()
+	{
+		int counter = 0;
+		while (_parr.TryNext(out TestStruct val))
+		{
+			counter++;
+		}
+		_parr.Reset();
+	}
+
+	[Benchmark]
 	public void PArrayDictBackedIndex_Small_Iteration_Unordered()
 	{
 		int counter = 0;
@@ -763,6 +774,17 @@ public partial class PackedArrayBenchmark_Big_Iteration : PackedArrayBenchmarkBa
 		{
 			counter++;
 		}
+	}
+
+	[Benchmark]
+	public void PArray_Big_Iteration_TryNext()
+	{
+		int counter = 0;
+		while (_parrBig.TryNext(out TestStruct val))
+		{
+			counter++;
+		}
+		_parr.Reset();
 	}
 
 	[Benchmark]
