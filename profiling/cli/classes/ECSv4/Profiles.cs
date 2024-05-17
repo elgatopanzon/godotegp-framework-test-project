@@ -50,12 +50,12 @@ public partial class ProfileBase : ProfilingContext
 		_ecs = new ECS();
 
 		// register components
-		Position.Id = (int) _ecs.RegisterComponent<Position>().Entity.Id;
-		Velocity.Id = (int) _ecs.RegisterComponent<Velocity>().Entity.Id;
-		DataComponent.Id = (int) _ecs.RegisterComponent<DataComponent>().Entity.Id;
-		Health.Id = (int) _ecs.RegisterComponent<Health>().Entity.Id;
-		Damage.Id = (int) _ecs.RegisterComponent<Damage>().Entity.Id;
-		Sprite.Id = (int) _ecs.RegisterComponent<Sprite>().Entity.Id;
+		_ecs.RegisterComponent<Position>();
+		_ecs.RegisterComponent<Velocity>();
+		_ecs.RegisterComponent<DataComponent>();
+		_ecs.RegisterComponent<Health>();
+		_ecs.RegisterComponent<Damage>();
+		_ecs.RegisterComponent<Sprite>();
 
 		// register systems with queries
 		_ecs.RegisterSystem<MovementSystem, OnUpdatePhase>(_ecs.CreateQuery()
