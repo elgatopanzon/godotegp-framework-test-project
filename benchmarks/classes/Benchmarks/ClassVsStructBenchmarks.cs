@@ -74,17 +74,17 @@ public struct Damage
 
 public struct Sprite
 {
-	public CharBuffer<Buffer16<char>> SpriteId;
+	public string SpriteId;
 }
 
 public struct DebugSpeed
 {
-	public CharBuffer<Buffer128<char>> SpeedText;
+	public string SpeedText;
 }
 
 public struct DebugData
 {
-	public CharBuffer<Buffer128<char>> DataText;
+	public string DataText;
 }
 
 public struct Robot {}
@@ -141,19 +141,19 @@ public interface IDamage
 
 public interface ISprite
 {
-	public CharBuffer<Buffer16<char>> SpriteId { get; set; }
+	public string SpriteId { get; set; }
 	public void Update(IHealth health);
 }
 
 public interface IDebugSpeed
 {
-	public CharBuffer<Buffer128<char>> SpeedText { get; set; }
+	public string SpeedText { get; set; }
 	public void Update(IPosition position, IVelocity velocity);
 }
 
 public interface IDebugData
 {
-	public CharBuffer<Buffer128<char>> DataText { get; set; }
+	public string DataText { get; set; }
 
 	public void Update(IData dataComponent);
 }
@@ -251,14 +251,6 @@ public class RenderableActor : DamagableActor
 public class RobotActor : RenderableActor
 {
 	public override IVelocity Velocity { get; } = new RobotVelocityOOP();
-	public override void Update()
-	{
-		// update the renderables
-		Sprite.Update(this.Health);
-
-		// update the base
-		base.Update();
-	}
 }
 
 
@@ -371,7 +363,7 @@ public class DamageOOP : IDamage
 
 public class SpriteOOP : ISprite
 {
-	public CharBuffer<Buffer16<char>> SpriteId { get; set; }
+	public string SpriteId { get; set; }
 
 	public virtual void Update(IHealth health)
 	{
@@ -400,7 +392,7 @@ public class SpriteOOP : ISprite
 
 public class DebugSpeedOOP : IDebugSpeed
 {
-	public CharBuffer<Buffer128<char>> SpeedText { get; set; }
+	public string SpeedText { get; set; }
 
 	public virtual void Update(IPosition position, IVelocity velocity)
 	{
@@ -410,7 +402,7 @@ public class DebugSpeedOOP : IDebugSpeed
 
 public class DebugDataOOP : IDebugData
 {
-	public CharBuffer<Buffer128<char>> DataText { get; set; }
+	public string DataText { get; set; }
 
 	public virtual void Update(IData dataComponent)
 	{
@@ -446,7 +438,7 @@ public class RobotVelocityOOP : VelocityOOP
 
 public partial class ClassVsStructBenchmarksBase
 {
-	protected int _fpsCount = (60 * 1);
+	protected int _fpsCount = 500 * (60 * 1);
 	protected int _entityCount = 1000;
 	protected IndexMap<int> _entities;
 	protected IndexMap<int> _entitiesRenderable;
