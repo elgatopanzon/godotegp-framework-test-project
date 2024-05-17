@@ -15,6 +15,7 @@ using GodotEGP.Config;
 
 using GodotEGP.ECSv3;
 using GodotEGP.ECSv3.Systems;
+using GodotEGP.ECSv3.Queries;
 
 // update position based on velocity
 public struct MovementSystem : ISystem

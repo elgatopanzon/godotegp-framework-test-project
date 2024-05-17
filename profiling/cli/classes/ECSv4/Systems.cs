@@ -15,14 +15,15 @@ using GodotEGP.Config;
 
 using GodotEGP.ECSv4;
 using GodotEGP.ECSv4.Systems;
+using GodotEGP.ECSv4.Queries;
 
 // update position based on velocity
 public struct MovementSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, ECS core, Query query)
 	{
-		ref Position position = ref core.Get<Position>(entity);
-		ref Velocity velocity = ref core.Get<Velocity>(entity);
+		ref Position position = ref query.GetComponent<Position>(entity);
+		ref Velocity velocity = ref query.GetComponent<Velocity>(entity);
 
 		position.X += (velocity.X * system.DeltaTime);
 		position.Y += (velocity.Y * system.DeltaTime);
@@ -32,9 +33,9 @@ public struct MovementSystem : ISystem
 // control entity state based on hp
 public struct HealthSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, ECS core, Query query)
 	{
-		ref Health health = ref core.Get<Health>(entity);
+		ref Health health = ref query.GetComponent<Health>(entity);
 		if (health.Hp <= 0 && health.Status != 0) 
 		{
       		health.Hp = 0;
@@ -60,11 +61,11 @@ public struct HealthSystem : ISystem
 // calculate damage and deal damage to health component
 public struct DamageSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, ECS core, Query query)
 	{
-		ref Damage damage = ref core.Get<Damage>(entity);
-		ref Health health = ref core.Get<Health>(entity);
-		ref DataComponent dataComponent = ref core.Get<DataComponent>(entity);
+		ref Damage damage = ref query.GetComponent<Damage>(entity);
+		ref Health health = ref query.GetComponent<Health>(entity);
+		ref DataComponent dataComponent = ref query.GetComponent<DataComponent>(entity);
 
 		if (damage.Attack == 0 || damage.Defense == 0)
 		{
@@ -84,9 +85,9 @@ public struct DamageSystem : ISystem
 // randomly update some data values
 public struct DataSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, ECS core, Query query)
 	{
-		ref DataComponent data = ref core.Get<DataComponent>(entity);
+		ref DataComponent data = ref query.GetComponent<DataComponent>(entity);
 		data.RandomInt = data.RNG.Randi();
 		data.RandomDouble = (double) data.RNG.Randf();
 	}
@@ -96,11 +97,11 @@ public struct DataSystem : ISystem
 // direction system randomly updates direction based on data
 public struct DirectionSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, ECS core, Query query)
 	{
-		ref Position position = ref core.Get<Position>(entity);
-		ref Velocity velocity = ref core.Get<Velocity>(entity);
-		ref DataComponent data = ref core.Get<DataComponent>(entity);
+		ref Position position = ref query.GetComponent<Position>(entity);
+		ref Velocity velocity = ref query.GetComponent<Velocity>(entity);
+		ref DataComponent data = ref query.GetComponent<DataComponent>(entity);
 
 		if (data.RandomInt % 10 == 0)
 		{
@@ -121,11 +122,11 @@ public struct DirectionSystem : ISystem
 // update sprite type based on character status and health
 public struct SpriteSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, ECS core, Query query)
 	{
-		ref Damage damage = ref core.Get<Damage>(entity);
-		ref Health health = ref core.Get<Health>(entity);
-		ref Sprite sprite = ref core.Get<Sprite>(entity);
+		ref Damage damage = ref query.GetComponent<Damage>(entity);
+		ref Health health = ref query.GetComponent<Health>(entity);
+		ref Sprite sprite = ref query.GetComponent<Sprite>(entity);
 
 		switch (health.Status)
 		{

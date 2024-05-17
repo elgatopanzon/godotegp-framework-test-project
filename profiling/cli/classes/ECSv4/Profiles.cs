@@ -70,6 +70,7 @@ public partial class ProfileBase : ProfilingContext
 		_ecs.RegisterSystem<DamageSystem, OnUpdatePhase>(_ecs.CreateQuery()
 				.Has<Health>()
 				.Has<Damage>()
+				.Has<DataComponent>()
 				.Build()
 			);
 		_ecs.RegisterSystem<DataSystem, FinalPhase>(_ecs.CreateQuery()
