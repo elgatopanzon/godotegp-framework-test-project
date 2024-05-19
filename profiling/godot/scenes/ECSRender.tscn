@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqyw8wttx3hhn"]
+
+[ext_resource type="Script" path="res://scenes/ECSRender.cs" id="1_0j5jb"]
+
+[node name="EcsRender" type="Node2D"]
+script = ExtResource("1_0j5jb")
+_entities = 16000
