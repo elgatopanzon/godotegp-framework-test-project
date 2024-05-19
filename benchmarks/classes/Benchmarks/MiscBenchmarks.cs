@@ -33,6 +33,12 @@ public partial class MiscBenchmarks
 	{
 		BenchmarkRunner.Run<MiscBenchmarks_StructLong2Int>();
 	}
+
+	[Fact]
+	public void MiscBenchmarks_random_double()
+	{
+		BenchmarkRunner.Run<MiscBenchmarks_RandomDouble>();
+	}
 #endif
 }
 
@@ -96,4 +102,20 @@ public struct ExplicitLayoutLong2Ints
 
 	[FieldOffset(4)]
 	public uint Int2;
+}
+
+public partial class MiscBenchmarks_RandomDouble
+{
+	private double _min = -500;
+	private double _max = 500;
+
+	[Benchmark]
+	public void RandomDouble()
+	{
+		double[] doubles = new double[32000];
+		for (int i = 0; i < 32000; i++)
+		{
+			doubles[i] = _min + (System.Random.Shared.NextDouble() * (_max - _min));
+		}
+	}
 }
