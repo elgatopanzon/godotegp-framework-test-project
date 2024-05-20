@@ -63,7 +63,7 @@ public partial class ECSRender : Node2D
 	public void Setup()
 	{
 		// setup the ECS
-		_ecs = new();
+		_ecs = ServiceRegistry.Get<ECS>();
 
 		// register components and systems
 		_ecs.RegisterComponent<GodotNode>();
@@ -103,8 +103,6 @@ public partial class ECSRender : Node2D
 
 	public override void _Process(double deltaTime)
 	{
-		_ecs.Update(deltaTime);
-
 		_lastUpdate = _stopwatch.Elapsed;
 		_frames++;
 
