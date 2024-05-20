@@ -91,7 +91,7 @@ public partial class ECSRender : Node2D
 			node.Position = new Vector2(GetViewportRect().Size.X / 2, GetViewportRect().Size.Y / 2);
 
 			e.Set<GodotNode>(new GodotNode() {
-				Node2D = node,
+				Node2DId = _ecs.RegisterObject(node),
 				});
 
 			// define an RNG instance
@@ -132,8 +132,8 @@ public struct GodotNode : IComponentData
 {
 	public static int Id { get; set; }
 
-	// godot node instance
-	public Node2D Node2D { get; set; }
+	// godot node instance ID
+	public Entity Node2DId { get; set; }
 }
 
 public struct RNG : IComponentData
@@ -161,7 +161,7 @@ public class NodeMovementSystem : ISystem
 		ref GodotNode nodeComponent = ref query.Results.GetComponent<GodotNode>(entity);
 		ref RNG rng = ref query.Results.GetComponent<RNG>(entity);
 
-		Node2D node = nodeComponent.Node2D; 
+		Node2D node = core.GetObject<Node2D>(nodeComponent.Node2DId); 
 		float delta = (float) deltaTime;
 
 		Vector2 pos = node.Position;
