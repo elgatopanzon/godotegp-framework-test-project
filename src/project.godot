@@ -12,12 +12,9 @@ config_version=5
 
 config/name="Addon - godotegp-framework-csharp"
 run/main_scene="res://scenes/Main.tscn"
+run/main_loop_type="GodotEGPMainLoop"
 config/features=PackedStringArray("4.2", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
-
-[autoload]
-
-Main="*res://addons/godotegp-framework-csharp/classes/Main.cs"
 
 [display]
 

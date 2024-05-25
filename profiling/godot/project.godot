@@ -16,10 +16,6 @@ run/main_loop_type="GodotEGPMainLoop"
 config/features=PackedStringArray("4.2", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
-[autoload]
-
-Main="res://addons/godotegp-framework-csharp/classes/Main.cs"
-
 [debug]
 
 settings/stdout/print_fps=true
