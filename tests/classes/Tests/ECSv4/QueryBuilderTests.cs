@@ -515,7 +515,7 @@ public partial class QueryBuilderTests : QueryBuilderTestsContext
 		// create a query
 		Query query = QueryBuilder.Create()
 			.Has(_entities["TestTag"])
-			.Has(0) // matches basically any other component
+			.Has(Entity.CreateFrom(0)) // matches basically any other component
 			.Build();
 
 		// run the query and get results

@@ -78,7 +78,7 @@ public partial class QueryManagerTests : TestContext
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(EcsComponentConfig.Id, res.Entities.ArraySegment);
+		Assert.Contains(Entity.CreateFrom(EcsComponentConfig.Id), res.Entities.ArraySegment);
 	}
 
 	[Fact]

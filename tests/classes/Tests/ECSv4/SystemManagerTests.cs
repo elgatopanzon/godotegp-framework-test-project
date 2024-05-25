@@ -44,7 +44,7 @@ public partial class SystemManagerTests : TestContext
 
 		// register the systems
 		EntityHandle s1 = ecs.RegisterSystem<TestSystem1, OnUpdatePhase>("s1", ecs.CreateQuery().Build());
-		EntityHandle s2 = ecs.RegisterSystem<TestSystem2, OnUpdatePhase>("s2", 123); // fake query id
+		EntityHandle s2 = ecs.RegisterSystem<TestSystem2, OnUpdatePhase>("s2", Entity.CreateFrom(123)); // fake query id
 
 		LoggerManager.LogDebug("System 1 entity", "", "entity", s1);
 		LoggerManager.LogDebug("System 2 entity", "", "entity", s2);
@@ -57,7 +57,7 @@ public partial class SystemManagerTests : TestContext
 
 public struct TestSystem1 : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
 	{
 		LoggerManager.LogDebug("Updating", this.GetType().Name, "entity", entity);
 	}
@@ -65,7 +65,7 @@ public struct TestSystem1 : ISystem
 
 public struct TestSystem2 : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
 	{
 		LoggerManager.LogDebug("Updating", this.GetType().Name, "entity", entity);
 	}

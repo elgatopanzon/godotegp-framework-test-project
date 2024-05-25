@@ -39,7 +39,7 @@ public partial class SystemSchedulerTests : TestContext
 
 		// register the systems with a different phase
 		EntityHandle s2 = ecs.RegisterSystem<TestDataMutator, FinalPhase>("TestDataMutilator", ecs.CreateQuery().Has<TestData>().Build());
-		EntityHandle s1 = ecs.RegisterSystem<TestSystem2, OnStartupPhase>("s1", 0); // no query id
+		EntityHandle s1 = ecs.RegisterSystem<TestSystem2, OnStartupPhase>("s1", Entity.CreateFrom(0)); // no query id
 
 		LoggerManager.LogDebug("System 1 entity", "", "entity", s1);
 		LoggerManager.LogDebug("System 2 entity", "", "entity", s2);
@@ -55,11 +55,10 @@ public partial class SystemSchedulerTests : TestContext
 
 public struct TestDataMutator : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core)
+	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
 	{
 		LoggerManager.LogDebug("Updating", this.GetType().Name, "entity", entity);
-		LoggerManager.LogDebug("Delta time", this.GetType().Name, "deltaTime", system.DeltaTime);
-		LoggerManager.LogDebug("System delta time", this.GetType().Name, "SystemDeltaTime", system.SystemDeltaTime);
+		LoggerManager.LogDebug("Delta time", this.GetType().Name, "deltaTime", deltaTime);
 
 		ref TestData td = ref core.Get<TestData>(entity);
 
