@@ -37,16 +37,12 @@ public partial class ProfileBase : ProfilingContext
 	private ECS _ecs;
 	private PackedArray<Entity> _entities;
 
-	public ProfileBase(ulong entities, bool run = true)
+	public ProfileBase(ulong entities)
 	{
 		Entities = entities;
 
 		Setup();
-
-		if (run)
-		{
-			Run();
-		}
+		Run();
 	}
 
 	public void Setup()
@@ -60,6 +56,7 @@ public partial class ProfileBase : ProfilingContext
 		_ecs.RegisterComponent<Health>();
 		_ecs.RegisterComponent<Damage>();
 		_ecs.RegisterComponent<Sprite>();
+		_ecs.RegisterComponent<Render>();
 
 		// register systems with queries
 		_ecs.RegisterSystem<MovementSystem, OnUpdatePhase>(_ecs.CreateQuery()
@@ -93,22 +90,60 @@ public partial class ProfileBase : ProfilingContext
 				.Has<Sprite>()
 				.Build()
 			);
-		_ecs.RegisterSystem<RenderSystem, FinalPhase>(_ecs.CreateQuery()
+		_ecs.RegisterSystem<PreRenderSystem, OnStartupPhase>(_ecs.CreateQuery()
+				.Has<Render>()
+				.Build()
+			);
+		_ecs.RegisterSystem<RenderSystem, PostUpdatePhase>(_ecs.CreateQuery()
 				.Has<Health>()
 				.Has<Position>()
 				.Has<Sprite>()
 				.Build()
 			);
+		_ecs.RegisterSystem<PostRenderSystem, FinalPhase>(_ecs.CreateQuery()
+				.Has<Render>()
+				.Build()
+			);
+
+		// render entity to trigger pre/post render steps
+		EntityHandle render_e = _ecs.Create($"render");
+		render_e.Set<Render>(new Render());
 
 		// create number of required entities
 		for (ulong i = 0; i < Entities; i++)
 		{
 			EntityHandle e = _ecs.Create($"entity_{i+1}");
+		}
+
+		// add components in contiguous order
+		for (ulong i = 0; i < Entities; i++)
+		{
+			EntityHandle e = _ecs.Create($"entity_{i+1}");
 			e.Set<Position>(new Position());
+		}
+		for (ulong i = 0; i < Entities; i++)
+		{
+			EntityHandle e = _ecs.Create($"entity_{i+1}");
 			e.Set<Velocity>(new Velocity());
+		}
+		for (ulong i = 0; i < Entities; i++)
+		{
+			EntityHandle e = _ecs.Create($"entity_{i+1}");
 			e.Set<Health>(new Health());
+		}
+		for (ulong i = 0; i < Entities; i++)
+		{
+			EntityHandle e = _ecs.Create($"entity_{i+1}");
 			e.Set<Damage>(new Damage());
+		}
+		for (ulong i = 0; i < Entities; i++)
+		{
+			EntityHandle e = _ecs.Create($"entity_{i+1}");
 			e.Set<DataComponent>(new DataComponent());
+		}
+		for (ulong i = 0; i < Entities; i++)
+		{
+			EntityHandle e = _ecs.Create($"entity_{i+1}");
 			e.Set<Sprite>(new Sprite());
 		}
 	}
@@ -153,7 +188,7 @@ public partial class ProfileBase : ProfilingContext
 				fps = frames;
 				fpsSamples.Add(fps);
 
-				LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / Entities}ms)");
+				LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / Entities)}ns)");
 
 				frames = 0;
 
@@ -178,20 +213,11 @@ public partial class ProfileBase : ProfilingContext
 
 		}
 	}
-
-	public void Update(double deltaTime)
-	{
-		_ecs.Update(deltaTime);
-	}
-
-	public ECS GetECS() {
-		return _ecs;
-	}
 }
 
 public partial class ECSv4Profile_Update_6 : ProfileBase
 {
-	public ECSv4Profile_Update_6(ulong entities, bool run = true) : base(entities, run)
+	public ECSv4Profile_Update_6(ulong entities) : base(entities)
 	{
 		ProfileType = UpdateProfileType.Update7Systems;
 	}

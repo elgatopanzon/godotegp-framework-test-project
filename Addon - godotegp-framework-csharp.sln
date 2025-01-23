@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotEGP Profiling", "profi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotEGP.Benchmark", "benchmarks\GodotEGP.Benchmark.csproj", "{2C19AF4E-9CAD-4C4D-8075-F975728A16A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotEGP.Profiling.Raylib", "profiling\raylib\GodotEGP.Profiling.Raylib.csproj", "{D822A4DA-7A36-4356-96D8-CC937FFACFEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,9 +69,16 @@ Global
 		{2C19AF4E-9CAD-4C4D-8075-F975728A16A5}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
 		{2C19AF4E-9CAD-4C4D-8075-F975728A16A5}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
 		{2C19AF4E-9CAD-4C4D-8075-F975728A16A5}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
+		{D822A4DA-7A36-4356-96D8-CC937FFACFEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D822A4DA-7A36-4356-96D8-CC937FFACFEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D822A4DA-7A36-4356-96D8-CC937FFACFEE}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D822A4DA-7A36-4356-96D8-CC937FFACFEE}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{D822A4DA-7A36-4356-96D8-CC937FFACFEE}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{D822A4DA-7A36-4356-96D8-CC937FFACFEE}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{73EF2CA8-1D6D-4F81-AE1B-01CA05BEFCC5} = {FF6201E6-F6F1-418F-9D14-01212E323C68}
 		{2B0507F0-44D5-4B88-9A8D-89F16C61EBD1} = {FF6201E6-F6F1-418F-9D14-01212E323C68}
+		{D822A4DA-7A36-4356-96D8-CC937FFACFEE} = {FF6201E6-F6F1-418F-9D14-01212E323C68}
 	EndGlobalSection
 EndGlobal

@@ -17,7 +17,7 @@ using GodotEGP.ECSv4;
 using GodotEGP.ECSv4.Systems;
 using GodotEGP.ECSv4.Queries;
 
-using System;
+using Raylib_cs;
 
 // update position based on velocity
 public struct MovementSystem : ISystem
@@ -69,21 +69,14 @@ public struct DamageSystem : ISystem
 		ref Health health = ref query.Results.GetComponent<Health>(entity);
 		ref DataComponent dataComponent = ref query.Results.GetComponent<DataComponent>(entity);
 
-		if (damage.Attack == 0 || damage.Defense == 0)
+		int total = damage.Attack - damage.Defense;
+		if (total <= 0)
 		{
 			damage.Attack = dataComponent.RNG.RandiRange(10, 40);
 			damage.Defense = dataComponent.RNG.RandiRange(10, 40);
 			health.HpMax = dataComponent.RNG.RandiRange(100, 200);
 		}
 
-		if (health.Status == 0)
-		{
-			ref Position position = ref core.Get<Position>(entity);
-			damage.Attack = Math.Max(1, Convert.ToInt32(position.X * 10));
-			damage.Defense = Math.Max(1, Convert.ToInt32(position.Y * 10));
-		}
-
-		int total = damage.Attack - damage.Defense;
 		if (health.Hp > 0 && total > 0)
 		{
 			health.Hp = Math.Max(0, health.Hp - total);
@@ -97,7 +90,7 @@ public struct DataSystem : ISystem
 	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
 	{
 		ref DataComponent data = ref query.Results.GetComponent<DataComponent>(entity);
-		data.RandomInt = (int) data.RNG.Randi();
+		data.RandomInt = data.RNG.Randi();
 		data.RandomDouble = (double) data.RNG.Randf();
 	}
 }
@@ -160,7 +153,16 @@ public struct SpriteSystem : ISystem
 	}
 }
 
-// render sprite character to godot sprite node
+public struct PreRenderSystem : ISystem
+{
+	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	{
+		Raylib.BeginDrawing();
+        Raylib.ClearBackground(Color.White);
+	}
+}
+
+// render sprite character in raylib
 public struct RenderSystem : ISystem
 {
 	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
@@ -171,10 +173,14 @@ public struct RenderSystem : ISystem
 
 		string renderString = $"{entity}: [{health.Hp}/{health.HpMax}][{sprite.SpriteId.ToString()}]";
 
-		NodeManager nm = ServiceRegistry.Get<NodeManager>();
-		Label label = nm.GetNode<Label>($"entity{entity.Id}");
+		Raylib.DrawText(renderString.ToString(), (int) (position.X * 10), (int) (position.Y * 10), 20, Color.Black);
+	}
+}
 
-		label.Text = renderString;
-		label.Position = new Vector2((float) position.X * 10, (float) position.Y * 10);
+public struct PostRenderSystem : ISystem
+{
+	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	{
+		Raylib.EndDrawing();
 	}
 }

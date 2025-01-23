@@ -12,13 +12,20 @@ using GodotEGP.Random;
 using GodotEGP.Objects.Extensions;
 using GodotEGP.Event.Events;
 using GodotEGP.Event.Filters;
+using GodotEGP.Collections;
 using Godot;
 
 using GodotEGP.Profiling.CLI.ECSv3;
 using GodotEGP.Profiling.CLI.ECSv4;
 
-using GodotEGP.Collections;
+using GodotEGP.ECSv4;
+using GodotEGP.ECSv4.Components;
+using GodotEGP.ECSv4.Queries;
+using GodotEGP.ECSv4.Systems;
+
 using System.Diagnostics;
+
+using Raylib_cs;
 
 internal class Program
 {
@@ -57,6 +64,9 @@ internal class Program
     	string profileSubName = args[1];
 
     	ProfilingContext profile = null;
+
+    	// init raylib
+    	Raylib.InitWindow(800, 480, "Hello World");
 
     	// run different profiles based on given argument
     	switch (profileName)
@@ -195,79 +205,80 @@ internal class Program
     					break;
     			}
     			break;
-    		case "noecs":
-    			NoEcs noEcs;
+    		case "raylib_noecs":
+    			RaylibNoEcs raylibNoEcs;
 
     			switch (profileSubName)
     			{
 					case "update_1":
-						noEcs = new NoEcs(1) {
+						raylibNoEcs = new RaylibNoEcs(1) {
 						};
 						break;
 					case "update_2":
-						noEcs = new NoEcs(2) {
+						raylibNoEcs = new RaylibNoEcs(2) {
 						};
 						break;
 					case "update_8":
-						noEcs = new NoEcs(8) {
+						raylibNoEcs = new RaylibNoEcs(8) {
 						};
 						break;
 					case "update_16":
-						noEcs = new NoEcs(16) {
+						raylibNoEcs = new RaylibNoEcs(16) {
 						};
 						break;
 					case "update_32":
-						noEcs = new NoEcs(32) {
+						raylibNoEcs = new RaylibNoEcs(32) {
 						};
 						break;
 					case "update_64":
-						noEcs = new NoEcs(64) {
+						raylibNoEcs = new RaylibNoEcs(64) {
 						};
 						break;
 					case "update_128":
-						noEcs = new NoEcs(128) {
+						raylibNoEcs = new RaylibNoEcs(128) {
 						};
 						break;
 					case "update_256":
-						noEcs = new NoEcs(256) {
+						raylibNoEcs = new RaylibNoEcs(256) {
 						};
 						break;
 					case "update_1k":
-						noEcs = new NoEcs(1000) {
+						raylibNoEcs = new RaylibNoEcs(1000) {
 						};
 						break;
 					case "update_4k":
-						noEcs = new NoEcs(4000) {
+						raylibNoEcs = new RaylibNoEcs(4000) {
 						};
 						break;
 					case "update_16k":
-						noEcs = new NoEcs(16000) {
+						raylibNoEcs = new RaylibNoEcs(16000) {
 						};
 						break;
 					case "update_65k":
-						noEcs = new NoEcs(65000) {
+						raylibNoEcs = new RaylibNoEcs(65000) {
 						};
 						break;
 					case "update_262k":
-						noEcs = new NoEcs(262000) {
+						raylibNoEcs = new RaylibNoEcs(262000) {
 						};
 						break;
 					case "update_1m":
-						noEcs = new NoEcs(1000000) {
+						raylibNoEcs = new RaylibNoEcs(1000000) {
 						};
 						break;
 					case "update_2m":
-						noEcs = new NoEcs(2000000) {
+						raylibNoEcs = new RaylibNoEcs(2000000) {
 						};
 						break;
     				default:
     					break;
     			}
     			break;
-
     		default:
     			break;
     	}
+
+    	Raylib.CloseWindow();
 
     	throw new Exception("Not a valid profile!");
 
@@ -275,7 +286,7 @@ internal class Program
     }
 }
 
-public class NoEcs
+public class RaylibNoEcs
 {
 	public ulong Entities { get; set; }
 
@@ -286,7 +297,7 @@ public class NoEcs
 	public ECSv4.Damage[] _damage { get; set; }
 	public ECSv4.Sprite[] _sprite { get; set; }
 
-	public NoEcs(ulong entities)
+	public RaylibNoEcs(ulong entities)
 	{
 		Entities = entities;
 
@@ -346,7 +357,10 @@ public class NoEcs
 			deltaTime = (timeNow.Ticks - lastUpdate.Ticks) / 10000000f;
 			// stopWatch.Start();
 
+			Raylib.BeginDrawing();
+        	Raylib.ClearBackground(Color.White);
 			// do update logic
+			
 			for (int i = 0; i < (int) Entities; i++)
 			{
 				ECSv4.Position position = _position[i];
@@ -452,6 +466,13 @@ public class NoEcs
 						break;
 				}
 
+				/******************
+				*  RenderSystem  *
+				******************/
+				string renderString = $"{i}: [{health.Hp}/{health.HpMax}][{sprite.SpriteId.ToString()}]";
+
+				Raylib.DrawText(renderString.ToString(), (int) (position.X * 10), (int) (position.Y * 10), 20, Color.Black);
+				
 
 				// write components back in case they changed
 				_position[i] = position;
@@ -463,9 +484,14 @@ public class NoEcs
 			}
 
 			// end update logic
+			Raylib.EndDrawing();
+
+			// stopWatch.Stop();
 
 			// deltaTime = ((float) stopWatch.ElapsedMilliseconds) / 1000f;
 			elapsedTime += deltaTime;
+
+			// stopWatch.Reset();
 
 			lastUpdate = timeNow;
 
@@ -478,13 +504,27 @@ public class NoEcs
 				fpsSamples.Add(fps);
 
 				LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / Entities)}ns)");
-				// Console.WriteLine($"FPS fps={fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / Entities)}ns)");
 
 				frames = 0;
 
 				lastFrameCount = timeNow;
 				lastUpdate = lastFrameCount;
 			}
+
+
+			// if (elapsedTime >= 1)
+			// {
+			// 	fps = frames;
+			// 	fpsSamples.Add(fps);
+            //
+			// 	LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / Entities}ms)");
+            //
+			// 	frames = 0;
+			// 	elapsedTime = 0;
+            //
+			// 	// lastFrameCount = timeNow;
+			// 	// lastUpdate = lastFrameCount;
+			// }
 
 		}
 	}

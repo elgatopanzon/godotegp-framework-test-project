@@ -4,7 +4,7 @@
  * @created     : Wednesday May 08, 2024 22:41:19 CST
  */
 
-namespace GodotEGP.Profiling.CLI.ECSv4;
+namespace GodotEGP.Profiling.CLI.ECSv3;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -15,10 +15,10 @@ using GodotEGP.Config;
 using GodotEGP.Collections;
 
 using GodotEGP.Profiling.CLI;
-using GodotEGP.ECSv4;
-using GodotEGP.ECSv4.Components;
-using GodotEGP.ECSv4.Queries;
-using GodotEGP.ECSv4.Systems;
+using GodotEGP.ECSv3;
+using GodotEGP.ECSv3.Components;
+using GodotEGP.ECSv3.Queries;
+using GodotEGP.ECSv3.Systems;
 
 using System;
 using System.Linq;
@@ -37,16 +37,12 @@ public partial class ProfileBase : ProfilingContext
 	private ECS _ecs;
 	private PackedArray<Entity> _entities;
 
-	public ProfileBase(ulong entities, bool run = true)
+	public ProfileBase(ulong entities)
 	{
 		Entities = entities;
 
 		Setup();
-
-		if (run)
-		{
-			Run();
-		}
+		Run();
 	}
 
 	public void Setup()
@@ -54,12 +50,12 @@ public partial class ProfileBase : ProfilingContext
 		_ecs = new ECS();
 
 		// register components
-		_ecs.RegisterComponent<Position>();
-		_ecs.RegisterComponent<Velocity>();
-		_ecs.RegisterComponent<DataComponent>();
-		_ecs.RegisterComponent<Health>();
-		_ecs.RegisterComponent<Damage>();
-		_ecs.RegisterComponent<Sprite>();
+		Position.Id = (int) _ecs.RegisterComponent<Position>().Entity.Id;
+		Velocity.Id = (int) _ecs.RegisterComponent<Velocity>().Entity.Id;
+		DataComponent.Id = (int) _ecs.RegisterComponent<DataComponent>().Entity.Id;
+		Health.Id = (int) _ecs.RegisterComponent<Health>().Entity.Id;
+		Damage.Id = (int) _ecs.RegisterComponent<Damage>().Entity.Id;
+		Sprite.Id = (int) _ecs.RegisterComponent<Sprite>().Entity.Id;
 
 		// register systems with queries
 		_ecs.RegisterSystem<MovementSystem, OnUpdatePhase>(_ecs.CreateQuery()
@@ -74,7 +70,6 @@ public partial class ProfileBase : ProfilingContext
 		_ecs.RegisterSystem<DamageSystem, OnUpdatePhase>(_ecs.CreateQuery()
 				.Has<Health>()
 				.Has<Damage>()
-				.Has<DataComponent>()
 				.Build()
 			);
 		_ecs.RegisterSystem<DataSystem, FinalPhase>(_ecs.CreateQuery()
@@ -90,12 +85,6 @@ public partial class ProfileBase : ProfilingContext
 		_ecs.RegisterSystem<SpriteSystem, FinalPhase>(_ecs.CreateQuery()
 				.Has<Damage>()
 				.Has<Health>()
-				.Has<Sprite>()
-				.Build()
-			);
-		_ecs.RegisterSystem<RenderSystem, FinalPhase>(_ecs.CreateQuery()
-				.Has<Health>()
-				.Has<Position>()
 				.Has<Sprite>()
 				.Build()
 			);
@@ -153,7 +142,7 @@ public partial class ProfileBase : ProfilingContext
 				fps = frames;
 				fpsSamples.Add(fps);
 
-				LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / Entities}ms)");
+				LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(int) ((deltaTime * 1000000000) / Entities)}ns)");
 
 				frames = 0;
 
@@ -178,20 +167,11 @@ public partial class ProfileBase : ProfilingContext
 
 		}
 	}
-
-	public void Update(double deltaTime)
-	{
-		_ecs.Update(deltaTime);
-	}
-
-	public ECS GetECS() {
-		return _ecs;
-	}
 }
 
-public partial class ECSv4Profile_Update_6 : ProfileBase
+public partial class ECSv3Profile_Update_6 : ProfileBase
 {
-	public ECSv4Profile_Update_6(ulong entities, bool run = true) : base(entities, run)
+	public ECSv3Profile_Update_6(ulong entities) : base(entities)
 	{
 		ProfileType = UpdateProfileType.Update7Systems;
 	}

@@ -31,7 +31,7 @@ public partial class ECSv4 : Node2D
 	private TimeSpan _lastFrameCount = new TimeSpan();
 	private PackedArray<int> _fpsSamples = new();
 
-	private ulong _entities = 1000;
+	private ulong _entities = 16000;
 	private double _deltaTime;
 
 	private Stopwatch _stopwatch;
@@ -50,6 +50,16 @@ public partial class ECSv4 : Node2D
 
 		_profile = new ECSv4Profile_Update_6(_entities, false);
 	    _active = true;
+
+	    // create label nodes to render label strings
+	    foreach (var entity in _profile.GetECS().EntityManager.GetEntities())
+	    {
+	    	Label label = new Label();
+			label.Name = $"entity{entity.Id}";
+			label.Text = "";
+			// LoggerManager.LogInfo("Entity label", "", "label", label.Name.ToString());
+			AddChild(label);
+	    }
 
 	    _stopwatch = new();
 	    _stopwatch.Start();
