@@ -131,40 +131,34 @@ public partial class ProfileBase : ProfilingContext
 
 	public void Run()
 	{
-		DateTime lastUpdate = DateTime.Now;
 		float deltaTime = 0;
+		float deltaTimeTotal = 0;
 
-		DateTime lastFrameCount = DateTime.Now;
 		int frames = 0;
 		int fps = 0;
 
 		PackedArray<int> fpsSamples = new();
 
-		Stopwatch stopWatch = new Stopwatch();
-
 		float elapsedTime = 0;
+		long prevTicks = Stopwatch.GetTimestamp();
 
 		while (true)
 		{
-			DateTime timeNow = DateTime.Now;
-			deltaTime = (timeNow.Ticks - lastUpdate.Ticks) / 10000000f;
-			// stopWatch.Start();
-
 			_ecs.Update(deltaTime);
 
-			// stopWatch.Stop();
+			long ticks = Stopwatch.GetTimestamp() - prevTicks;
+			prevTicks += ticks;
+			deltaTime = (float) ((double) ticks / Stopwatch.Frequency);
 
-			// deltaTime = ((float) stopWatch.ElapsedMilliseconds) / 1000f;
+			// deltaTime = ((float) ts.TotalSeconds - deltaTimeTotal);
+			deltaTimeTotal += deltaTime;
 			elapsedTime += deltaTime;
 
-			// stopWatch.Reset();
-
-			lastUpdate = timeNow;
-
-			// updates fps
+			// updates frame counter
 			frames++;
 
-			if ((timeNow - lastFrameCount).TotalSeconds >= 1)
+			// log FPS after a second passed
+			if (elapsedTime >= 1)
 			{
 				fps = frames;
 				fpsSamples.Add(fps);
@@ -173,25 +167,8 @@ public partial class ProfileBase : ProfilingContext
 
 				frames = 0;
 
-				lastFrameCount = timeNow;
-				lastUpdate = lastFrameCount;
+				elapsedTime = 0;
 			}
-
-
-			// if (elapsedTime >= 1)
-			// {
-			// 	fps = frames;
-			// 	fpsSamples.Add(fps);
-            //
-			// 	LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / Entities}ms)");
-            //
-			// 	frames = 0;
-			// 	elapsedTime = 0;
-            //
-			// 	// lastFrameCount = timeNow;
-			// 	// lastUpdate = lastFrameCount;
-			// }
-
 		}
 	}
 }

@@ -38,12 +38,6 @@ public struct DataComponent : IComponentData
 	public int Type;
 	public int RandomInt;
 	public double RandomDouble;
-	public NumberGenerator RNG { get; } = new();
-
-	public DataComponent()
-	{
-		RNG.Randomize();
-	}
 }
 
 public struct Health : IComponentData
@@ -64,7 +58,7 @@ public struct Damage : IComponentData
 public struct Sprite : IComponentData
 {
 	public static int Id { get; set; }
-	public CharBuffer<Buffer16<char>> SpriteId;
+	public char SpriteId;
 }
 
 public struct Render : IComponentData

@@ -22,40 +22,47 @@ using System;
 // update position based on velocity
 public struct MovementSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
-		ref Position position = ref query.Results.GetComponent<Position>(entity);
-		ref Velocity velocity = ref query.Results.GetComponent<Velocity>(entity);
+		ComponentArray<Position> position = query.Results.GetComponents<Position>();
+		ComponentArray<Velocity> velocity = query.Results.GetComponents<Velocity>();
 
-		position.X += (velocity.X * deltaTime);
-		position.Y += (velocity.Y * deltaTime);
+		foreach (var entity in query.Results.Entities.Values)
+		{
+			position.Data[entity].X += (velocity.Data[entity].X * deltaTime);
+			position.Data[entity].Y += (velocity.Data[entity].Y * deltaTime);
+		}
 	}
 }
 
 // control entity state based on hp
 public struct HealthSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
-		ref Health health = ref query.Results.GetComponent<Health>(entity);
-		if (health.Hp <= 0 && health.Status != 0) 
+		ComponentArray<Health> health = query.Results.GetComponents<Health>();
+
+		foreach (var entity in query.Results.Entities.Values)
 		{
-      		health.Hp = 0;
-      		health.Status = 0;
-    	} 
-    	else if (health.Status == 0 && health.Hp == 0)
-    	{
-      		health.Hp = health.HpMax;
-      		health.Status = 1;
-    	} 
-    	else if (health.Hp >= health.HpMax && health.Status != 2)
-    	{
-      		health.Hp = health.HpMax;
-      		health.Status = 2;
-    	} 
-    	else 
-    	{
-      		health.Status = 2;
+			if (health.Data[entity].Hp <= 0 && health.Data[entity].Status != 0) 
+			{
+      			health.Data[entity].Hp = 0;
+      			health.Data[entity].Status = 0;
+    		} 
+    		else if (health.Data[entity].Status == 0 && health.Data[entity].Hp == 0)
+    		{
+      			health.Data[entity].Hp = health.Data[entity].HpMax;
+      			health.Data[entity].Status = 1;
+    		} 
+    		else if (health.Data[entity].Hp >= health.Data[entity].HpMax && health.Data[entity].Status != 2)
+    		{
+      			health.Data[entity].Hp = health.Data[entity].HpMax;
+      			health.Data[entity].Status = 2;
+    		} 
+    		else 
+    		{
+      			health.Data[entity].Status = 2;
+    		}
     	}
 	}
 }
@@ -63,30 +70,26 @@ public struct HealthSystem : ISystem
 // calculate damage and deal damage to health component
 public struct DamageSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
-		ref Damage damage = ref query.Results.GetComponent<Damage>(entity);
-		ref Health health = ref query.Results.GetComponent<Health>(entity);
-		ref DataComponent dataComponent = ref query.Results.GetComponent<DataComponent>(entity);
+		ComponentArray<Damage> damage = query.Results.GetComponents<Damage>();
+		ComponentArray<Health> health = query.Results.GetComponents<Health>();
+		ComponentArray<DataComponent> dataComponent = query.Results.GetComponents<DataComponent>();
 
-		if (damage.Attack == 0 || damage.Defense == 0)
+		foreach (var entity in query.Results.Entities.Values)
 		{
-			damage.Attack = dataComponent.RNG.RandiRange(10, 40);
-			damage.Defense = dataComponent.RNG.RandiRange(10, 40);
-			health.HpMax = dataComponent.RNG.RandiRange(100, 200);
-		}
+			int total = damage.Data[entity].Attack - damage.Data[entity].Defense;
+			if (total <= 0)
+			{
+				damage.Data[entity].Attack = Random.Shared.Next(10, 40);
+				damage.Data[entity].Defense = Random.Shared.Next(10, 40);
+				health.Data[entity].HpMax = Random.Shared.Next(100, 200);
+			}
 
-		if (health.Status == 0)
-		{
-			ref Position position = ref core.Get<Position>(entity);
-			damage.Attack = Math.Max(1, Convert.ToInt32(position.X * 10));
-			damage.Defense = Math.Max(1, Convert.ToInt32(position.Y * 10));
-		}
-
-		int total = damage.Attack - damage.Defense;
-		if (health.Hp > 0 && total > 0)
-		{
-			health.Hp = Math.Max(0, health.Hp - total);
+			if (health.Data[entity].Hp > 0 && total > 0)
+			{
+				health.Data[entity].Hp = Math.Max(0, health.Data[entity].Hp - total);
+			}
 		}
 	}
 }
@@ -94,11 +97,15 @@ public struct DamageSystem : ISystem
 // randomly update some data values
 public struct DataSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
-		ref DataComponent data = ref query.Results.GetComponent<DataComponent>(entity);
-		data.RandomInt = (int) data.RNG.Randi();
-		data.RandomDouble = (double) data.RNG.Randf();
+		ComponentArray<DataComponent> data = query.Results.GetComponents<DataComponent>();
+
+		foreach (var entity in query.Results.Entities.Values)
+		{
+			data.Data[entity].RandomInt = Random.Shared.Next();
+			data.Data[entity].RandomDouble = Random.Shared.NextDouble();
+		}
 	}
 }
 
@@ -106,23 +113,26 @@ public struct DataSystem : ISystem
 // direction system randomly updates direction based on data
 public struct DirectionSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
-		ref Position position = ref query.Results.GetComponent<Position>(entity);
-		ref Velocity velocity = ref query.Results.GetComponent<Velocity>(entity);
-		ref DataComponent data = ref query.Results.GetComponent<DataComponent>(entity);
+		ComponentArray<Position> position = query.Results.GetComponents<Position>();
+		ComponentArray<Velocity> velocity = query.Results.GetComponents<Velocity>();
+		ComponentArray<DataComponent> data = query.Results.GetComponents<DataComponent>();
 
-		if (data.RandomInt % 10 == 0)
+		foreach (var entity in query.Results.Entities.Values)
 		{
-			if (position.X > position.Y)
+			if (data.Data[entity].RandomInt % 10 == 0)
 			{
-				velocity.X = data.RNG.RandfRange(3, 19) - 10;
-				velocity.Y = data.RNG.RandfRange(0, 5);
-			}
-			else
-			{
-				velocity.X = data.RNG.RandfRange(0, 5);
-				velocity.Y = data.RNG.RandfRange(3, 19) - 10;
+				if (position.Data[entity].X > position.Data[entity].Y)
+				{
+					velocity.Data[entity].X = Random.Shared.Next(3, 19) - 10;
+					velocity.Data[entity].Y = Random.Shared.Next(0, 5);
+				}
+				else
+				{
+					velocity.Data[entity].X = Random.Shared.Next(0, 5);
+					velocity.Data[entity].Y = Random.Shared.Next(3, 19) - 10;
+				}
 			}
 		}
 	}
@@ -131,50 +141,58 @@ public struct DirectionSystem : ISystem
 // update sprite type based on character status and health
 public struct SpriteSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
-		ref Damage damage = ref query.Results.GetComponent<Damage>(entity);
-		ref Health health = ref query.Results.GetComponent<Health>(entity);
-		ref Sprite sprite = ref query.Results.GetComponent<Sprite>(entity);
+		ComponentArray<Damage> damage = query.Results.GetComponents<Damage>();
+		ComponentArray<Health> health = query.Results.GetComponents<Health>();
+		ComponentArray<Sprite> sprite = query.Results.GetComponents<Sprite>();
 
-		switch (health.Status)
+		foreach (var entity in query.Results.Entities.Values)
 		{
-			case 0:
-				sprite.SpriteId = "_";
-				break;
-			case 1:
-				sprite.SpriteId = "/";
-				break;
-			case 2:
-				if (health.Hp == health.HpMax)
-				{
-					sprite.SpriteId = "+";
-				}
-				else {
-					sprite.SpriteId = "|";
-				}
-				break;
-			default:
-				break;
+			switch (health.Data[entity].Status)
+			{
+				case 0:
+					sprite.Data[entity].SpriteId = '_';
+					break;
+				case 1:
+					sprite.Data[entity].SpriteId = '/';
+					break;
+				case 2:
+					if (health.Data[entity].Hp == health.Data[entity].HpMax)
+					{
+						sprite.Data[entity].SpriteId = '+';
+					}
+					else {
+						sprite.Data[entity].SpriteId = '|';
+					}
+					break;
+				default:
+					break;
+			}
 		}
 	}
 }
 
-// render sprite character to godot sprite node
+
+
+// render sprite character in raylib
 public struct RenderSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
-		ref Position position = ref query.Results.GetComponent<Position>(entity);
-		ref Health health = ref query.Results.GetComponent<Health>(entity);
-		ref Sprite sprite = ref query.Results.GetComponent<Sprite>(entity);
+		ComponentArray<Position> position = query.Results.GetComponents<Position>();
+		ComponentArray<Health> health = query.Results.GetComponents<Health>();
+		ComponentArray<Sprite> sprite = query.Results.GetComponents<Sprite>();
 
-		string renderString = $"{entity}: [{health.Hp}/{health.HpMax}][{sprite.SpriteId.ToString()}]";
+		foreach (var entity in query.Results.Entities.Values)
+		{
+			string renderString = $"{sprite.Data[entity].SpriteId.ToString()}";
 
-		NodeManager nm = ServiceRegistry.Get<NodeManager>();
-		Label label = nm.GetNode<Label>($"entity{entity.Id}");
+			NodeManager nm = ServiceRegistry.Get<NodeManager>();
+			Label label = nm.GetNode<Label>($"entity{entity.Id}");
 
-		label.Text = renderString;
-		label.Position = new Vector2((float) position.X * 10, (float) position.Y * 10);
+			label.Text = renderString;
+			label.Position = new Vector2((float) position.Data[entity].X * 10, (float) position.Data[entity].Y * 10);
+		}
 	}
 }

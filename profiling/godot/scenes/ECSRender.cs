@@ -154,34 +154,40 @@ public struct RNG : IComponentData
 // update node position
 public class NodeMovementSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
-		ref GodotNode nodeComponent = ref query.Results.GetComponent<GodotNode>(entity);
-		ref RNG rng = ref query.Results.GetComponent<RNG>(entity);
+		ComponentArray<GodotNode> nodeComponent = query.Results.GetComponents<GodotNode>();
+		ComponentArray<RNG> rng = query.Results.GetComponents<RNG>();
 
-		Node2D node = core.GetObject<Node2D>(nodeComponent.Node2DId); 
-		float delta = (float) deltaTime;
+		foreach (var entity in query.Results.Entities.Values)
+		{
+			Node2D node = core.GetObject<Node2D>(nodeComponent.Data[entity].Node2DId); 
+			float delta = (float) deltaTime;
 
-		Vector2 pos = node.Position;
+			Vector2 pos = node.Position;
 
-		node.Position = node.Position with {
-			X = pos.X + (float) rng.d1 * delta,
-			Y = pos.Y + (float) rng.d2 * delta,
-		};
+			node.Position = node.Position with {
+				X = pos.X + (float) rng.Data[entity].d1 * delta,
+				Y = pos.Y + (float) rng.Data[entity].d2 * delta,
+			};
+		}
 	}
 }
 
 // randomly update some data values
 public class RNGSystem : ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
 	{
 		double minValue = -500;
 		double maxValue = 500;
 
-		ref RNG data = ref query.Results.GetComponent<RNG>(entity);
+		ComponentArray<RNG> data = query.Results.GetComponents<RNG>();
 
-		data.d1 = minValue + (Random.Shared.NextDouble() * (maxValue - minValue));
-		data.d2 = minValue + (Random.Shared.NextDouble() * (maxValue - minValue));
+		foreach (var entity in query.Results.Entities.Values)
+		{
+			data.Data[entity].d1 = minValue + (Random.Shared.NextDouble() * (maxValue - minValue));
+			data.Data[entity].d2 = minValue + (Random.Shared.NextDouble() * (maxValue - minValue));
+		}
 	}
 }

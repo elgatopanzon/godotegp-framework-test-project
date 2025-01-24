@@ -31,7 +31,7 @@ public partial class ECSv4 : Node2D
 	private TimeSpan _lastFrameCount = new TimeSpan();
 	private PackedArray<int> _fpsSamples = new();
 
-	private ulong _entities = 16000;
+	private ulong _entities = 64;
 	private double _deltaTime;
 
 	private Stopwatch _stopwatch;

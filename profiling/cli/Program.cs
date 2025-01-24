@@ -364,13 +364,13 @@ public class NoEcs
 				{
 					if (position.X > position.Y)
 					{
-						velocity.X = dataComponent.RNG.RandfRange(3, 19) - 10;
-						velocity.Y = dataComponent.RNG.RandfRange(0, 5);
+						velocity.X = Random.Shared.Next(3, 19) - 10;
+						velocity.Y = Random.Shared.Next(0, 5);
 					}
 					else
 					{
-						velocity.X = dataComponent.RNG.RandfRange(0, 5);
-						velocity.Y = dataComponent.RNG.RandfRange(3, 19) - 10;
+						velocity.X = Random.Shared.Next(0, 5);
+						velocity.Y = Random.Shared.Next(3, 19) - 10;
 					}
 				}
 
@@ -411,9 +411,9 @@ public class NoEcs
 				int total = damage.Attack - damage.Defense;
 				if (total <= 0)
 				{
-					damage.Attack = dataComponent.RNG.RandiRange(10, 40);
-					damage.Defense = dataComponent.RNG.RandiRange(10, 40);
-					health.HpMax = dataComponent.RNG.RandiRange(100, 200);
+					damage.Attack = Random.Shared.Next(10, 40);
+					damage.Defense = Random.Shared.Next(10, 40);
+					health.HpMax = Random.Shared.Next(100, 200);
 				}
 
 				if (health.Hp > 0 && total > 0)
@@ -425,8 +425,8 @@ public class NoEcs
 				/****************
 				*  DataSystem  *
 				****************/
-				dataComponent.RandomInt = dataComponent.RNG.Randi();
-				dataComponent.RandomDouble = (double) dataComponent.RNG.Randf();
+				dataComponent.RandomInt = Random.Shared.Next();
+				dataComponent.RandomDouble = Random.Shared.NextDouble();
 
 				/******************
 				*  SpriteSystem  *
@@ -434,18 +434,18 @@ public class NoEcs
 				switch (health.Status)
 				{
 					case 0:
-						sprite.SpriteId = "_";
+						sprite.SpriteId = '_';
 						break;
 					case 1:
-						sprite.SpriteId = "/";
+						sprite.SpriteId = '/';
 						break;
 					case 2:
 						if (health.Hp == health.HpMax)
 						{
-							sprite.SpriteId = "+";
+							sprite.SpriteId = '+';
 						}
 						else {
-							sprite.SpriteId = "|";
+							sprite.SpriteId = '|';
 						}
 						break;
 					default:

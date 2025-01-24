@@ -338,25 +338,20 @@ public class RaylibNoEcs
 
 	public void Run()
 	{
-		DateTime lastUpdate = DateTime.Now;
-		float deltaTime = 0;
 
-		DateTime lastFrameCount = DateTime.Now;
+		float deltaTime = 0;
+		float deltaTimeTotal = 0;
+
 		int frames = 0;
 		int fps = 0;
 
 		PackedArray<int> fpsSamples = new();
 
-		Stopwatch stopWatch = new Stopwatch();
-
 		float elapsedTime = 0;
+		long prevTicks = Stopwatch.GetTimestamp();
 
 		while (true)
 		{
-			DateTime timeNow = DateTime.Now;
-			deltaTime = (timeNow.Ticks - lastUpdate.Ticks) / 10000000f;
-			// stopWatch.Start();
-
 			Raylib.BeginDrawing();
         	Raylib.ClearBackground(Color.White);
 			// do update logic
@@ -378,13 +373,13 @@ public class RaylibNoEcs
 				{
 					if (position.X > position.Y)
 					{
-						velocity.X = dataComponent.RNG.RandfRange(3, 19) - 10;
-						velocity.Y = dataComponent.RNG.RandfRange(0, 5);
+						velocity.X = Random.Shared.Next(3, 19) - 10;
+						velocity.Y = Random.Shared.Next(0, 5);
 					}
 					else
 					{
-						velocity.X = dataComponent.RNG.RandfRange(0, 5);
-						velocity.Y = dataComponent.RNG.RandfRange(3, 19) - 10;
+						velocity.X = Random.Shared.Next(0, 5);
+						velocity.Y = Random.Shared.Next(3, 19) - 10;
 					}
 				}
 
@@ -425,9 +420,9 @@ public class RaylibNoEcs
 				int total = damage.Attack - damage.Defense;
 				if (total <= 0)
 				{
-					damage.Attack = dataComponent.RNG.RandiRange(10, 40);
-					damage.Defense = dataComponent.RNG.RandiRange(10, 40);
-					health.HpMax = dataComponent.RNG.RandiRange(100, 200);
+					damage.Attack = Random.Shared.Next(10, 40);
+					damage.Defense = Random.Shared.Next(10, 40);
+					health.HpMax = Random.Shared.Next(100, 200);
 				}
 
 				if (health.Hp > 0 && total > 0)
@@ -439,8 +434,8 @@ public class RaylibNoEcs
 				/****************
 				*  DataSystem  *
 				****************/
-				dataComponent.RandomInt = dataComponent.RNG.Randi();
-				dataComponent.RandomDouble = (double) dataComponent.RNG.Randf();
+				dataComponent.RandomInt = Random.Shared.Next();
+				dataComponent.RandomDouble = Random.Shared.NextDouble();
 
 				/******************
 				*  SpriteSystem  *
@@ -448,18 +443,18 @@ public class RaylibNoEcs
 				switch (health.Status)
 				{
 					case 0:
-						sprite.SpriteId = "_";
+						sprite.SpriteId = '_';
 						break;
 					case 1:
-						sprite.SpriteId = "/";
+						sprite.SpriteId = '/';
 						break;
 					case 2:
 						if (health.Hp == health.HpMax)
 						{
-							sprite.SpriteId = "+";
+							sprite.SpriteId = '+';
 						}
 						else {
-							sprite.SpriteId = "|";
+							sprite.SpriteId = '|';
 						}
 						break;
 					default:
@@ -469,7 +464,7 @@ public class RaylibNoEcs
 				/******************
 				*  RenderSystem  *
 				******************/
-				string renderString = $"{i}: [{health.Hp}/{health.HpMax}][{sprite.SpriteId.ToString()}]";
+				string renderString = $"{sprite.SpriteId.ToString()}";
 
 				Raylib.DrawText(renderString.ToString(), (int) (position.X * 10), (int) (position.Y * 10), 20, Color.Black);
 				
@@ -486,19 +481,19 @@ public class RaylibNoEcs
 			// end update logic
 			Raylib.EndDrawing();
 
-			// stopWatch.Stop();
+			long ticks = Stopwatch.GetTimestamp() - prevTicks;
+			prevTicks += ticks;
+			deltaTime = (float) ((double) ticks / Stopwatch.Frequency);
 
-			// deltaTime = ((float) stopWatch.ElapsedMilliseconds) / 1000f;
+			// deltaTime = ((float) ts.TotalSeconds - deltaTimeTotal);
+			deltaTimeTotal += deltaTime;
 			elapsedTime += deltaTime;
 
-			// stopWatch.Reset();
-
-			lastUpdate = timeNow;
-
-			// updates fps
+			// updates frame counter
 			frames++;
 
-			if ((timeNow - lastFrameCount).TotalSeconds >= 1)
+			// log FPS after a second passed
+			if (elapsedTime >= 1)
 			{
 				fps = frames;
 				fpsSamples.Add(fps);
@@ -507,25 +502,8 @@ public class RaylibNoEcs
 
 				frames = 0;
 
-				lastFrameCount = timeNow;
-				lastUpdate = lastFrameCount;
+				elapsedTime = 0;
 			}
-
-
-			// if (elapsedTime >= 1)
-			// {
-			// 	fps = frames;
-			// 	fpsSamples.Add(fps);
-            //
-			// 	LoggerManager.LogInfo("FPS", "", "fps", $"{fps} @ {Entities.ToString()}e (avg:{Convert.ToInt32(fpsSamples.Span.ToArray().TakeLast(50).Average())}) [({deltaTime * 1000}ms) ({deltaTime * 1000000}us) ({deltaTime * 1000000000}ns)] cpe:{(deltaTime * 1000) / Entities}ms)");
-            //
-			// 	frames = 0;
-			// 	elapsedTime = 0;
-            //
-			// 	// lastFrameCount = timeNow;
-			// 	// lastUpdate = lastFrameCount;
-			// }
-
 		}
 	}
 }
