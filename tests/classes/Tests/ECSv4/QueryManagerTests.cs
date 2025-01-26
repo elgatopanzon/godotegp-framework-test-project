@@ -66,19 +66,20 @@ public partial class QueryManagerTests : TestContext
 
 		Query query = ecs.CreateQuery()
 			.Has(ecs.Id<EcsComponent>())
+			.IsNot(ecs.Id<EcsSystem>()) // include data components
 			.Build();
 
 		EntityHandle q1 = ecs.RegisterQuery(query, "q1");
 
 		LoggerManager.LogDebug("Query entity id", "", "entity", q1);
 
-		QueryResult res = ecs.Query("q1");
-		ArraySegment<EntityHandle> handles = ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
+		QueryEntities res = ecs.Query("q1");
+		List<EntityHandle> handles = ecs.EntityHandles(res.Entities.ToArray());
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(Entity.CreateFrom(EcsComponentConfig.Id), res.Entities.ArraySegment);
+		Assert.Contains(Entity.CreateFrom(EcsComponentConfig.Id), res.Entities);
 	}
 
 	[Fact]
@@ -100,18 +101,18 @@ public partial class QueryManagerTests : TestContext
 		LoggerManager.LogDebug("Query entity id", "", "entity", q1);
 
 		// run the query
-		QueryResult res = ecs.Query("test query");
-		ArraySegment<EntityHandle> handles = ecs.EntityHandles(res.Entities.ArraySegment.ToArray()).ArraySegment;
+		QueryEntities res = ecs.Query("test query");
+		List<EntityHandle> handles = ecs.EntityHandles(res.Entities.ToArray());
 
 		LoggerManager.LogDebug("Query result", "", "res", handles);
 		LoggerManager.LogDebug("Query result hash", "", "hash", res.GetHashCode());
 
-		QueryResult result = ecs.QueryResults("test query");
+		QueryEntities result = ecs.QueryResults("test query");
 
 		LoggerManager.LogDebug("Query result obtained hash", "", "hash", result.GetHashCode());
 
 		Assert.Equal(1, res.Entities.Count);
-		Assert.Contains(e1.Entity, res.Entities.ArraySegment);
+		Assert.Contains(e1.Entity, res.Entities);
 
 		// disable automatic query updating
 		ecs.Config.KeepQueryResultsUpdated = false;
@@ -121,13 +122,13 @@ public partial class QueryManagerTests : TestContext
 		e1.Remove<TestTag>();
 
 		// get the results without running the query
-		QueryResult resultAfter = ecs.QueryResults("test query");
+		QueryEntities resultAfter = ecs.QueryResults("test query");
 
 		LoggerManager.LogDebug("Query result after", "", "res", resultAfter);
 
 		// verify the results still contain the outdated entity
 		Assert.Equal(1, resultAfter.Entities.Count);
-		Assert.Contains(e1.Entity, resultAfter.Entities.ArraySegment);
+		Assert.Contains(e1.Entity, resultAfter.Entities);
 
 		// manually update the query results for the entity
 		ecs.Config.KeepQueryResultsUpdated = true;
@@ -136,7 +137,7 @@ public partial class QueryManagerTests : TestContext
 		LoggerManager.LogDebug("Query result after update", "", "res", resultAfter);
 
 		// verify query results are empty
-		QueryResult resultAfterUpdate = ecs.QueryResults("test query");
+		QueryEntities resultAfterUpdate = ecs.QueryResults("test query");
 
 		Assert.Equal(0, resultAfterUpdate.Entities.Count);
 	}

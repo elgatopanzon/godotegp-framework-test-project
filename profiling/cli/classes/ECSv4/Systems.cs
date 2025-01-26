@@ -15,123 +15,124 @@ using GodotEGP.Config;
 
 using GodotEGP.ECSv4;
 using GodotEGP.ECSv4.Systems;
+using GodotEGP.ECSv4.Components;
 using GodotEGP.ECSv4.Queries;
 
 using System;
 
 // update position based on velocity
-public struct MovementSystem : ISystem
+public struct MovementSystem : IEcsSystem
 {
-	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		ComponentArray<Position> position = query.Results.GetComponents<Position>();
-		ComponentArray<Velocity> velocity = query.Results.GetComponents<Velocity>();
+		ComponentStore<Position> position = core.GetComponentStore<Position>();
+		ComponentStore<Velocity> velocity = core.GetComponentStore<Velocity>();
 
-		foreach (var entity in query.Results.Entities.Values)
+		foreach (var entity in query.Entities.Entities)
 		{
-			position.Data[entity.Id].X += (velocity.Data[entity.Id].X * deltaTime);
-			position.Data[entity.Id].Y += (velocity.Data[entity.Id].Y * deltaTime);
+			position.GetMutable(entity).X += (velocity.GetMutable(entity).X * deltaTime);
+			position.GetMutable(entity).Y += (velocity.GetMutable(entity).Y * deltaTime);
 		}
 	}
 }
 
 // control entity state based on hp
-public struct HealthSystem : ISystem
+public struct HealthSystem : IEcsSystem
 {
-	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		ComponentArray<Health> health = query.Results.GetComponents<Health>();
+		ComponentStore<Health> health = core.GetComponentStore<Health>();
 
-		foreach (var entity in query.Results.Entities.Values)
+		foreach (var entity in query.Entities.Entities)
 		{
-			if (health.Data[entity.Id].Hp <= 0 && health.Data[entity.Id].Status != 0) 
+			if (health.GetMutable(entity).Hp <= 0 && health.GetMutable(entity).Status != 0) 
 			{
-      			health.Data[entity.Id].Hp = 0;
-      			health.Data[entity.Id].Status = 0;
+      			health.GetMutable(entity).Hp = 0;
+      			health.GetMutable(entity).Status = 0;
     		} 
-    		else if (health.Data[entity.Id].Status == 0 && health.Data[entity.Id].Hp == 0)
+    		else if (health.GetMutable(entity).Status == 0 && health.GetMutable(entity).Hp == 0)
     		{
-      			health.Data[entity.Id].Hp = health.Data[entity.Id].HpMax;
-      			health.Data[entity.Id].Status = 1;
+      			health.GetMutable(entity).Hp = health.GetMutable(entity).HpMax;
+      			health.GetMutable(entity).Status = 1;
     		} 
-    		else if (health.Data[entity.Id].Hp >= health.Data[entity.Id].HpMax && health.Data[entity.Id].Status != 2)
+    		else if (health.GetMutable(entity).Hp >= health.GetMutable(entity).HpMax && health.GetMutable(entity).Status != 2)
     		{
-      			health.Data[entity.Id].Hp = health.Data[entity.Id].HpMax;
-      			health.Data[entity.Id].Status = 2;
+      			health.GetMutable(entity).Hp = health.GetMutable(entity).HpMax;
+      			health.GetMutable(entity).Status = 2;
     		} 
     		else 
     		{
-      			health.Data[entity.Id].Status = 2;
+      			health.GetMutable(entity).Status = 2;
     		}
     	}
 	}
 }
 
 // calculate damage and deal damage to health component
-public struct DamageSystem : ISystem
+public struct DamageSystem : IEcsSystem
 {
-	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		ComponentArray<Damage> damage = query.Results.GetComponents<Damage>();
-		ComponentArray<Health> health = query.Results.GetComponents<Health>();
-		ComponentArray<DataComponent> dataComponent = query.Results.GetComponents<DataComponent>();
+		ComponentStore<Damage> damage = core.GetComponentStore<Damage>();
+		ComponentStore<Health> health = core.GetComponentStore<Health>();
+		ComponentStore<DataComponent> dataComponent = core.GetComponentStore<DataComponent>();
 
-		foreach (var entity in query.Results.Entities.Values)
+		foreach (var entity in query.Entities.Entities)
 		{
-			int total = damage.Data[entity.Id].Attack - damage.Data[entity.Id].Defense;
+			int total = damage.GetMutable(entity).Attack - damage.GetMutable(entity).Defense;
 			if (total <= 0)
 			{
-				damage.Data[entity.Id].Attack = Random.Shared.Next(10, 40);
-				damage.Data[entity.Id].Defense = Random.Shared.Next(10, 40);
-				health.Data[entity.Id].HpMax = Random.Shared.Next(100, 200);
+				damage.GetMutable(entity).Attack = Random.Shared.Next(10, 40);
+				damage.GetMutable(entity).Defense = Random.Shared.Next(10, 40);
+				health.GetMutable(entity).HpMax = Random.Shared.Next(100, 200);
 			}
 
-			if (health.Data[entity.Id].Hp > 0 && total > 0)
+			if (health.GetMutable(entity).Hp > 0 && total > 0)
 			{
-				health.Data[entity.Id].Hp = Math.Max(0, health.Data[entity.Id].Hp - total);
+				health.GetMutable(entity).Hp = Math.Max(0, health.GetMutable(entity).Hp - total);
 			}
 		}
 	}
 }
 
 // randomly update some data values
-public struct DataSystem : ISystem
+public struct DataSystem : IEcsSystem
 {
-	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		ComponentArray<DataComponent> data = query.Results.GetComponents<DataComponent>();
+		ComponentStore<DataComponent> data = core.GetComponentStore<DataComponent>();
 
-		foreach (var entity in query.Results.Entities.Values)
+		foreach (var entity in query.Entities.Entities)
 		{
-			data.Data[entity.Id].RandomInt = Random.Shared.Next();
-			data.Data[entity.Id].RandomDouble = Random.Shared.NextDouble();
+			data.GetMutable(entity).RandomInt = Random.Shared.Next();
+			data.GetMutable(entity).RandomDouble = Random.Shared.NextDouble();
 		}
 	}
 }
 
 
 // direction system randomly updates direction based on data
-public struct DirectionSystem : ISystem
+public struct DirectionSystem : IEcsSystem
 {
-	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		ComponentArray<Position> position = query.Results.GetComponents<Position>();
-		ComponentArray<Velocity> velocity = query.Results.GetComponents<Velocity>();
-		ComponentArray<DataComponent> data = query.Results.GetComponents<DataComponent>();
+		ComponentStore<Position> position = core.GetComponentStore<Position>();
+		ComponentStore<Velocity> velocity = core.GetComponentStore<Velocity>();
+		ComponentStore<DataComponent> data = core.GetComponentStore<DataComponent>();
 
-		foreach (var entity in query.Results.Entities.Values)
+		foreach (var entity in query.Entities.Entities)
 		{
-			if (data.Data[entity.Id].RandomInt % 10 == 0)
+			if (data.GetMutable(entity).RandomInt % 10 == 0)
 			{
-				if (position.Data[entity.Id].X > position.Data[entity.Id].Y)
+				if (position.GetMutable(entity).X > position.GetMutable(entity).Y)
 				{
-					velocity.Data[entity.Id].X = Random.Shared.Next(3, 19) - 10;
-					velocity.Data[entity.Id].Y = Random.Shared.Next(0, 5);
+					velocity.GetMutable(entity).X = Random.Shared.Next(3, 19) - 10;
+					velocity.GetMutable(entity).Y = Random.Shared.Next(0, 5);
 				}
 				else
 				{
-					velocity.Data[entity.Id].X = Random.Shared.Next(0, 5);
-					velocity.Data[entity.Id].Y = Random.Shared.Next(3, 19) - 10;
+					velocity.GetMutable(entity).X = Random.Shared.Next(0, 5);
+					velocity.GetMutable(entity).Y = Random.Shared.Next(3, 19) - 10;
 				}
 			}
 		}
@@ -139,31 +140,31 @@ public struct DirectionSystem : ISystem
 }
 
 // update sprite type based on character status and health
-public struct SpriteSystem : ISystem
+public struct SpriteSystem : IEcsSystem
 {
-	public void Update(SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		ComponentArray<Damage> damage = query.Results.GetComponents<Damage>();
-		ComponentArray<Health> health = query.Results.GetComponents<Health>();
-		ComponentArray<Sprite> sprite = query.Results.GetComponents<Sprite>();
+		ComponentStore<Damage> damage = core.GetComponentStore<Damage>();
+		ComponentStore<Health> health = core.GetComponentStore<Health>();
+		ComponentStore<Sprite> sprite = core.GetComponentStore<Sprite>();
 
-		foreach (var entity in query.Results.Entities.Values)
+		foreach (var entity in query.Entities.Entities)
 		{
-			switch (health.Data[entity.Id].Status)
+			switch (health.GetMutable(entity).Status)
 			{
 				case 0:
-					sprite.Data[entity.Id].SpriteId = '_';
+					sprite.GetMutable(entity).SpriteId = '_';
 					break;
 				case 1:
-					sprite.Data[entity.Id].SpriteId = '/';
+					sprite.GetMutable(entity).SpriteId = '/';
 					break;
 				case 2:
-					if (health.Data[entity.Id].Hp == health.Data[entity.Id].HpMax)
+					if (health.GetMutable(entity).Hp == health.GetMutable(entity).HpMax)
 					{
-						sprite.Data[entity.Id].SpriteId = '+';
+						sprite.GetMutable(entity).SpriteId = '+';
 					}
 					else {
-						sprite.Data[entity.Id].SpriteId = '|';
+						sprite.GetMutable(entity).SpriteId = '|';
 					}
 					break;
 				default:

@@ -55,18 +55,17 @@ public partial class SystemManagerTests : TestContext
 	}
 }
 
-public struct TestSystem1 : ISystem
+public struct TestSystem1 : IEcsSystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		LoggerManager.LogDebug("Updating", this.GetType().Name, "entity", entity);
+		LoggerManager.LogDebug("Updating", "TestSystem1");
 	}
 }
-
-public struct TestSystem2 : ISystem
+public struct TestSystem2 : IEcsSystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		LoggerManager.LogDebug("Updating", this.GetType().Name, "entity", entity);
+		LoggerManager.LogDebug("Updating", "TestSystem2");
 	}
 }

@@ -53,15 +53,15 @@ public partial class SystemSchedulerTests : TestContext
 	}
 }
 
-public struct TestDataMutator : ISystem
+public struct TestDataMutator : IEcsSystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query)
+	public static void Update(double deltaTimeSys, double deltaTime, ECS core, Query query)
 	{
-		LoggerManager.LogDebug("Updating", this.GetType().Name, "entity", entity);
-		LoggerManager.LogDebug("Delta time", this.GetType().Name, "deltaTime", deltaTime);
+		foreach (var entity in query.Entities.Entities)
+		{
+			ref TestData td = ref core.Get<TestData>(entity);
 
-		ref TestData td = ref core.Get<TestData>(entity);
-
-		td.Long1 += 1;
+			td.Long1 += 1;
+		}
 	}
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "qVEHOebbK1ZIDpXh4FYKZRy7ROc7qV6egYYSTHhAN5jELF9ujyChX+Qph8b3kkk0MkC1HVhBkfVAcA47DycDpQ==",
+  "dgSpecHash": "7z4LkjR5DvB2NBDUvAw+sGAPsY5fbFhZnEPXDdt9AlK0SoYRc2D0T1qOq0kUXanG56tEL0RuTaPJUv/l+EjkLA==",
   "success": true,
   "projectFilePath": "/home/laz/Documents/Projects/games/godot/plugins/godotegp-framework/project-csharp/tests/GodotEGP.Test.csproj",
   "expectedPackageFiles": [
@@ -127,7 +127,7 @@
     "/home/laz/.nuget/packages/xunit.extensibility.core/2.4.2/xunit.extensibility.core.2.4.2.nupkg.sha512",
     "/home/laz/.nuget/packages/xunit.extensibility.execution/2.4.2/xunit.extensibility.execution.2.4.2.nupkg.sha512",
     "/home/laz/.nuget/packages/xunit.runner.visualstudio/2.4.5/xunit.runner.visualstudio.2.4.5.nupkg.sha512",
-    "/home/laz/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.1/microsoft.aspnetcore.app.ref.8.0.1.nupkg.sha512"
+    "/home/laz/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.11/microsoft.aspnetcore.app.ref.8.0.11.nupkg.sha512"
   ],
   "logs": []
 }

@@ -192,11 +192,11 @@ public partial class ECSTests : TestContext
 	}
 }
 
-public struct TestTag : ITag {public static int Id { get; set; }}
-public struct TestTag2 : ITag {public static int Id { get; set; }}
-public struct TestTag3 : ITag {public static int Id { get; set; }}
-public struct TestTag4 : ITag {public static int Id { get; set; }}
-public struct TestData : IComponentData 
+public struct TestTag : ITagComponent {public static int Id { get; set; }}
+public struct TestTag2 : ITagComponent {public static int Id { get; set; }}
+public struct TestTag3 : ITagComponent {public static int Id { get; set; }}
+public struct TestTag4 : ITagComponent {public static int Id { get; set; }}
+public struct TestData : IDataComponent 
 {
 	public static int Id { get; set; }
 	public ulong Long1;
@@ -205,7 +205,7 @@ public struct TestData : IComponentData
 	public ulong Long4;
 }
 
-public struct TestData2 : IComponentData 
+public struct TestData2 : IDataComponent 
 {
 	public static int Id { get; set; }
 	public double Double1;
@@ -214,7 +214,7 @@ public struct TestData2 : IComponentData
 	public double Double4;
 }
 
-public struct TestData3 : IComponentData 
+public struct TestData3 : IDataComponent 
 {
 	public static int Id { get; set; }
 	public int Int1;

@@ -18,21 +18,21 @@ using GodotEGP.Collections;
 using GodotEGP.ECSv4;
 using GodotEGP.ECSv4.Components;
 
-public struct Position : IComponentData
+public struct Position : IDataComponent
 {
 	public static int Id { get; set; }
 	public double X;
 	public double Y;
 }
 
-public struct Velocity : IComponentData
+public struct Velocity : IDataComponent
 {
 	public static int Id { get; set; }
 	public double X;
 	public double Y;
 }
 
-public struct DataComponent : IComponentData
+public struct DataComponent : IDataComponent
 {
 	public static int Id { get; set; }
 	public int Type;
@@ -40,7 +40,7 @@ public struct DataComponent : IComponentData
 	public double RandomDouble;
 }
 
-public struct Health : IComponentData
+public struct Health : IDataComponent
 {
 	public static int Id { get; set; }
 	public int Hp;
@@ -48,14 +48,14 @@ public struct Health : IComponentData
 	public int Status;
 }
 
-public struct Damage : IComponentData
+public struct Damage : IDataComponent
 {
 	public static int Id { get; set; }
 	public int Attack;
 	public int Defense;
 }
 
-public struct Sprite : IComponentData
+public struct Sprite : IDataComponent
 {
 	public static int Id { get; set; }
 	public char SpriteId;
